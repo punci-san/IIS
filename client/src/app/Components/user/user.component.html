@@ -1,0 +1,39 @@
+<div class="user-settings">
+    <div *ngIf="showMsg" class="message" [ngStyle]="{'background-color': msgColor}">
+        <span>{{msg}}</span>
+        <button (click)="closeMessage()">x</button>
+    </div>
+
+
+    <div class="current-team">
+        <div *ngIf="user.team !== null && team !== null">
+            <p>{{team.name}}</p>
+            <button (click)="leaveTeam()">Leave team</button>
+        </div>
+        <div *ngIf="user.team === null">
+            <p>You are currently in no team.</p>
+        </div>
+    </div>
+
+    <p>Update data</p>
+    <div class="input">
+        <label for="user_name">Name:</label>
+        <input [(ngModel)]="user.name" type="text" name="user_name" id="user_name">
+    </div>
+    <div class="input">
+        <label for="user_description">Description:</label>
+        <textarea [(ngModel)]="user.description" name="user_description" id="user_description" cols="30" rows="10"></textarea>
+    </div>
+    <div class="input">
+        <label for="user_name">Password:</label>
+        <input [(ngModel)]="pass1" type="password" name="user_pass1" id="user_pass1">
+    </div>
+    <div class="input">
+        <label for="user_name">Retype password:</label>
+        <input [(ngModel)]="pass2" type="password" name="user_pass2" id="user_pass2">
+    </div>
+        
+    <div class="update-button">
+        <button (click)="updateData()">Update data</button>
+    </div>
+</div>

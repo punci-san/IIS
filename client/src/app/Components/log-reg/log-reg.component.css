@@ -1,0 +1,79 @@
+.logreg {
+    margin:0;
+    margin-top: 5px;
+    width: 100%;
+}
+
+.logreg .signin-div {
+    max-width: 48%;
+    width:48%;
+    float: left;
+}
+
+span {
+    margin-left: 17%;
+    font-size: larger;
+}
+
+input  {
+    width: 66%;
+    padding: 4px 12px;
+    box-sizing: border-box;
+    margin-left: 17%;
+    margin-top: 10px;
+}
+
+label {
+    width: 66%;
+    margin-top: 10px;
+    margin-left: 17%;
+    display: block;
+}
+
+button {
+    background-color: #4CAF50; /* Green */
+    margin-top: 10px;
+    margin-left: 17%;
+    border: none;
+    color: white;
+    padding: 7px 16px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #83c985;
+}
+
+
+.divider {
+    margin-top: 20px;
+    width: 2px;
+    background-color: #333;
+    height: 200px;
+    float: left;
+}
+
+.signup-div {
+    max-width: 48%;
+    width: 48%;
+    float: left;
+}
+
+.message {
+    width: 100%;
+}
+
+.message span {
+    color: white;
+    margin: 0;
+    margin-left: 25px;
+    font-size: medium;
+}
+
+.message button {
+    background-color: '#ffffff';
+}

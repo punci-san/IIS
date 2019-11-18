@@ -1,0 +1,8 @@
+<p>Team listing!</p>
+<div class="team-listing">
+    <div *ngFor="let team of getTeams" class="team">
+      {{team.name}}
+      
+      <button *ngIf="user !== null && user.team === null" (click)="joinTeam(team.id)">Join team</button>
+    </div>
+</div>

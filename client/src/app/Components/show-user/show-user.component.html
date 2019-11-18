@@ -1,0 +1,15 @@
+<div>
+    <div class="team">
+        <div *ngIf="team === null">
+            <p>user is in no team.</p>
+        </div>
+        <div *ngIf="team !== null">
+            <p>{{team.name}}</p>
+            <p>{{team.description}}</p>
+        </div>
+    </div>
+    <div *ngIf="user !== null" class="user-data">
+        <p>{{user.name}}</p>
+        <p>{{user.description}}</p>
+    </div>
+</div>

@@ -1,0 +1,39 @@
+.add-team {
+    width: 100%;
+    margin: 0;
+    margin-top: 5px;
+}
+
+.input-field {
+    margin: 0;
+    display: block;
+    margin-top: 10px;
+    margin-left: 17%;
+}
+.input-field label {
+    display: block;
+}
+
+.input-field input {
+    display: block;
+}
+
+.add-button {
+    margin: 0;
+    display: block;
+    margin-left: 17%;
+    margin-top: 10px;
+}
+
+button {
+    background-color: #4CAF50; /* Green */
+    margin-top: 5px;
+    border: none;
+    color: white;
+    padding: 7px 16px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    cursor: pointer;
+}

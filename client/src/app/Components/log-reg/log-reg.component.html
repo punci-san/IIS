@@ -1,0 +1,25 @@
+<div class="logreg">
+    <div *ngIf="showMsg" class="message" [ngStyle]="{'background-color': msgColor}">
+        <span>{{msg}}</span>
+        <button (click)="closeMessage()">x</button>
+    </div>
+    <div class="signin-div">
+        <span>Log in:</span>
+            <label for="signin_user">Username</label>
+            <input #signin_user type="text" name="signin_user" id="signin_user">
+            <label for="signin_pass">Password</label>
+            <input #signin_pass type="password" name="signin_pass" id="signin_pass">
+            <button (click)="login(signin_user.value, signin_pass.value)">Login</button>
+        </div>
+        <div class="divider"></div>
+        <div class="signup-div">
+            <span>Register:</span>
+            <label for="signup_user">Username</label>
+            <input #signup_user type="text" name="signup_user" id="signup_user">
+            <label for="signup_pass_1">Password</label>
+            <input #signup_pass_1 type="password" name="signup_pass_1" id="signup_pass_1">
+            <label for="signup_pass_2">Password again</label>
+            <input #signup_pass_2 type="password" name="signup_pass_2" id="signup_pass_2">
+            <button (click)="register(signup_user.value, signup_pass_1.value ,signup_pass_2.value)">Register</button>
+        </div>
+</div>

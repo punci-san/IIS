@@ -1,0 +1,31 @@
+<div class="topbar">
+    <div class="logo" routerLink="" routerLinkActive="active">
+        <img src="https://media1.tenor.com/images/d79853a94b7a8b8669facc6657d7b187/tenor.gif" >
+    </div>
+    <div class="search-bar">
+        <input [(ngModel)]="searchValue" name="search-bar" type="text" (input)="updateFilter()">
+        <button routerLink="" routerLinkActive="active">Search</button>
+    </div>
+    <div class="match-add-button">
+        <button *ngIf="getUserData !== null" routerLink="/add-match" routerLinkActive="active">
+            <i>+</i>
+            <span>Match</span>
+        </button>
+    </div>
+    <div *ngIf="getUserData !== null && getUserData.team === null" class="team-add-button">
+            <button routerLink="/add-team" routerLinkActive="active">
+                <i>+</i>
+                <span>Team</span>
+            </button>
+        </div>
+    <div class="user">
+        <div *ngIf="getUserData === null">
+            <button routerLink="/user-log_reg" routerLinkActive="active">Sign in</button>
+        </div>
+        <div *ngIf="getUserData !== null">
+
+            <button routerLink="/user">{{getUserData.name}}</button>
+            <button (click)="logout()">Logout</button>
+        </div>
+    </div>
+</div>

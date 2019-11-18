@@ -4,8 +4,7 @@ import path from "path";
 import { container, singleton } from "tsyringe";
 import { RouterHandler } from "./RouterHandler";
 
-const port = 5000;
-const dbServer = "mongodb://localhost:27017/WebDemander";
+const port = 4201;
 
 @singleton()
 export class IIS {
@@ -20,7 +19,6 @@ export class IIS {
     }
 
     private listen(): void {
-        console.log(path.join(path.join(__dirname + "./../client/")));
         this.app.use("/", express.static(path.join(__dirname + "./../client/")));
         this.app.use("/", Router);
         this.app.listen(port, (err) => {
