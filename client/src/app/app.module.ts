@@ -14,6 +14,7 @@ import { MatchListingComponent } from './Components/match-listing/match-listing.
 import { ListingComponent } from './Components/listing/listing.component';
 import { UserComponent } from './Components/user/user.component';
 import { ShowUserComponent } from './Components/show-user/show-user.component';
+import { ShowTeamComponent } from './Components/show-team/show-team.component';
 
 @NgModule({
   declarations: [
@@ -27,7 +28,8 @@ import { ShowUserComponent } from './Components/show-user/show-user.component';
     MatchListingComponent,
     ListingComponent,
     UserComponent,
-    ShowUserComponent
+    ShowUserComponent,
+    ShowTeamComponent
   ],
   imports: [
     BrowserModule,

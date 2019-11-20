@@ -120,4 +120,21 @@ export class TeamService {
       }
     }
   }
+
+  public deleteTeam(id: number): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const http = new XMLHttpRequest();
+      const page = `${teamPage}/${id}`;
+      http.open('DELETE', page, true);
+      http.onreadystatechange = () => {
+        if (http.readyState === 4 && http.status === 200) {
+          this.loadTeams();
+          return resolve();
+        } else if (http.readyState === 4 && http.status !== 200) {
+          return reject();
+        }
+      };
+      http.send(null);
+    });
+  }
 }

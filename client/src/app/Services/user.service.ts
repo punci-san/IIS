@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { IUser } from '../../../../interfaces/user';
 import { userKeyValue, timeout } from '../../../../settings/variables';
-import { registerPage, loginPage, getUsersPage } from '../../../../settings/routes';
+import { registerPage, loginPage, getUsersPage, teamUserPage } from '../../../../settings/routes';
 
 @Injectable({
   providedIn: 'root'
@@ -39,6 +39,29 @@ export class UserService {
 
   public get getUsers(): IUser[] {
     return this.filteredUsers;
+  }
+
+  public getTeamUsers(teamID: number): Promise<IUser[]> {
+    return new Promise((resolve, reject) => {
+      const http = new XMLHttpRequest();
+      const page = `${teamUserPage}/${teamID}`;
+      http.open('GET', page, true);
+
+      http.onreadystatechange = () => {
+        if (http.readyState === 4 && http.status === 200) {
+          try {
+            const res: IUser[] = JSON.parse(http.responseText);
+            return resolve(res);
+          } catch (error) {
+            return reject();
+          }
+        } else if (http.readyState === 4 && http.status !== 200) {
+          return reject();
+        }
+      };
+
+      http.send(null);
+    });
   }
 
   private loadUsers(): void {

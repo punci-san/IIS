@@ -13,11 +13,16 @@
         </button>
     </div>
     <div *ngIf="getUserData !== null && getUserData.team === null" class="team-add-button">
-            <button routerLink="/add-team" routerLinkActive="active">
-                <i>+</i>
-                <span>Team</span>
-            </button>
-        </div>
+        <button routerLink="/add-team" routerLinkActive="active">
+            <i>+</i>
+            <span>Team</span>
+        </button>
+    </div>
+    <div *ngIf="getUserData !== null && getUserData.team !== null && getTeamdata !== null" class="team-add-button">
+        <button [routerLink]="['/show-user', getTeamdata.id]" routerLinkActive="active">
+            <span>{{getTeamdata.name}}</span>
+        </button>
+    </div>
     <div class="user">
         <div *ngIf="getUserData === null">
             <button routerLink="/user-log_reg" routerLinkActive="active">Sign in</button>

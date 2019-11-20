@@ -111,4 +111,21 @@ export class UserComponent implements OnInit {
       });
     }
   }
+
+  public deteleTeam(): void {
+    if (this.user.team !== null) {
+      this.teamService.deleteTeam(this.user.team)
+      .then(() => {
+        this.user.team = null;
+        this.msg = 'You have successfully removed all users from given team and deleted team.';
+        this.showMsg = true;
+        this.msgColor = GREEN;
+      })
+      .catch(() => {
+        this.msg = 'There was a problem while deleting team.';
+        this.showMsg = true;
+        this.msgColor = RED;
+      });
+    }
+  }
 }

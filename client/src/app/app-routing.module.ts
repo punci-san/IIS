@@ -6,6 +6,7 @@ import { AddTeamComponent } from './Components/add-team/add-team.component';
 import { ListingComponent } from './Components/listing/listing.component';
 import { UserComponent } from './Components/user/user.component';
 import { ShowUserComponent } from './Components/show-user/show-user.component';
+import { ShowTeamComponent } from './Components/show-team/show-team.component';
 
 const routes: Routes = [
   {
@@ -31,6 +32,11 @@ const routes: Routes = [
     path: 'add-team',
     pathMatch: 'full',
     component: AddTeamComponent,
+  },
+  {
+    path: 'show-user/:id',
+    pathMatch: 'full',
+    component: ShowTeamComponent,
   },
   {
     path: 'add-match',

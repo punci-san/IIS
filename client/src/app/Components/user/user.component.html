@@ -8,7 +8,12 @@
     <div class="current-team">
         <div *ngIf="user.team !== null && team !== null">
             <p>{{team.name}}</p>
-            <button (click)="leaveTeam()">Leave team</button>
+            <div *ngIf="user.id === team.creator_id">
+                <button (click)="deteleTeam()">Delete team and all its members</button>
+            </div>
+            <div *ngIf="user.id !== team.creator_id">
+                <button (click)="leaveTeam()">Leave team</button>
+            </div>
         </div>
         <div *ngIf="user.team === null">
             <p>You are currently in no team.</p>

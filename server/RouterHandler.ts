@@ -70,6 +70,23 @@ export class RouterHandler {
                 });
             });
 
+        app.route("/teamusers/:id")
+            .get((req: Request, res: Response) => {
+                if (req.params.id === undefined) {
+                    return res.status(404).send();
+                }
+
+                const num: number = Number(req.params.id);
+
+                this.database.getTeamUsers(num)
+                .then((result: IUser[]) => {
+                    return res.json(result);
+                })
+                .catch(() => {
+                    return res.status(401).send();
+                });
+            });
+
         app.route("/user")
         .get((req: Request, res: Response) => {
             this.database.getUsers()
@@ -192,6 +209,21 @@ export class RouterHandler {
             this.database.getTeam(id)
             .then((result: ITeam) => {
                 return res.send(result);
+            })
+            .catch(() => {
+                return res.status(401).send();
+            });
+        })
+        .delete((req: Request, res: Response) => {
+            if (req.params.id === undefined) {
+                return res.status(401).send();
+            }
+
+            const id: number = Number(req.params.id);
+
+            this.database.deleteTeam(id)
+            .then(() => {
+                return res.send();
             })
             .catch(() => {
                 return res.status(401).send();

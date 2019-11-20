@@ -4,3 +4,4 @@ export const loginPage = `${mainPage}login`;
 export const registerPage = `${mainPage}register`;
 export const getUsersPage = `${mainPage}user`;
 export const teamPage = `${mainPage}team`;
+export const teamUserPage = `${mainPage}teamusers`;

@@ -1,0 +1,7 @@
+<div *ngIf="team !== null">
+    <p>{{team.name}}</p>
+    <div *ngFor="let user of users" class="user">
+        {{user.name}}
+        <button (click)="showUser(user.id)">Show</button>
+    </div>
+</div>
