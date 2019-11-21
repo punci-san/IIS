@@ -8,7 +8,10 @@
         <div *ngFor="let tmUsers of teamUsers" class="user">
             {{tmUsers.name}}
             <button (click)="showUser(tmUsers.id)">Show</button>
-            <button *ngIf="getUser !== null && getUser.id === team.creator_id" (click)="kickUser(tmUsers.id)">Kick</button>
+            <div *ngIf="getUser !== null && getUser.id === team.creator_id && team.creator_id !== tmUsers.id">
+                <button (click)="kickUser(tmUsers.id)">Kick</button>
+                <button (click)="makeTeamLeader(tmUsers.id)">Make team admin</button>
+            </div>
         </div>
         <div *ngIf="getUser !== null && getUser.id === team.creator_id">
             <p>Requests:</p>

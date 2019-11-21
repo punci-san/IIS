@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { IUser } from '../../../../interfaces/user';
 import { userKeyValue, timeout } from '../../../../settings/variables';
-import { registerPage, loginPage, getUsersPage, teamUserPage } from '../../../../settings/routes';
+import { registerPage, loginPage, usersPage, teamUserPage, teamAdminPage } from '../../../../settings/routes';
 
 @Injectable({
   providedIn: 'root'
@@ -66,7 +66,7 @@ export class UserService {
 
   private loadUsers(): void {
     const http = new XMLHttpRequest();
-    http.open('GET', getUsersPage, true);
+    http.open('GET', usersPage, true);
 
     http.onreadystatechange = () => {
       if (http.readyState === 4 && http.status === 200) {
@@ -187,7 +187,7 @@ export class UserService {
 
   public updateUser(user: IUser, password: string): Promise<IUser> {
     return new Promise((resolve, reject) => {
-      const page = `${getUsersPage}/${user.id}`;
+      const page = `${usersPage}/${user.id}`;
       const data = {
         user: user.name,
         pass: password,
@@ -222,7 +222,7 @@ export class UserService {
 
   public getUser(id: number): Promise<IUser> {
     return new Promise((resolve, reject) => {
-      const page = `${getUsersPage}/${id}`;
+      const page = `${usersPage}/${id}`;
       const http = new XMLHttpRequest();
       http.open('GET', page, true);
 
@@ -234,6 +234,27 @@ export class UserService {
           } catch (error) {
             return reject();
           }
+        } else if (http.readyState === 4 && http.status !== 200) {
+          return reject();
+        }
+      };
+
+      http.send(null);
+    });
+  }
+
+  public deleteUser(userID: number): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const http = new XMLHttpRequest();
+      const page = `${usersPage}/${userID}`;
+      http.open('DELETE', page, true);
+
+      this.addAuthentication(http);
+
+      http.onreadystatechange = () => {
+        if (http.readyState === 4 && http.status === 200) {
+          this.logout();
+          return resolve();
         } else if (http.readyState === 4 && http.status !== 200) {
           return reject();
         }

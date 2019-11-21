@@ -142,18 +142,32 @@ export class RouterHandler {
             });
         })
         .delete((req: Request, res: Response) => {
-            if (req.params.id === undefined) {
-                return res.status(404).send();
-            }
+            this.isAuthenticated(req)
+            .then((userObj: IUser) => {
+                if (req.params.id === undefined) {
+                    return res.status(404).send();
+                }
 
-            const userID: number = Number(req .params.id);
+                const userID: number = Number(req .params.id);
 
-            this.database.deleteUser(userID)
-            .then((result) => {
-                return res.send(result);
+                if (isNaN(userID)) {
+                    return res.status(404).send();
+                }
+
+                if (userObj.id !== userID && userObj.admin === false) {
+                    return res.status(401).send();
+                }
+
+                this.database.deleteUser(userID)
+                .then(() => {
+                    return res.send();
+                })
+                .catch(() => {
+                    return res.status(500).send();
+                });
             })
             .catch(() => {
-                return res.json(JSON.stringify([]));
+                return res.status(401).send();
             });
         });
     }
@@ -234,15 +248,12 @@ export class RouterHandler {
         .post((req: Request, res: Response) => {
             this.isAuthenticated(req)
             .then((usrObj: IUser) => {
-                console.log("Team kick");
-                console.log(req.body);
                 if (req.body.team_id === undefined || req.body.user_id === undefined) {
                     return res.status(404).send();
                 }
 
                 const teamID: number = Number(req.body.team_id);
                 const userID: number = Number(req.body.user_id);
-
 
                 if (isNaN(teamID) || isNaN(userID)) {
                     return res.status(404).send();
@@ -255,13 +266,14 @@ export class RouterHandler {
                         return res.status(401).send();
                     }
 
+                    // Kick user from team
                     this.database.kickUser(userID, teamID)
                     .then(() => {
                         return res.send();
                     })
                     .catch(() => {
                         return res.status(500).send();
-                    })
+                    });
                 })
                 .catch(() => {
                     return res.status(500).send();
@@ -270,7 +282,35 @@ export class RouterHandler {
             .catch(() => {
                 return res.status(401).send();
             });
-        })
+        });
+
+        app.route("/team-admin")
+            .post((req: Request, res: Response) => {
+                this.isAuthenticated(req)
+                .then((user: IUser) => {
+                    if (req.body.user_id === undefined || req.body.team_id === undefined) {
+                        return res.status(404).send();
+                    }
+
+                    const userID: number = Number(req.body.user_id);
+                    const teamID: number = Number(req.body.team_id);
+
+                    if (isNaN(userID) || isNaN(teamID)) {
+                        return res.status(404).send();
+                    }
+
+                    this.database.changeTeamAdmin(teamID, userID)
+                    .then((team: ITeam) => {
+                        return res.json(team);
+                    })
+                    .catch(() => {
+                        return res.status(500).send();
+                    });
+                })
+                .catch(() => {
+                    return res.status(401).send();
+                });
+            });
     }
 
     private addTeamRequests(app: Express): void {
@@ -295,11 +335,10 @@ export class RouterHandler {
             .catch(() => {
                 return res.status(401).send();
             });
-        })
+        });
 
         app.route("/teamrequest")
         .get((req: Request, res: Response) => {
-            console.log("Teamrequest without id");
             this.isAuthenticated(req)
             .then((user: IUser) => {
                 this.database.getTeamRequests(null)

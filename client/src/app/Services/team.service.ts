@@ -1,5 +1,11 @@
 import { Injectable } from '@angular/core';
-import { teamPage, teamRequestPage, teamRequestDenyPage, teamRequestAcceptPage, teamKickPage } from '../../../../settings/routes';
+import {
+  teamPage,
+  teamRequestPage,
+  teamRequestDenyPage,
+  teamRequestAcceptPage,
+  teamKickPage,
+  teamAdminPage } from '../../../../settings/routes';
 import { UserService } from './user.service';
 import { timeout } from '../../../../settings/variables';
 import { ITeam, ITeamRequest } from '../../../../interfaces/team';
@@ -158,6 +164,37 @@ export class TeamService {
           return reject();
         }
       };
+      http.send(JSON.stringify(data));
+    });
+  }
+
+  public makeTeamLeader(teamID: number, userID: number): Promise<ITeam> {
+    return new Promise((resolve, reject) => {
+      const http = new XMLHttpRequest();
+
+      const data = {
+        team_id: teamID,
+        user_id: userID,
+      };
+
+      http.open('POST', teamAdminPage, true);
+      http.setRequestHeader('Content-Type', 'application/json');
+
+      this.userService.addAuthentication(http);
+
+      http.onreadystatechange = () => {
+        if (http.readyState === 4 && http.status === 200) {
+          try {
+            const team: ITeam = JSON.parse(http.responseText);
+            return resolve(team);
+          } catch (error) {
+          return reject();
+          }
+        } else if (http.readyState === 4 && http.status !== 200) {
+          return reject();
+        }
+      };
+
       http.send(JSON.stringify(data));
     });
   }

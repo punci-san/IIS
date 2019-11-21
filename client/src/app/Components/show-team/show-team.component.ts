@@ -61,7 +61,9 @@ export class ShowTeamComponent implements OnInit {
       .then((tr: ITeamRequest[]) => {
         this.teamRequests = tr;
       })
-      .catch();
+      .catch(() => {
+        this.teamRequests = [];
+      });
     })
     .catch(() => {
       this.router.navigate([''], { queryParams: { succ: false, msg: 'Given team does not exist', listing: 'team'}});
@@ -156,5 +158,26 @@ export class ShowTeamComponent implements OnInit {
       this.msgColor = RED;
       this.showMsg = true;
     });
+  }
+
+  public makeTeamLeader(userID: number): void {
+    this.showMsg = false;
+
+    this.teamService.makeTeamLeader(this.teamID, userID)
+    .then((teamData: ITeam) => {
+      this.team = teamData;
+      this.msg = 'Team admin changed.';
+      this.msgColor = GREEN;
+      this.showMsg = true;
+    })
+    .catch(() => {
+      this.msg = 'There was a problem while trying to change team admin, please try again.';
+      this.msgColor = RED;
+      this.showMsg = true;
+    });
+  }
+
+  public closeMessage(): void {
+    this.showMsg = false;
   }
 }

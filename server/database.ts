@@ -2,6 +2,7 @@ import { singleton, container } from "tsyringe";
 import mysql from "mysql";
 import { IUser } from "../interfaces/user";
 import { ITeam, ITeamRequest } from "../interfaces/team";
+import { rejects } from "assert";
 
 const dbServer = "localhost";
 const user = "xskuta04";
@@ -32,8 +33,6 @@ export class Database {
                 this.userDatabase.setConnection(this.connection);
                 this.teamDatabase.setConnection(this.connection);
                 this.teamRequestsDatabase.setConnection(this.connection);
-            } else {
-                console.log(err);
             }
         });
     }
@@ -77,7 +76,23 @@ export class Database {
     }
 
     public deleteUser(id: number): Promise<any> {
-        return this.userDatabase.deleteUser(id);
+        return new Promise((resolve, reject) => {
+            // Remove user
+            this.userDatabase.deleteUser(id)
+            .then(() => {
+                // Remove all team requests made by user
+                this.teamRequestsDatabase.deleteTeamRequestByUserID(id)
+                .then(() => {
+                    return resolve();
+                })
+                .catch(() => {
+                    return reject();
+                });
+            })
+            .catch(() => {
+                return reject();
+            });
+        });
     }
 
     public leaveTeam(teamID: number): Promise<any> {
@@ -104,17 +119,14 @@ export class Database {
                         return resolve(usr);
                     })
                     .catch(() => {
-                        console.log("User getting failed.");
                         return reject();
                     });
                 })
                 .catch(() => {
-                    console.log("User updating failed.");
                     return reject();
                 });
             })
             .catch(() => {
-                console.log("Team adding failed.");
                 return reject();
             });
         });
@@ -128,13 +140,46 @@ export class Database {
         return this.teamDatabase.getTeam(id);
     }
 
+    public changeTeamAdmin(teamID: number, userID: number): Promise<any> {
+        return new Promise((resolve, reject) => {
+            // Check if user exist
+            this.userDatabase.getUser(userID)
+            .then(() => {
+                // Update team
+                this.teamDatabase.updateTeam(teamID, null, userID)
+                .then(() => {
+                    // Get updated team and return
+                    this.teamDatabase.getTeam(teamID)
+                    .then((team: ITeam) => {
+                        return resolve(team);
+                    })
+                    .catch(() => {
+                        return reject();
+                    });
+                })
+                .catch(() => {
+                    return reject();
+                });
+            })
+            .catch(() => {
+                return reject();
+            });
+        });
+    }
+
     public deleteTeam(id: number): Promise<any> {
         return new Promise((resolve, reject) => {
             this.userDatabase.leaveTeam(id)
             .then(() => {
                 this.teamDatabase.deleteTeam(id)
                 .then(() => {
-                    return resolve();
+                    this.teamRequestsDatabase.deleteTeamRequestByTeamID(id)
+                    .then(() => {
+                        return resolve();
+                    })
+                    .catch(() => {
+                        return reject();
+                    });
                 })
                 .catch(() => {
                     return reject();
@@ -217,7 +262,7 @@ export class Database {
                         this.userDatabase.updateUser(userObj.id, null, null, teamRequest.team_id, null, null)
                         .then(() => {
                             // Delete request
-                            this.teamRequestsDatabase.deleteTeamRequest(teamRequestID)
+                            this.teamRequestsDatabase.deleteTeamRequestByID(teamRequestID)
                             .then(() => {
                                 return resolve();
                             })
@@ -244,7 +289,7 @@ export class Database {
     }
 
     public deleteTeamRequest(teamRequestID: number): Promise<void> {
-        return this.teamRequestsDatabase.deleteTeamRequest(teamRequestID);
+        return this.teamRequestsDatabase.deleteTeamRequestByID(teamRequestID);
     }
 }
 
@@ -362,11 +407,9 @@ class UserDatabase {
             }
             this.connection.query(`SELECT * FROM users WHERE id='${userId}'`, (queryErr: mysql.MysqlError, result, field: mysql.FieldInfo[]) => {
                 if (queryErr !== null) {
-                    console.log(queryErr);
                     return reject();
                 }
                 if (result === null) {
-                    console.log(result);
                     return reject();
                 }
 
@@ -424,7 +467,6 @@ class UserDatabase {
                 uDescription = `description='${description}',`;
             }
 
-            console.log(`UPDATE users SET ${uUsername} ${uPassword} ${uTeam} ${uDescription} ${uAdmin} WHERE id = '${id}';`);
             // UPDATE `users` SET `name` = 'aaaaaaa' WHERE `users`.`id` = 1;
             this.connection.query(`UPDATE users SET ${uUsername} ${uPassword} ${uTeam} ${uDescription} ${uAdmin} WHERE id = '${id}';`, (err: mysql.MysqlError, result, field: mysql.FieldInfo[]) => {
                 if (err !== null) {
@@ -456,9 +498,7 @@ class UserDatabase {
                     return reject();
                 }
 
-                console.log(result);
-                console.log(field);
-                resolve(result);
+                return resolve(result);
             });
         });
     }
@@ -478,8 +518,6 @@ class UserDatabase {
                 if (result === null) {
                     return reject();
                 }
-
-                console.log(result);
 
                 return resolve();
             });
@@ -522,7 +560,7 @@ class UserDatabase {
             if (this.connection === null) {
                 return reject();
             }
-            // INSERT INTO `users` (`id`, `name`, `pass`, `admin`, `team`) VALUES ('1', 'xpodlu01', 'jebojo9mon', '0', NULL);
+
             this.connection.query(`SELECT * FROM users where name='${username}';`,
                 (err: mysql.MysqlError, result, field: mysql.FieldInfo[]) => {
                     if (err !== null) {
@@ -599,8 +637,6 @@ class TeamDatabase {
                     return reject();
                 }
 
-                console.log(result);
-
                 if (result.length === 1) {
                     return resolve({
                         id: result[0].id,
@@ -608,6 +644,44 @@ class TeamDatabase {
                         description: result[0].description,
                         creator_id : result[0].creator_id ,
                     } as ITeam);
+                }
+
+                return reject();
+            });
+        });
+    }
+
+    public updateTeam(teamID: number, name: string, creatorID: number): Promise<ITeam> {
+        return new Promise((resolve, reject) => {
+            if (this.connection === null) {
+                return reject();
+            }
+
+            let uName = "";
+            let uCreator = "";
+
+            if (name !== null) {
+                uName = `name='${name}'`;
+            }
+
+            if (creatorID !== null) {
+                if (name !== null) {
+                    uCreator = ", ";
+                }
+                uCreator = `${uCreator}creator_id='${creatorID}'`;
+            }
+
+            this.connection.query(`UPDATE teams SET ${uName} ${uCreator} WHERE id = '${teamID}';`, (queryErr: mysql.MysqlError, result, field: mysql.FieldInfo[]) => {
+                if (queryErr !== null) {
+                    return reject();
+                }
+
+                if (result === null) {
+                    return reject();
+                }
+
+                if (result !== undefined && result.affectedRows === 1) {
+                    return resolve();
                 }
 
                 return reject();
@@ -656,15 +730,12 @@ class TeamDatabase {
             }
             this.connection.query(`DELETE FROM teams WHERE id='${id}'`, (queryErr: mysql.MysqlError, result, field: mysql.FieldInfo[]) => {
                 if (queryErr !== null) {
-                    console.log(queryErr);
                     return reject();
                 }
 
                 if (result === null) {
                     return reject();
                 }
-
-                console.log(resolve);
 
                 return resolve();
             });
@@ -708,7 +779,6 @@ class TeamRequestsDatabase {
     public addTeamRequest(teamID: number, userID: number): Promise<number> {
         return new Promise((resolve, reject) => {
             if (this.connection === null) {
-                console.log("No connection.");
                 return reject();
             }
 
@@ -720,15 +790,12 @@ class TeamRequestsDatabase {
                 this.connection.query(`INSERT INTO team_requests (team_id, user_id ) VALUES ('${teamID}', '${userID}')`,
                 (err: mysql.MysqlError, result, field: mysql.FieldInfo[]) => {
                     if (err !== null) {
-                        console.log(err);
                         return reject();
                     }
 
                     if (result === null) {
                         return reject();
                     }
-
-                    console.log(result);
 
                     if (result.affectedRows !== undefined && result.affectedRows > 0) {
                         return resolve(result.insertId);
@@ -801,12 +868,52 @@ class TeamRequestsDatabase {
         });
     }
 
-    public deleteTeamRequest(id: number): Promise<void> {
+    public deleteTeamRequestByID(id: number): Promise<void> {
         return new Promise((resolve, reject) => {
             if (this.connection === null) {
                 return reject();
             }
             this.connection.query(`DELETE FROM team_requests WHERE id='${id}'`, (queryErr: mysql.MysqlError, result, field: mysql.FieldInfo[]) => {
+                if (queryErr !== null) {
+                    return reject();
+                }
+
+                if (result === null) {
+                    return reject();
+                }
+
+                return resolve();
+            });
+        });
+    }
+
+    public deleteTeamRequestByUserID(userID: number): Promise<void> {
+        return new Promise((resolve, reject) => {
+            if (this.connection === null) {
+                return reject();
+            }
+
+            this.connection.query(`DELETE FROM team_requests WHERE user_id='${userID}'`, (queryErr: mysql.MysqlError, result, field: mysql.FieldInfo[]) => {
+                if (queryErr !== null) {
+                    return reject();
+                }
+
+                if (result === null) {
+                    return reject();
+                }
+
+                return resolve();
+            });
+        });
+    }
+
+    public deleteTeamRequestByTeamID(teamID: number): Promise<void> {
+        return new Promise((resolve, reject) => {
+            if (this.connection === null) {
+                return reject();
+            }
+
+            this.connection.query(`DELETE FROM team_requests WHERE team_id='${teamID}'`, (queryErr: mysql.MysqlError, result, field: mysql.FieldInfo[]) => {
                 if (queryErr !== null) {
                     return reject();
                 }

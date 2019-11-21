@@ -15,6 +15,7 @@ CREATE TABLE teams(
 	id int NOT NULL AUTO_INCREMENT,
 	name varchar(255) NOT NULL,
 	creator_id int,
+	description varchar(255) DEFAULT '',
 	PRIMARY KEY (id)
 )ENGINE=InnoDB;
 

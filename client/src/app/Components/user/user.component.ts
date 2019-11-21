@@ -128,4 +128,16 @@ export class UserComponent implements OnInit {
       });
     }
   }
+
+  public deleteUser(userID: number): void {
+    this.userService.deleteUser(userID)
+    .then(() => {
+      this.router.navigate([''], { queryParams: { succ: true, msg: 'Successfully removed your account.'}});
+    })
+    .catch(() => {
+      this.msg = 'There was a problem while deleting your account.';
+      this.showMsg = true;
+      this.msgColor = RED;
+    });
+  }
 }

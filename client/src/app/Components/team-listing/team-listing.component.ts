@@ -29,7 +29,9 @@ export class TeamListingComponent implements OnInit {
     .then((teamReqs: ITeamRequest[]) => {
       this.teamRequests = teamReqs;
     })
-    .catch();
+    .catch(() => {
+      this.teamRequests = [];
+    });
   }
 
   public get getTeams(): ITeam[] {
