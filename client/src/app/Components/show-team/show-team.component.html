@@ -1,7 +1,24 @@
-<div *ngIf="team !== null">
-    <p>{{team.name}}</p>
-    <div *ngFor="let user of users" class="user">
-        {{user.name}}
-        <button (click)="showUser(user.id)">Show</button>
+<div>
+    <div *ngIf="showMsg" class="message" [ngStyle]="{'background-color': msgColor}">
+        <span>{{msg}}</span>
+        <button (click)="closeMessage()">x</button>
+    </div>
+    <div *ngIf="team !== null">
+        <p>{{team.name}}</p>
+        <div *ngFor="let tmUsers of teamUsers" class="user">
+            {{tmUsers.name}}
+            <button (click)="showUser(tmUsers.id)">Show</button>
+            <button *ngIf="getUser !== null && getUser.id === team.creator_id" (click)="kickUser(tmUsers.id)">Kick</button>
+        </div>
+        <div *ngIf="getUser !== null && getUser.id === team.creator_id">
+            <p>Requests:</p>
+            <div *ngFor="let tr of teamRequests">
+                <div *ngIf="getUserData(tr.user_id) !== null">
+                    <span>{{getUserData(tr.user_id).name}}</span>
+                    <button (click)="acceptJoin(tr.id)">Accept</button>
+                    <button (click)="denyJoin(tr.id)">Deny</button>
+                </div>
+            </div>
+        </div>
     </div>
 </div>

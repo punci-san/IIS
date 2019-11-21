@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
-import { teamPage } from '../../../../settings/routes';
+import { teamPage, teamRequestPage, teamRequestDenyPage, teamRequestAcceptPage, teamKickPage } from '../../../../settings/routes';
 import { UserService } from './user.service';
 import { timeout } from '../../../../settings/variables';
-import { ITeam } from '../../../../interfaces/team';
+import { ITeam, ITeamRequest } from '../../../../interfaces/team';
 import { IUser } from '../../../../interfaces/user';
 
 @Injectable({
@@ -135,6 +135,136 @@ export class TeamService {
         }
       };
       http.send(null);
+    });
+  }
+
+  public kickUser(userID: number, teamID: number): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const http = new XMLHttpRequest();
+      const data = {
+        team_id: teamID,
+        user_id: userID,
+      };
+
+      http.open('POST', teamKickPage, true);
+      http.setRequestHeader('Content-Type', 'application/json');
+
+      this.userService.addAuthentication(http);
+
+      http.onreadystatechange = () => {
+        if (http.readyState === 4 && http.status === 200) {
+          return resolve();
+        } else if (http.readyState === 4 && http.status !== 200) {
+          return reject();
+        }
+      };
+      http.send(JSON.stringify(data));
+    });
+  }
+
+  public getTeamRequests(teamID?: number): Promise<ITeamRequest[]> {
+    return new Promise((resolve, reject) => {
+      const http = new XMLHttpRequest();
+
+      let page = `${teamRequestPage}`;
+
+      if (teamID !== undefined) {
+        page = `${teamRequestPage}/${teamID}`;
+      }
+
+      http.open('GET', page, true);
+
+      this.userService.addAuthentication(http);
+
+      http.onreadystatechange = () => {
+        if (http.readyState === 4 && http.status === 200) {
+          try {
+            const teamRequests: ITeamRequest[] = JSON.parse(http.responseText);
+            return resolve(teamRequests);
+          } catch (error) {
+            return reject();
+          }
+        } else if (http.readyState === 4 && http.status !== 200) {
+          return reject();
+        }
+      };
+
+      http.send(null);
+    });
+  }
+
+  public joinTeam(userID: number, teamID: number): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const http = new XMLHttpRequest();
+      const data = {
+        user_id: userID,
+        team_id: teamID,
+      };
+
+      http.open('POST', teamRequestPage, true);
+      http.setRequestHeader('Content-Type', 'application/json');
+
+      this.userService.addAuthentication(http);
+
+      http.onreadystatechange = () => {
+        if (http.readyState === 4 && http.status === 200) {
+          return resolve();
+        } else if (http.readyState === 4 && http.status !== 200) {
+          return reject();
+        }
+      };
+
+      http.send(JSON.stringify(data));
+    });
+  }
+
+  public acceptTeamJoin(teamRequestID: number, teamID: number): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const http = new XMLHttpRequest();
+      const data = {
+        id: teamRequestID,
+        team_id: teamID,
+      };
+
+      http.open('POST', teamRequestAcceptPage, true);
+      http.setRequestHeader('Content-Type', 'application/json');
+
+      this.userService.addAuthentication(http);
+
+      http.onreadystatechange = () => {
+        if (http.readyState === 4 && http.status === 200) {
+          return resolve();
+        } else if (http.readyState === 4 && http.status !== 200) {
+          return reject();
+        }
+      };
+
+      http.send(JSON.stringify(data));
+    });
+  }
+
+  public denyTeamJoin(teamRequestID: number, teamID: number): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const http = new XMLHttpRequest();
+      const data = {
+        id: teamRequestID,
+        team_id: teamID,
+      };
+
+      http.open('POST', teamRequestDenyPage, true);
+      http.setRequestHeader('Content-Type', 'application/json');
+
+      this.userService.addAuthentication(http);
+
+      http.onreadystatechange = () => {
+        if (http.readyState === 4 && http.status === 200) {
+          return resolve();
+        } else if (http.readyState === 4 && http.status !== 200) {
+          return reject();
+        }
+      };
+
+      http.send(JSON.stringify(data));
     });
   }
 }

@@ -34,7 +34,7 @@ const routes: Routes = [
     component: AddTeamComponent,
   },
   {
-    path: 'show-user/:id',
+    path: 'show-team/:id',
     pathMatch: 'full',
     component: ShowTeamComponent,
   },

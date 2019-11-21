@@ -1,9 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { TeamService } from 'src/app/Services/team.service';
-import { ITeam } from '../../../../../interfaces/team';
+import { ITeam, ITeamRequest } from '../../../../../interfaces/team';
 import { IUser } from '../../../../../interfaces/user';
 import { UserService } from 'src/app/Services/user.service';
+import { RED, GREEN } from '../../../../../settings/variables';
 
 @Component({
   selector: 'app-show-team',
@@ -13,7 +14,13 @@ import { UserService } from 'src/app/Services/user.service';
 export class ShowTeamComponent implements OnInit {
   private teamID: number;
   private team: ITeam;
+  private teamUsers: IUser[];
+  private teamRequests: ITeamRequest[];
   private users: IUser[];
+
+  private showMsg: boolean;
+  private msg: string;
+  private msgColor: string;
 
   constructor(
     private router: Router,
@@ -24,33 +31,130 @@ export class ShowTeamComponent implements OnInit {
     this.teamID = Number(this.route.snapshot.params.id);
     this.team = null;
     this.users = [];
+    this.teamUsers = [];
+    this.teamRequests = [];
+
+    this.showMsg = false;
+    this.msg = '';
+    this.msgColor = '';
   }
 
   ngOnInit() {
     if (isNaN(this.teamID)) {
       this.router.navigate([''], { queryParams: { succ: false, msg: 'Given team does not exist', listing: 'team'}});
     }
+
     this.teamService.getTeam(this.teamID)
     .then((teamData: ITeam) => {
       this.team = teamData;
       this.userService.getTeamUsers(this.team.id)
       .then((users: IUser[]) => {
-        this.users = users;
+        this.teamUsers = users;
       })
       .catch(() => {
-        this.users = [];
+        this.teamUsers = [];
       });
+
+      this.users = this.userService.getUsers;
+
+      this.teamService.getTeamRequests(this.team.id)
+      .then((tr: ITeamRequest[]) => {
+        this.teamRequests = tr;
+      })
+      .catch();
     })
     .catch(() => {
       this.router.navigate([''], { queryParams: { succ: false, msg: 'Given team does not exist', listing: 'team'}});
     });
   }
 
+  public get getUser(): IUser {
+    return this.userService.getLoggedData;
+  }
+
+  public getUserData(userID: number) {
+    const index: number = this.users.findIndex((usr: IUser) => usr.id === userID);
+
+    if (index < 0) {
+      return null;
+    }
+
+    return this.users[index];
+  }
+
   public showUser(userID: number): void {
     this.router.navigate(['show-user'], { queryParams: { id: userID}});
   }
 
+  public acceptJoin(teamRequestID: number): void {
+    this.showMsg = false;
+
+    // Accept team member
+    this.teamService.acceptTeamJoin(teamRequestID, this.teamID)
+    .then(() => {
+      // Update team members
+      this.userService.getTeamUsers(this.team.id)
+      .then((users: IUser[]) => {
+        this.teamUsers = users;
+      })
+      .catch(() => {
+        this.teamUsers = [];
+      });
+
+      // Update requests
+      this.teamService.getTeamRequests(this.team.id)
+      .then((tr: ITeamRequest[]) => {
+        this.teamRequests = tr;
+      })
+      .catch();
+    })
+    .catch(() => {
+      this.showMsg = true;
+      this.msgColor = RED;
+      this.msg = 'Problem while trying to accept user. Please try again';
+    });
+  }
+
+  public denyJoin(teamRequestID: number): void {
+    this.showMsg = false;
+
+    // Accept team member
+    this.teamService.denyTeamJoin(teamRequestID, this.teamID)
+    .then(() => {
+      // Update requests
+      this.teamService.getTeamRequests(this.team.id)
+      .then((tr: ITeamRequest[]) => {
+        this.teamRequests = tr;
+      })
+      .catch();
+    })
+    .catch(() => {
+      this.showMsg = true;
+      this.msgColor = RED;
+      this.msg = 'Problem while trying to deny user. Please try again';
+    });
+  }
+
   public kickUser(userID: number): void {
-    
+    this.showMsg = false;
+    this.teamService.kickUser(userID, this.teamID)
+    .then(() => {
+      // Update team members
+      this.userService.getTeamUsers(this.team.id)
+      .then((users: IUser[]) => {
+        this.teamUsers = users;
+      })
+      .catch(() => {
+        this.teamUsers = [];
+      });
+      this.msg = 'User was successfully kicked from team.';
+      this.msgColor = GREEN;
+      this.showMsg = true;
+    })
+    .catch(() => {
+      this.msg = 'There was a problem while trying to kick user, please try again.';
+      this.msgColor = RED;
+      this.showMsg = true;
+    });
   }
 }

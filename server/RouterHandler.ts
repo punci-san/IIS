@@ -4,7 +4,7 @@ import { Express } from "express-serve-static-core";
 import { Database } from "./database";
 import { IUser } from "../interfaces/user";
 import cors from "cors";
-import { ITeam } from "../interfaces/team";
+import { ITeam, ITeamRequest } from "../interfaces/team";
 
 const varcharLen = 255;
 
@@ -20,9 +20,9 @@ export class RouterHandler {
         app.use(cors());
         app.use(json());
 
-        // parse application/json
         this.addUserRoutes(app);
         this.addTeamRoutes(app);
+        this.addTeamRequests(app);
 
         // Path not found
         app.route("*")
@@ -70,7 +70,7 @@ export class RouterHandler {
                 });
             });
 
-        app.route("/teamusers/:id")
+        app.route("/teamuser/:id")
             .get((req: Request, res: Response) => {
                 if (req.params.id === undefined) {
                     return res.status(404).send();
@@ -224,6 +224,196 @@ export class RouterHandler {
             this.database.deleteTeam(id)
             .then(() => {
                 return res.send();
+            })
+            .catch(() => {
+                return res.status(401).send();
+            });
+        });
+
+        app.route("/team-kick")
+        .post((req: Request, res: Response) => {
+            this.isAuthenticated(req)
+            .then((usrObj: IUser) => {
+                console.log("Team kick");
+                console.log(req.body);
+                if (req.body.team_id === undefined || req.body.user_id === undefined) {
+                    return res.status(404).send();
+                }
+
+                const teamID: number = Number(req.body.team_id);
+                const userID: number = Number(req.body.user_id);
+
+
+                if (isNaN(teamID) || isNaN(userID)) {
+                    return res.status(404).send();
+                }
+
+                this.database.getTeam(teamID)
+                .then((team: ITeam) => {
+                    // Only team admin can kick
+                    if (team.creator_id !== usrObj.id) {
+                        return res.status(401).send();
+                    }
+
+                    this.database.kickUser(userID, teamID)
+                    .then(() => {
+                        return res.send();
+                    })
+                    .catch(() => {
+                        return res.status(500).send();
+                    })
+                })
+                .catch(() => {
+                    return res.status(500).send();
+                });
+            })
+            .catch(() => {
+                return res.status(401).send();
+            });
+        })
+    }
+
+    private addTeamRequests(app: Express): void {
+        app.route("/teamrequest/:id")
+        .get((req: Request, res: Response) => {
+            this.isAuthenticated(req)
+            .then((user: IUser) => {
+                const teamRequestID: number = Number(req.params.id);
+
+                if (isNaN(teamRequestID)) {
+                    return res.status(404).send();
+                }
+
+                this.database.getTeamRequests(teamRequestID)
+                .then((results: ITeamRequest[]) => {
+                    return res.json(results);
+                })
+                .catch(() => {
+                    return res.status(404).send();
+                });
+            })
+            .catch(() => {
+                return res.status(401).send();
+            });
+        })
+
+        app.route("/teamrequest")
+        .get((req: Request, res: Response) => {
+            console.log("Teamrequest without id");
+            this.isAuthenticated(req)
+            .then((user: IUser) => {
+                this.database.getTeamRequests(null)
+                .then((results: ITeamRequest[]) => {
+                    return res.json(results);
+                })
+                .catch(() => {
+                    return res.status(404).send();
+                });
+            })
+            .catch(() => {
+                return res.status(401).send();
+            });
+        })
+        .post((req: Request, res: Response) => {
+
+            if (req.body.user_id === undefined || req.body.team_id === undefined) {
+                return res.status(401).send();
+            }
+
+            const userID: number = Number(req.body.user_id);
+            const teamID: number = Number(req.body.team_id);
+
+            if (isNaN(userID) || isNaN(teamID)) {
+                return res.status(500).send();
+            }
+
+            this.isAuthenticated(req)
+            .then((user: IUser) => {
+                this.database.addTeamRequest(teamID, userID)
+                .then(() => {
+                    return res.send();
+                })
+                .catch(() => {
+                    return res.status(500).send();
+                });
+            })
+            .catch(() => {
+                return res.status(401).send();
+            });
+        });
+
+        app.route("/teamrequest-accept")
+        .post((req: Request, res: Response) => {
+
+            if (req.body.id === undefined || req.body.team_id === undefined) {
+                return res.status(404).send();
+            }
+
+            const teamRequestID: number = Number(req.body.id);
+            const teamID: number = Number(req.body.team_id);
+
+            if (isNaN(teamRequestID) || isNaN(teamID)) {
+                return res.status(404).send();
+            }
+
+            this.isAuthenticated(req)
+            .then((user: IUser) => {
+                this.database.getTeam(teamID)
+                .then((team: ITeam) => {
+                    if (user.id !== team.creator_id) {
+                        return res.status(401).send();
+                    }
+
+                    this.database.acceptTeamRequest(teamRequestID)
+                    .then(() => {
+                        return res.send();
+                    })
+                    .catch(() => {
+                        return res.status(500).send();
+                    });
+                })
+                .catch(() => {
+                    return res.status(404).send();
+                });
+            })
+            .catch(() => {
+                return res.status(401).send();
+            });
+        });
+
+        app.route("/teamrequest-deny")
+        .post((req: Request, res: Response) => {
+
+            if (req.body.id === undefined || req.body.team_id === undefined) {
+                return res.status(404).send();
+            }
+
+            const teamRequestID: number = Number(req.body.id);
+            const teamID: number = Number(req.body.team_id);
+
+            if (isNaN(teamRequestID) || isNaN(teamID)) {
+                return res.status(404).send();
+            }
+
+            this.isAuthenticated(req)
+            .then((user: IUser) => {
+                this.database.getTeam(teamID)
+                .then((team: ITeam) => {
+                    if (user.id !== team.creator_id) {
+                        return res.status(401).send();
+                    }
+
+                    this.database.deleteTeamRequest(teamRequestID)
+                    .then(() => {
+                        return res.send();
+                    })
+                    .catch(() => {
+                        return res.status(500).send();
+                    });
+                })
+                .catch(() => {
+                    return res.status(404).send();
+                });
             })
             .catch(() => {
                 return res.status(401).send();

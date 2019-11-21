@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { TeamService } from 'src/app/Services/team.service';
-import { ITeam } from '../../../../../interfaces/team';
+import { ITeam, ITeamRequest } from '../../../../../interfaces/team';
 import { UserService } from 'src/app/Services/user.service';
 import { IUser } from '../../../../../interfaces/user';
 import { Router } from '@angular/router';
@@ -12,6 +12,7 @@ import { Router } from '@angular/router';
 })
 export class TeamListingComponent implements OnInit {
   private user: IUser;
+  private teamRequests: ITeamRequest[];
 
   constructor(
     private teamService: TeamService,
@@ -19,17 +20,27 @@ export class TeamListingComponent implements OnInit {
     private router: Router
     ) {
       this.user = null;
+      this.teamRequests = [];
     }
 
   ngOnInit() {
     this.user = this.userService.getLoggedData;
+    this.teamService.getTeamRequests()
+    .then((teamReqs: ITeamRequest[]) => {
+      this.teamRequests = teamReqs;
+    })
+    .catch();
   }
 
   public get getTeams(): ITeam[] {
     return this.teamService.getTeams;
   }
 
-  public joinTeam(id: number): void {
+  public joinSend(teamID: number): boolean {
+    return this.teamRequests.findIndex((tr: ITeamRequest) => tr.team_id === teamID) >= 0;
+  }
+
+  public joinTeam(teamID: number): void {
     const currUser: IUser = this.userService.getLoggedData;
     if (currUser === null) {
       return;
@@ -39,21 +50,21 @@ export class TeamListingComponent implements OnInit {
       return;
     }
 
-    const usr: IUser = {
-      id: currUser.id,
-      admin: currUser.admin,
-      description: currUser.description,
-      name: currUser.name,
-      team: id,
-    };
-
-    this.userService.updateUser(usr, null)
+    this.teamService.joinTeam(currUser.id, teamID)
     .then(() => {
-      this.user = this.userService.getLoggedData;
-      this.router.navigate([''], { queryParams: { succ: true, msg: 'You have successfuly joined team.', listing: 'team'}});
+      this.teamService.getTeamRequests()
+      .then((teamReqs: ITeamRequest[]) => {
+        this.teamRequests = teamReqs;
+      })
+      .catch();
+      this.router.navigate([''], { queryParams: { succ: true, msg: 'Successfully send request to join team.', listing: 'team'}});
     })
     .catch(() => {
-      this.router.navigate([''], { queryParams: { succ: false, msg: 'There was a problem while joining team.', listing: 'team'}});
+      this.router.navigate([''], { queryParams: { succ: false, msg: 'There was an error while trying to send request.', listing: 'team'}});
     });
+  }
+
+  public showTeam(teamID: number): void {
+    this.router.navigate(['show-team'], { queryParams: { id: teamID}});
   }
 }

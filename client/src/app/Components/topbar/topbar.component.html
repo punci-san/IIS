@@ -19,7 +19,7 @@
         </button>
     </div>
     <div *ngIf="getUserData !== null && getUserData.team !== null && getTeamdata !== null" class="team-add-button">
-        <button [routerLink]="['/show-user', getTeamdata.id]" routerLinkActive="active">
+        <button [routerLink]="['/show-team', getTeamdata.id]" routerLinkActive="active">
             <span>{{getTeamdata.name}}</span>
         </button>
     </div>

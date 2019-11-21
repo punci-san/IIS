@@ -1,7 +1,7 @@
 import { singleton, container } from "tsyringe";
 import mysql from "mysql";
 import { IUser } from "../interfaces/user";
-import { ITeam } from "../interfaces/team";
+import { ITeam, ITeamRequest } from "../interfaces/team";
 
 const dbServer = "localhost";
 const user = "xskuta04";
@@ -13,6 +13,7 @@ export class Database {
     private connection: mysql.Connection;
     private userDatabase: UserDatabase;
     private teamDatabase: TeamDatabase;
+    private teamRequestsDatabase: TeamRequestsDatabase;
 
     constructor() {
         // Connect to database
@@ -24,11 +25,13 @@ export class Database {
         });
         this.userDatabase = container.resolve(UserDatabase);
         this.teamDatabase = container.resolve(TeamDatabase);
+        this.teamRequestsDatabase = container.resolve(TeamRequestsDatabase);
 
         this.connection.connect((err: mysql.MysqlError) => {
             if (err === null) {
                 this.userDatabase.setConnection(this.connection);
                 this.teamDatabase.setConnection(this.connection);
+                this.teamRequestsDatabase.setConnection(this.connection);
             } else {
                 console.log(err);
             }
@@ -141,6 +144,107 @@ export class Database {
                 return reject();
             });
         });
+    }
+
+    public kickUser(userID: number, teamID: number): Promise<void> {
+        return new Promise((resolve, reject) => {
+            // Get user
+            this.userDatabase.getUser(userID)
+            .then((usr: IUser) => {
+                // Not from this team
+                if (usr.team !== teamID) {
+                    return reject();
+                }
+
+                // Update user
+                this.userDatabase.updateUser(userID, null, null, null, null, null)
+                .then(() => {
+                    return resolve();
+                })
+                .catch(() => {
+                    return reject();
+                });
+            })
+            .catch(() => {
+                return reject();
+            });
+        });
+    }
+
+    /**
+     * TEAM REQUESTS
+     */
+
+    public addTeamRequest(teamID: number, userID: number): Promise<any> {
+        return new Promise((resolve, reject) => {
+            this.userDatabase.getUser(userID)
+            .then(() => {
+                this.teamDatabase.getTeam(teamID)
+                .then(() => {
+                    this.teamRequestsDatabase.addTeamRequest(teamID, userID)
+                    .then(() => {
+                        return resolve();
+                    })
+                    .catch(() => {
+                        return reject();
+                    });
+                }).catch(() => {
+                    return reject();
+                });
+            })
+            .catch(() => {
+                return reject();
+            });
+        });
+    }
+
+    public getTeamRequests(teamID: number): Promise<ITeamRequest[]> {
+        return this.teamRequestsDatabase.getTeamRequests(teamID);
+    }
+
+    public acceptTeamRequest(teamRequestID: number): Promise<any> {
+        return new Promise((resolve, reject) => {
+            // Get already created request
+            this.teamRequestsDatabase.getTeamRequest(teamRequestID)
+            .then((teamRequest: ITeamRequest) => {
+                // Check if team exist
+                this.teamDatabase.getTeam(teamRequest.team_id)
+                .then(() => {
+                    // Check if user exist
+                    this.userDatabase.getUser(teamRequest.user_id)
+                    .then((userObj: IUser) => {
+                        // Update user
+                        this.userDatabase.updateUser(userObj.id, null, null, teamRequest.team_id, null, null)
+                        .then(() => {
+                            // Delete request
+                            this.teamRequestsDatabase.deleteTeamRequest(teamRequestID)
+                            .then(() => {
+                                return resolve();
+                            })
+                            .catch(() => {
+                                return reject();
+                            });
+                        })
+                        .catch(() => {
+                            return reject();
+                        });
+                    })
+                    .catch(() => {
+                        return reject();
+                    });
+                })
+                .catch(() => {
+                    return reject();
+                });
+            })
+            .catch(() => {
+                return reject();
+            });
+        });
+    }
+
+    public deleteTeamRequest(teamRequestID: number): Promise<void> {
+        return this.teamRequestsDatabase.deleteTeamRequest(teamRequestID);
     }
 }
 
@@ -293,7 +397,7 @@ class UserDatabase {
             let uDescription = "";
             let uAdmin = "admin=false";
 
-            if (username !== null && username !== undefined) {
+            if (username !== null) {
                 uUsername = `name='${username}',`;
             }
 
@@ -584,6 +688,161 @@ class TeamDatabase {
                     }
 
                     return reject();
+            });
+        });
+    }
+}
+
+@singleton()
+class TeamRequestsDatabase {
+    private connection: mysql.Connection;
+
+    constructor() {
+        this.connection = null;
+    }
+
+    public setConnection(conn: mysql.Connection): void {
+        this.connection = conn;
+    }
+
+    public addTeamRequest(teamID: number, userID: number): Promise<number> {
+        return new Promise((resolve, reject) => {
+            if (this.connection === null) {
+                console.log("No connection.");
+                return reject();
+            }
+
+            this.teamRequestExist(teamID, userID)
+            .then(() => {
+                return reject();
+            })
+            .catch(() => {
+                this.connection.query(`INSERT INTO team_requests (team_id, user_id ) VALUES ('${teamID}', '${userID}')`,
+                (err: mysql.MysqlError, result, field: mysql.FieldInfo[]) => {
+                    if (err !== null) {
+                        console.log(err);
+                        return reject();
+                    }
+
+                    if (result === null) {
+                        return reject();
+                    }
+
+                    console.log(result);
+
+                    if (result.affectedRows !== undefined && result.affectedRows > 0) {
+                        return resolve(result.insertId);
+                    }
+
+                    return reject();
+                });
+            });
+        });
+    }
+
+    public getTeamRequest(id: number): Promise<ITeamRequest> {
+        return new Promise((resolve, reject) => {
+            if (this.connection === null) {
+                return reject();
+            }
+
+            this.connection.query(`SELECT * FROM team_requests WHERE id='${id}'`, (queryErr: mysql.MysqlError, result, field: mysql.FieldInfo[]) => {
+                if (queryErr !== null) {
+                    return reject();
+                }
+                if (result === null) {
+                    return reject();
+                }
+
+                if (result.length === 0) {
+                    return reject();
+                }
+
+                return resolve({
+                    id: result[0].id,
+                    user_id: result[0].user_id,
+                    team_id: result[0].team_id,
+                });
+            });
+        });
+    }
+
+    public getTeamRequests(id: number): Promise<ITeamRequest[]> {
+        return new Promise((resolve, reject) => {
+            if (this.connection === null) {
+                return reject();
+            }
+
+            const teamRequests: ITeamRequest[] = [];
+            let query = "";
+
+            if (id !== null) {
+                query = ` WHERE team_id='${id}'`;
+            }
+
+            this.connection.query(`SELECT * FROM team_requests ${query}`, (queryErr: mysql.MysqlError, result, field: mysql.FieldInfo[]) => {
+                if (queryErr !== null) {
+                    return reject();
+                }
+                if (result === null) {
+                    return reject();
+                }
+
+                for (const res of result) {
+                    teamRequests.push({
+                        id: res.id,
+                        user_id : res.user_id ,
+                        team_id: res.team_id,
+                    });
+                }
+
+                return resolve(teamRequests);
+            });
+        });
+    }
+
+    public deleteTeamRequest(id: number): Promise<void> {
+        return new Promise((resolve, reject) => {
+            if (this.connection === null) {
+                return reject();
+            }
+            this.connection.query(`DELETE FROM team_requests WHERE id='${id}'`, (queryErr: mysql.MysqlError, result, field: mysql.FieldInfo[]) => {
+                if (queryErr !== null) {
+                    return reject();
+                }
+
+                if (result === null) {
+                    return reject();
+                }
+
+                return resolve();
+            });
+        });
+    }
+
+    public teamRequestExist(teamID: number, userID: number): Promise<ITeamRequest> {
+        return new Promise((resolve, reject) => {
+            if (this.connection === null) {
+                return reject();
+            }
+
+            this.connection.query(`SELECT * FROM team_requests WHERE team_id='${teamID}' AND user_id='${userID}'`, (queryErr: mysql.MysqlError, result, field: mysql.FieldInfo[]) => {
+                if (queryErr !== null) {
+                    return reject();
+                }
+                if (result === null) {
+                    return reject();
+                }
+
+                if (result.length === 0) {
+                    return reject();
+                }
+
+                return resolve({
+                    id: result[0].id,
+                    user_id: result[0].user_id,
+                    team_id: result[0].team_id,
+                });
             });
         });
     }
