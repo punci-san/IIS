@@ -1,0 +1,15 @@
+<div>
+    <div *ngIf="showMsg" class="message" [ngStyle]="{'background-color': msgColor}">
+        <span>{{msg}}</span>
+        <button (click)="closeMessage()">x</button>
+    </div>
+
+    <div *ngIf="tournament !== null">
+        <p>{{tournament.name}}</p>
+        <div *ngIf="getLoggedUser !== null && getLoggedUser.id !== tournament.creator_id">
+            <button (click)="joinAsReferee(getLoggedUser.id)" *ngIf="canJoinAsReferee(getLoggedUser.id)">Register as referee</button>
+            <button *ngIf="canJoinAsTeam(getLoggedUser.team_id)" (click)="joinAsTeam(getLoggedUser.team_id)">Register as team</button>
+            <button *ngIf="canJoinAsUser(getLoggedUser.id)" (click)="joinAsUser(getLoggedUser.id)">Register as user</button>
+        </div>
+    </div>
+</div>

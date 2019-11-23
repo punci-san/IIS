@@ -1,12 +1,13 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { LogRegComponent } from './Components/log-reg/log-reg.component';
-import { AddMatchComponent } from './Components/add-match/add-match.component';
 import { AddTeamComponent } from './Components/add-team/add-team.component';
 import { ListingComponent } from './Components/listing/listing.component';
 import { UserComponent } from './Components/user/user.component';
 import { ShowUserComponent } from './Components/show-user/show-user.component';
 import { ShowTeamComponent } from './Components/show-team/show-team.component';
+import { AddTournamentComponent } from './Components/add-tournament/add-tournament.component';
+import { ShowTournamentComponent } from './Components/show-tournament/show-tournament.component';
 
 const routes: Routes = [
   {
@@ -39,10 +40,15 @@ const routes: Routes = [
     component: ShowTeamComponent,
   },
   {
-    path: 'add-match',
+    path: 'add-tournament',
     pathMatch: 'full',
-    component: AddMatchComponent,
-  }
+    component: AddTournamentComponent,
+  },
+  {
+    path: 'show-tournament',
+    pathMatch: 'full',
+    component: ShowTournamentComponent,
+  },
 ];
 
 @NgModule({

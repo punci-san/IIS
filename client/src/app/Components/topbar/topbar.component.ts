@@ -2,9 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { UserService } from 'src/app/Services/user.service';
 import { IUser } from '../../../../../interfaces/user';
 import { TeamService } from 'src/app/Services/team.service';
-import { MatchService } from 'src/app/Services/match.service';
 import { Router } from '@angular/router';
 import { ITeam } from '../../../../../interfaces/team';
+import { TournamentService } from 'src/app/Services/tournament.service';
 
 @Component({
   selector: 'app-topbar',
@@ -17,7 +17,7 @@ export class TopbarComponent implements OnInit {
   constructor(
     private userService: UserService,
     private teamService: TeamService,
-    private matchService: MatchService,
+    private tournamentService: TournamentService,
     private router: Router
   ) {
     this.searchValue = '';
@@ -59,6 +59,6 @@ export class TopbarComponent implements OnInit {
   public updateFilter(): void {
     this.userService.filterUsers(this.searchValue);
     this.teamService.filterTeams(this.searchValue);
-    this.matchService.filterMatches(this.searchValue);
+    this.tournamentService.filterTournaments(this.searchValue);
   }
 }

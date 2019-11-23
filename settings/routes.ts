@@ -10,3 +10,6 @@ export const teamAdminPage = `${mainPage}team-admin`;
 export const teamRequestPage = `${mainPage}teamrequest`;
 export const teamRequestAcceptPage = `${mainPage}teamrequest-accept`;
 export const teamRequestDenyPage = `${mainPage}teamrequest-deny`;
+
+export const tournamentPage = `${mainPage}tournament`;
+export const tournamentRegistrationPage = `${mainPage}tournament-registration`;

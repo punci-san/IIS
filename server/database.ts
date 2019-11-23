@@ -2,7 +2,8 @@ import { singleton, container } from "tsyringe";
 import mysql from "mysql";
 import { IUser } from "../interfaces/user";
 import { ITeam, ITeamRequest } from "../interfaces/team";
-import { rejects } from "assert";
+import { ITournament } from "../interfaces/tournament";
+import { ITournamentRegistrations } from "../interfaces/tournament-registrations";
 
 const dbServer = "localhost";
 const user = "xskuta04";
@@ -15,6 +16,8 @@ export class Database {
     private userDatabase: UserDatabase;
     private teamDatabase: TeamDatabase;
     private teamRequestsDatabase: TeamRequestsDatabase;
+    private tournamentDatabase: TournamentDatabase;
+    private tournamentRegDatabase: TournamentRegistrationDatabase;
 
     constructor() {
         // Connect to database
@@ -27,12 +30,16 @@ export class Database {
         this.userDatabase = container.resolve(UserDatabase);
         this.teamDatabase = container.resolve(TeamDatabase);
         this.teamRequestsDatabase = container.resolve(TeamRequestsDatabase);
+        this.tournamentDatabase = container.resolve(TournamentDatabase);
+        this.tournamentRegDatabase = container.resolve(TournamentRegistrationDatabase);
 
         this.connection.connect((err: mysql.MysqlError) => {
             if (err === null) {
                 this.userDatabase.setConnection(this.connection);
                 this.teamDatabase.setConnection(this.connection);
                 this.teamRequestsDatabase.setConnection(this.connection);
+                this.tournamentDatabase.setConnection(this.connection);
+                this.tournamentRegDatabase.setConnection(this.connection);
             }
         });
     }
@@ -290,6 +297,54 @@ export class Database {
 
     public deleteTeamRequest(teamRequestID: number): Promise<void> {
         return this.teamRequestsDatabase.deleteTeamRequestByID(teamRequestID);
+    }
+
+    /**
+     * TOURNAMENT REQUESTS
+     */
+
+     public getTournaments(): Promise<ITournament[]> {
+         return this.tournamentDatabase.getTournaments();
+     }
+
+     public getTournament(tournamentID: number): Promise<ITournament> {
+        return this.tournamentDatabase.getTournament(tournamentID);
+    }
+
+     public addTournament(
+        name: string,
+        dateCreated: Date,
+        numberOfPlayers: number,
+        teamType: number,
+        registerFee: number,
+        description: string,
+        creatorID: number,
+        tournamentStart: Date,
+        sponsors: string,
+     ): Promise<any> {
+         return this.tournamentDatabase.addTournament(
+             name,
+             dateCreated,
+             numberOfPlayers,
+             teamType,
+             registerFee,
+             description,
+             creatorID,
+             tournamentStart,
+             sponsors,
+             );
+     }
+
+     /**
+      * TOURNAMENT REGISTRATION REQUESTS
+      */
+
+    public getTournamentRegistrations(tournamentID: number): Promise<ITournamentRegistrations[]> {
+        return this.tournamentRegDatabase.getAll(tournamentID);
+    }
+
+    public addTournamentReg(tournamentID: number, userID: number, teamID: number, referee: boolean): Promise<number> {
+        return this.tournamentRegDatabase.add(tournamentID, userID, teamID, referee);
     }
 }
 
@@ -864,6 +919,384 @@ class TeamRequestsDatabase {
                 }
 
                 return resolve(teamRequests);
+            });
+        });
+    }
+
+    public deleteTeamRequestByID(id: number): Promise<void> {
+        return new Promise((resolve, reject) => {
+            if (this.connection === null) {
+                return reject();
+            }
+            this.connection.query(`DELETE FROM team_requests WHERE id='${id}'`, (queryErr: mysql.MysqlError, result, field: mysql.FieldInfo[]) => {
+                if (queryErr !== null) {
+                    return reject();
+                }
+
+                if (result === null) {
+                    return reject();
+                }
+
+                return resolve();
+            });
+        });
+    }
+
+    public deleteTeamRequestByUserID(userID: number): Promise<void> {
+        return new Promise((resolve, reject) => {
+            if (this.connection === null) {
+                return reject();
+            }
+
+            this.connection.query(`DELETE FROM team_requests WHERE user_id='${userID}'`, (queryErr: mysql.MysqlError, result, field: mysql.FieldInfo[]) => {
+                if (queryErr !== null) {
+                    return reject();
+                }
+
+                if (result === null) {
+                    return reject();
+                }
+
+                return resolve();
+            });
+        });
+    }
+
+    public deleteTeamRequestByTeamID(teamID: number): Promise<void> {
+        return new Promise((resolve, reject) => {
+            if (this.connection === null) {
+                return reject();
+            }
+
+            this.connection.query(`DELETE FROM team_requests WHERE team_id='${teamID}'`, (queryErr: mysql.MysqlError, result, field: mysql.FieldInfo[]) => {
+                if (queryErr !== null) {
+                    return reject();
+                }
+
+                if (result === null) {
+                    return reject();
+                }
+
+                return resolve();
+            });
+        });
+    }
+
+    public teamRequestExist(teamID: number, userID: number): Promise<ITeamRequest> {
+        return new Promise((resolve, reject) => {
+            if (this.connection === null) {
+                return reject();
+            }
+
+            this.connection.query(`SELECT * FROM team_requests WHERE team_id='${teamID}' AND user_id='${userID}'`, (queryErr: mysql.MysqlError, result, field: mysql.FieldInfo[]) => {
+                if (queryErr !== null) {
+                    return reject();
+                }
+                if (result === null) {
+                    return reject();
+                }
+
+                if (result.length === 0) {
+                    return reject();
+                }
+
+                return resolve({
+                    id: result[0].id,
+                    user_id: result[0].user_id,
+                    team_id: result[0].team_id,
+                });
+            });
+        });
+    }
+}
+
+@singleton()
+class TournamentDatabase {
+    private connection: mysql.Connection;
+
+    constructor() {
+        this.connection = null;
+    }
+
+    public setConnection(conn: mysql.Connection): void {
+        this.connection = conn;
+    }
+
+    public addTournament(name: string, dateCreated: Date, numberOfPlayers: number, teamType: number, registerFee: number, description: string, creatorID: number, tournamentStart: Date, sponsors: string): Promise<number> {
+        return new Promise((resolve, reject) => {
+            if (this.connection === null) {
+                return reject();
+            }
+
+            this.connection.query(
+                `INSERT INTO tournaments
+                (
+                    name,
+                    date_created,
+                    number_of_players,
+                    team_type,
+                    register_fee,
+                    description,
+                    creator_id,
+                    tournament_start,
+                    sponsors
+                    ) VALUES (
+                        '${name}',
+                        '${dateCreated.toISOString()}',
+                        '${numberOfPlayers}',
+                        '${teamType}',
+                        '${registerFee}',
+                        '${description}',
+                        '${creatorID}',
+                        '${tournamentStart.toISOString()}',
+                        '${sponsors}')`,
+            (err: mysql.MysqlError, result, field: mysql.FieldInfo[]) => {
+                if (err !== null) {
+                    return reject();
+                }
+
+                if (result === null) {
+                    return reject();
+                }
+
+                if (result.affectedRows !== undefined && result.affectedRows > 0) {
+                    return resolve(result.insertId);
+                }
+
+                return reject();
+            });
+        });
+    }
+
+    public getTournaments(): Promise<ITournament[]> {
+        return new Promise((resolve, reject) => {
+            if (this.connection === null) {
+                return reject();
+            }
+            const tournaments: ITournament[] = [];
+
+            this.connection.query("SELECT * FROM tournaments", (queryErr: mysql.MysqlError, result, field: mysql.FieldInfo[]) => {
+                if (queryErr !== null) {
+                    return reject();
+                }
+                if (result === null) {
+                    return reject();
+                }
+
+                for (const res of result) {
+                    tournaments.push({
+                        id: res.id,
+                        name: res.name,
+                        date_created: res.date_created,
+                        number_of_players: res.number_of_players,
+                        team_type: res.team_type,
+                        register_fee: res.register_fee,
+                        description: res.description,
+                        creator_id: res.creator_id,
+                        referee_id: res.referee_id,
+                        tournament_start: res.tournament_start,
+                        created: (res.created === 0) ? false : true,
+                        sponsors: res.sponsors,
+                    });
+                }
+
+                return resolve(tournaments);
+            });
+        });
+    }
+
+    public getTournament(tournamentID: number): Promise<ITournament> {
+        return new Promise((resolve, reject) => {
+            if (this.connection === null) {
+                return reject();
+            }
+
+            this.connection.query(`SELECT * FROM tournaments WHERE id='${tournamentID}' LIMIT 1`, (queryErr: mysql.MysqlError, result, field: mysql.FieldInfo[]) => {
+                if (queryErr !== null) {
+                    return reject();
+                }
+                if (result === null) {
+                    return reject();
+                }
+
+                if (result.length !== 1) {
+                    return reject();
+                }
+
+                return resolve({
+                    id: result[0].id,
+                    name: result[0].name,
+                    date_created: result[0].date_created,
+                    number_of_players: result[0].number_of_players,
+                    team_type: result[0].team_type,
+                    register_fee: result[0].register_fee,
+                    description: result[0].description,
+                    creator_id: result[0].creator_id,
+                    referee_id: result[0].referee_id,
+                    tournament_start: result[0].tournament_start,
+                    created: (result[0].created === 0) ? false : true,
+                    sponsors: result[0].sponsors,
+                });
+            });
+        });
+    }
+
+    public deleteTeamRequestByID(id: number): Promise<void> {
+        return new Promise((resolve, reject) => {
+            if (this.connection === null) {
+                return reject();
+            }
+            this.connection.query(`DELETE FROM team_requests WHERE id='${id}'`, (queryErr: mysql.MysqlError, result, field: mysql.FieldInfo[]) => {
+                if (queryErr !== null) {
+                    return reject();
+                }
+
+                if (result === null) {
+                    return reject();
+                }
+
+                return resolve();
+            });
+        });
+    }
+
+    public deleteTeamRequestByUserID(userID: number): Promise<void> {
+        return new Promise((resolve, reject) => {
+            if (this.connection === null) {
+                return reject();
+            }
+
+            this.connection.query(`DELETE FROM team_requests WHERE user_id='${userID}'`, (queryErr: mysql.MysqlError, result, field: mysql.FieldInfo[]) => {
+                if (queryErr !== null) {
+                    return reject();
+                }
+
+                if (result === null) {
+                    return reject();
+                }
+
+                return resolve();
+            });
+        });
+    }
+
+    public deleteTeamRequestByTeamID(teamID: number): Promise<void> {
+        return new Promise((resolve, reject) => {
+            if (this.connection === null) {
+                return reject();
+            }
+
+            this.connection.query(`DELETE FROM team_requests WHERE team_id='${teamID}'`, (queryErr: mysql.MysqlError, result, field: mysql.FieldInfo[]) => {
+                if (queryErr !== null) {
+                    return reject();
+                }
+
+                if (result === null) {
+                    return reject();
+                }
+
+                return resolve();
+            });
+        });
+    }
+
+    public teamRequestExist(teamID: number, userID: number): Promise<ITeamRequest> {
+        return new Promise((resolve, reject) => {
+            if (this.connection === null) {
+                return reject();
+            }
+
+            this.connection.query(`SELECT * FROM team_requests WHERE team_id='${teamID}' AND user_id='${userID}'`, (queryErr: mysql.MysqlError, result, field: mysql.FieldInfo[]) => {
+                if (queryErr !== null) {
+                    return reject();
+                }
+                if (result === null) {
+                    return reject();
+                }
+
+                if (result.length === 0) {
+                    return reject();
+                }
+
+                return resolve({
+                    id: result[0].id,
+                    user_id: result[0].user_id,
+                    team_id: result[0].team_id,
+                });
+            });
+        });
+    }
+}
+
+@singleton()
+class TournamentRegistrationDatabase {
+    private connection: mysql.Connection;
+
+    constructor() {
+        this.connection = null;
+    }
+
+    public setConnection(conn: mysql.Connection): void {
+        this.connection = conn;
+    }
+
+    public add(tournamentID: number, userID: number, teamID: number, referee: boolean): Promise<number> {
+        return new Promise((resolve, reject) => {
+            if (this.connection === null) {
+                return reject();
+            }
+
+            const uReferee: string = (referee) ? "true" : "false";
+            const uUserID: string = (userID === null) ? "null" : `'${userID}'`;
+            const uTeamID: string = (teamID === null) ? "null" : `'${teamID}'`;
+
+            this.connection.query(
+                `INSERT INTO tournament_registrations (tournament_id, referee, user_id, team_id) VALUES
+                ('${tournamentID}',${uReferee},${uUserID},${uTeamID})`, (err: mysql.MysqlError, result, field: mysql.FieldInfo[]) => {
+                if (err !== null) {
+                    return reject();
+                }
+
+                if (result === null) {
+                    return reject();
+                }
+
+                if (result.affectedRows !== undefined && result.affectedRows > 0) {
+                    return resolve(result.insertId);
+                }
+
+                return reject();
+            });
+        });
+    }
+
+    public getAll(tournamentID: number): Promise<ITournamentRegistrations[]> {
+        return new Promise((resolve, reject) => {
+            if (this.connection === null) {
+                return reject();
+            }
+            const tournaments: ITournamentRegistrations[] = [];
+
+            this.connection.query(`SELECT * FROM tournament_registrations WHERE tournament_id='${tournamentID}'`, (queryErr: mysql.MysqlError, result, field: mysql.FieldInfo[]) => {
+                if (queryErr !== null) {
+                    return reject();
+                }
+                if (result === null) {
+                    return reject();
+                }
+
+                for (const res of result) {
+                    tournaments.push({
+                        id: res.id,
+                        user_id: res.user_id,
+                        team_id: res.team_id,
+                        referee: res.referee,
+                        tournament_id: res.tournament_id,
+                        allowed: (res.allowed === 0) ? false : true,
+                    });
+                }
+
+                return resolve(tournaments);
             });
         });
     }

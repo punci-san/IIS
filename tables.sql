@@ -34,22 +34,21 @@ CREATE TABLE tournaments(
 	number_of_players int, 		-- 4, 8, 16, 32, 64
 	team_type int, 			-- 0 PvP, 1 Team 2v2, 2 Team 3v3, 3 Team 4v4
 	register_fee int,
-	description varchar(500),
+	description varchar(255) DEFAULT '',
 	creator_id int,			-- False means that it was just created and true means the players were accepted and matches created
-	referee_id int,
+	referee_id int DEFAULT NULL,
 	tournament_start timestamp,
-	created boolean,
+	sponsors varchar(255) DEFAULT '',
+	created boolean DEFAULT FALSE,
 	PRIMARY KEY (id)
 )ENGINE=InnoDB;
 
 CREATE TABLE tournament_registrations(
 	id int NOT NULL AUTO_INCREMENT,
-	id_match int,
-	type bool,			-- NULL = Referee, FALSE(0) Team, TRUE(1) Player
-	user_1 int DEFAULT NULL,	-- First player
-	user_2 int DEFAULT NULL,	-- Second player
-	team_1 int DEFAULT NULL,	-- First player
-	team_2 int DEFAULT NULL,	-- Second player
+	tournament_id int,
+	referee boolean DEFAULT FALSE,
+	user_id int DEFAULT NULL,	-- First player
+	team_id int DEFAULT NULL,	-- First player
 	allowed bool DEFAULT FALSE,
 	PRIMARY KEY (id)
 )ENGINE=InnoDB;
@@ -57,7 +56,6 @@ CREATE TABLE tournament_registrations(
 CREATE TABLE matches(
 	id int NOT NULL AUTO_INCREMENT,
 	tournament_id int,		-- Id tournamentu
-	team_user bool,			-- FALSE(0) means team, TRUE(1) means user
 	user_1 int DEFAULT NULL,
 	user_2 int DEFAULT NULL,
 	team_1 int DEFAULT NULL,
@@ -86,10 +84,8 @@ ALTER TABLE team_requests ADD FOREIGN KEY (user_id) REFERENCES users(id);
 ALTER TABLE tournaments ADD FOREIGN KEY (creator_id) REFERENCES users(id);
 ALTER TABLE tournaments ADD FOREIGN KEY (referee_id) REFERENCES users(id);
 
-ALTER TABLE tournament_registrations ADD FOREIGN KEY (user_1) REFERENCES users(id);
-ALTER TABLE tournament_registrations ADD FOREIGN KEY (user_2) REFERENCES users(id);
-ALTER TABLE tournament_registrations ADD FOREIGN KEY (team_1) REFERENCES teams(id);
-ALTER TABLE tournament_registrations ADD FOREIGN KEY (team_2) REFERENCES teams(id);
+ALTER TABLE tournament_registrations ADD FOREIGN KEY (user_id) REFERENCES users(id);
+ALTER TABLE tournament_registrations ADD FOREIGN KEY (team_id) REFERENCES teams(id);
 
 ALTER TABLE matches ADD FOREIGN KEY (tournament_id) REFERENCES tournaments(id);
 ALTER TABLE matches ADD FOREIGN KEY (user_1) REFERENCES users(id);

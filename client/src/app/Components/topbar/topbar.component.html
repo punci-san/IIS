@@ -6,10 +6,10 @@
         <input [(ngModel)]="searchValue" name="search-bar" type="text" (input)="updateFilter()">
         <button routerLink="" routerLinkActive="active">Search</button>
     </div>
-    <div class="match-add-button">
-        <button *ngIf="getUserData !== null" routerLink="/add-match" routerLinkActive="active">
+    <div class="tournament-add-button">
+        <button *ngIf="getUserData !== null" routerLink="/add-tournament" routerLinkActive="active">
             <i>+</i>
-            <span>Match</span>
+            <span>Tournament</span>
         </button>
     </div>
     <div *ngIf="getUserData !== null && getUserData.team === null" class="team-add-button">

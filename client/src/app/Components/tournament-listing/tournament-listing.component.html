@@ -1,0 +1,11 @@
+<div>
+    <p *ngIf="creatorID !== undefined">My tournaments: </p>
+    <p *ngIf="creatorID === undefined">Tournaments: </p>
+
+</div>
+<div class="team-listing">
+    <div *ngFor="let tournament of getTournaments" class="team">
+      {{tournament.name}}
+      <button (click)="showTournament(tournament.id)">Show tournament</button>
+    </div>
+</div>

@@ -51,7 +51,12 @@ button {
     float: right;
 }
 
-.match-add-button {
+.tournament-add-button {
+    margin-top: 10px;
+    float: right;
+}
+
+.tournament-show-my {
     margin-top: 10px;
     float: right;
 }

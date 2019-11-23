@@ -5,6 +5,9 @@ import { Database } from "./database";
 import { IUser } from "../interfaces/user";
 import cors from "cors";
 import { ITeam, ITeamRequest } from "../interfaces/team";
+import { ITournament } from "../interfaces/tournament";
+import { teamType, numberOfPlayers } from "../settings/tournament_config";
+import { ITournamentRegistrations } from "../interfaces/tournament-registrations";
 
 const varcharLen = 255;
 
@@ -23,6 +26,8 @@ export class RouterHandler {
         this.addUserRoutes(app);
         this.addTeamRoutes(app);
         this.addTeamRequests(app);
+        this.addTournamentRoutes(app);
+        this.addTournamentRegistrationRoutes(app);
 
         // Path not found
         app.route("*")
@@ -458,6 +463,154 @@ export class RouterHandler {
                 return res.status(401).send();
             });
         });
+    }
+
+    private addTournamentRoutes(app: Express): void {
+        app.route("/tournament")
+        .get((req: Request, res: Response) => {
+            this.database.getTournaments()
+            .then((tournaments: ITournament[]) => {
+                return res.json(tournaments);
+            })
+            .catch(() => {
+                return res.json([]);
+            });
+        })
+        .post((req: Request, res: Response) => {
+            this.isAuthenticated(req)
+            .then((usr: IUser) => {
+                if (req.body.name === undefined ||
+                    req.body.number_of_players === undefined ||
+                    req.body.tournament_type === undefined ||
+                    req.body.register_fee === undefined ||
+                    req.body.description === undefined ||
+                    req.body.tournament_start === undefined ||
+                    req.body.sponsors === undefined) {
+                        return res.status(500).send();
+                }
+
+                const name = req.body.name;
+                const nop: number = Number(req.body.number_of_players);
+                const tourType: number = Number(req.body.tournament_type);
+                const fee: number = Number(req.body.register_fee);
+                const desc = req.body.description;
+                const sponsors = req.body.sponsors;
+                const tournamentStart: Date = new Date(req.body.tournament_start);
+
+                if (
+                    name === "" ||
+                    isNaN(nop) ||
+                    isNaN(tourType) ||
+                    isNaN(fee) ||
+                    numberOfPlayers.includes(nop) === false ||
+                    tourType < 0 || tourType > teamType.length ||
+                    tournamentStart.getDate() < new Date().getDate()
+                    ) {
+                        return res.status(500).send();
+                }
+
+                this.database.addTournament(
+                    name,
+                    new Date(),
+                    nop,
+                    tourType,
+                    fee,
+                    desc,
+                    usr.id,
+                    tournamentStart,
+                    sponsors,
+                )
+                .then(() => {
+                    return res.send();
+                })
+                .catch(() => {
+                    return res.status(500).send();
+                });
+            })
+            .catch(() => {
+                return res.status(401).send();
+            });
+        });
+
+        app.route("/tournament/:id")
+        .get((req: Request, res: Response) => {
+            if (req.params.id === undefined) {
+                return res.status(404).send();
+            }
+
+            const id: number = Number(req.params.id);
+
+            if (isNaN(id)) {
+                return res.status(404).send();
+            }
+
+            this.database.getTournament(id)
+            .then((tournament: ITournament) => {
+                return res.json(tournament);
+            })
+            .catch(() => {
+                return res.status(404).send();
+            });
+        });
+    }
+
+    private addTournamentRegistrationRoutes(app: Express): void {
+        app.route("/tournament-registration")
+            .post((req: Request, res: Response) => {
+                // User needs to be registered
+                this.isAuthenticated(req)
+                .then((usr: IUser) => {
+                    console.log(req.body);
+
+                    const tournamentID: number = Number(req.body.tournament_id);
+                    const userID: number = isNaN(Number(req.body.user_id)) ? null : Number(req.body.user_id);
+                    const teamID: number = isNaN(Number(req.body.team_id)) ? null : Number(req.body.team_id);
+                    const referee: boolean = req.body.referee;
+
+                    console.log(req.body.referee);
+                    console.log(typeof req.body.referee);
+
+                    if (isNaN(tournamentID)) {
+                        return res.status(500).send();
+                    }
+
+                    if (userID === null && teamID === null) {
+                        return res.status(500).send();
+                    }
+
+                    this.database.addTournamentReg(tournamentID, userID, teamID, referee)
+                    .then(() => {
+                        return res.send();
+                    })
+                    .catch(() => {
+                        return res.status(500).send();
+                    });
+                })
+                .catch(() => {
+                    return res.status(401).send();
+                });
+            });
+
+        app.route("/tournament-registration/:id")
+            .get((req: Request, res: Response) => {
+                if (req.params.id === undefined) {
+                    return res.status(404).send();
+                }
+
+                const tournamentID: number = Number(req.params.id);
+
+                if (isNaN(tournamentID)) {
+                    return res.status(404).send();
+                }
+
+                this.database.getTournamentRegistrations(tournamentID)
+                .then((trs: ITournamentRegistrations[]) => {
+                    return res.json(trs);
+                })
+                .catch(() => {
+                    return res.status(404).send();
+                });
+            });
     }
 
     private isAuthenticated(req: Request): Promise<IUser> {

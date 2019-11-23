@@ -2,11 +2,14 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { SelectedGREEN, GREEN, RED } from '../../../../../settings/variables';
 import { Subscription } from 'rxjs';
 import { Router, NavigationEnd, ActivatedRoute } from '@angular/router';
+import { UserService } from 'src/app/Services/user.service';
+import { IUser } from '../../../../../interfaces/user';
 
 enum Listing  {
-    MATCH = 'match',
+    TOURNAMENT = 'tournament',
     TEAM = 'team',
     USER = 'user',
+    MYTOURNAMENT = 'mytournament',
 }
 
 @Component({
@@ -26,9 +29,10 @@ export class ListingComponent implements OnInit, OnDestroy {
 
   constructor(
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private userService: UserService,
   ) {
-    this.selectedListing = Listing.MATCH;
+    this.selectedListing = Listing.TOURNAMENT;
     this.selColor = SelectedGREEN;
     this.defColor = GREEN;
 
@@ -59,12 +63,14 @@ export class ListingComponent implements OnInit, OnDestroy {
     const listing: string = this.route.snapshot.queryParams.listing;
 
     if (listing !== undefined) {
-      if (listing === 'match') {
-        this.selectedListing = Listing.MATCH;
+      if (listing === 'tournament') {
+        this.selectedListing = Listing.TOURNAMENT;
       } else if (listing === 'team') {
         this.selectedListing = Listing.TEAM;
       } else if (listing === 'user') {
         this.selectedListing = Listing.USER;
+      } else if (listing === 'mytournament') {
+        this.selectedListing = Listing.MYTOURNAMENT;
       }
     }
 
@@ -85,5 +91,9 @@ export class ListingComponent implements OnInit, OnDestroy {
 
   public closeMessage(): void {
     this.showMsg = false;
+  }
+
+  public get getCurrData(): IUser {
+    return this.userService.getLoggedData;
   }
 }

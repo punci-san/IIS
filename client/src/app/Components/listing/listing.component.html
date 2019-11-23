@@ -4,10 +4,16 @@
         <button (click)="closeMessage()">x</button>
     </div>
     <div class="topbar-switch">
+        <button
+            *ngIf="getCurrData !== null"
+            (click)="selectedListing='mytournament'"
+            [ngStyle]="{'background-color':selectedListing === 'mytournament' ? selColor : defColor }">
+            My tournaments</button> 
+
         <button 
-            (click)="selectedListing='match'"
-            [ngStyle]="{'background-color':selectedListing === 'match' ? selColor : defColor }">
-            Matches</button>  
+            (click)="selectedListing='tournament'"
+            [ngStyle]="{'background-color':selectedListing === 'tournament' ? selColor : defColor }">
+            Tournaments</button>  
         <button 
             (click)="selectedListing='team'"
             [ngStyle]="{'background-color':selectedListing === 'team' ? selColor : defColor }">
@@ -16,14 +22,21 @@
             (click)="selectedListing='user'"
             [ngStyle]="{'background-color':selectedListing === 'user' ? selColor : defColor }">
             Users</button>  
+
     </div>
-    <div *ngIf="selectedListing === 'match'">
-        <app-match-listing></app-match-listing>
+    <div *ngIf="selectedListing === 'tournament'">
+        <app-tournament-listing></app-tournament-listing>
     </div>
     <div *ngIf="selectedListing === 'team'">
         <app-team-listing></app-team-listing>
     </div>
     <div *ngIf="selectedListing === 'user'">
         <app-user-listing></app-user-listing>
+    </div>
+    <div *ngIf="getCurrData !== null && selectedListing === 'mytournament'">
+        <app-tournament-listing [creatorID]='getCurrData.id'></app-tournament-listing>
+    </div>
+    <div *ngIf="getCurrData === null && selectedListing === 'mytournament'">
+        <app-tournament-listing></app-tournament-listing>
     </div>
 </div>

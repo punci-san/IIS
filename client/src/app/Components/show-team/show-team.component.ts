@@ -28,7 +28,6 @@ export class ShowTeamComponent implements OnInit {
     private teamService: TeamService,
     private userService: UserService
     ) {
-    this.teamID = Number(this.route.snapshot.params.id);
     this.team = null;
     this.users = [];
     this.teamUsers = [];
@@ -40,6 +39,7 @@ export class ShowTeamComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.teamID = Number(this.route.snapshot.params.id);
     if (isNaN(this.teamID)) {
       this.router.navigate([''], { queryParams: { succ: false, msg: 'Given team does not exist', listing: 'team'}});
     }
