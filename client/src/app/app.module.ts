@@ -16,6 +16,7 @@ import { ShowTeamComponent } from './Components/show-team/show-team.component';
 import { AddTournamentComponent } from './Components/add-tournament/add-tournament.component';
 import { TournamentListingComponent } from './Components/tournament-listing/tournament-listing.component';
 import { ShowTournamentComponent } from './Components/show-tournament/show-tournament.component';
+import { SpiderTournamentComponent } from './Components/spider-tournament/spider-tournament.component';
 
 @NgModule({
   declarations: [
@@ -31,7 +32,8 @@ import { ShowTournamentComponent } from './Components/show-tournament/show-tourn
     ShowTeamComponent,
     AddTournamentComponent,
     TournamentListingComponent,
-    ShowTournamentComponent
+    ShowTournamentComponent,
+    SpiderTournamentComponent
   ],
   imports: [
     BrowserModule,

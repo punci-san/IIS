@@ -5,11 +5,107 @@
     </div>
 
     <div *ngIf="tournament !== null">
-        <p>{{tournament.name}}</p>
+        <p>Name: {{tournament.name}}</p>
+        <p>Description: {{tournament.description}}</p>
+        <p>Sponsors {{tournament.sponsors}}</p>
         <div *ngIf="getLoggedUser !== null && getLoggedUser.id !== tournament.creator_id">
-            <button (click)="joinAsReferee(getLoggedUser.id)" *ngIf="canJoinAsReferee(getLoggedUser.id)">Register as referee</button>
-            <button *ngIf="canJoinAsTeam(getLoggedUser.team_id)" (click)="joinAsTeam(getLoggedUser.team_id)">Register as team</button>
+            <button *ngIf="canJoinAsReferee(getLoggedUser.id)" (click)="joinAsReferee(getLoggedUser.id)">Register as referee</button>
+            <button *ngIf="canJoinAsTeam(getLoggedUser.team)" (click)="joinAsTeam(getLoggedUser.team)">Register as team</button>
             <button *ngIf="canJoinAsUser(getLoggedUser.id)" (click)="joinAsUser(getLoggedUser.id)">Register as user</button>
         </div>
+        <div *ngIf="getLoggedUser !== null && tournament.creator_id === getLoggedUser.id">
+            <div *ngIf="tournament.referee_id !== null && getCurrReferee !== null">
+                <span>Current referee: {{getCurrReferee.name}}</span>
+                <button (click)="showUser(getCurrReferee.id)">Show user</button>
+                <button *ngIf="tournament.created === null" (click)="clearReferee()">Clear referee</button>
+            </div>
+            <div *ngIf="tournament.referee_id === null">
+                <p>No referee added.</p>
+            </div>
+        </div>
+        <div>
+            <p>Team type: {{getTeamType(tournament.team_type)}}</p>
+        </div>
+        <button *ngIf="tournament.creator_id === getLoggedUser.id" (click)="deleteTournament()">Delete tournament</button>
+    </div>
+
+    
+    <div *ngIf="getLoggedUser !== null && tournament !== null && tournament.creator_id === getLoggedUser.id">
+        <div *ngIf="tournament.team_type === 0">
+            <div *ngIf="tournament !== null">
+                <p>Accepted users {{getRegUsers}}/{{tournament.number_of_players}}:</p>
+                <div *ngFor="let t_user of getAcceptedUsers">
+                    <span>{{t_user.name}}</span>
+                    <button (click)="showUser(t_user.user_id)">Show user</button>
+                    <button *ngIf="tournament.created === null" (click)="denyUser(t_user.user_id)">Deny</button>
+                </div>
+            </div>
+            <p>Avalaible users:</p>
+            <div *ngFor="let t_user of getAvalaibleUsers">
+                <span>{{t_user.name}}</span>
+                <div *ngIf="tournament !== null && t_user.allowed === null && tournament.number_of_players > getRegUsers">
+                    <button *ngIf="tournament.created === null" (click)="acceptUser(t_user.user_id)">Accept</button>
+                    <button *ngIf="tournament.created === null" (click)="denyUser(t_user.user_id)">Deny</button>
+                </div>
+            </div>
+    
+            <p>Denied users:</p>
+            <div *ngFor="let t_user of getDeniedUsers">
+                <span>{{t_user.name}}</span>
+            <button (click)="showUser(t_user.user_id)">Show user</button>
+                <button *ngIf="tournament !== null && tournament.created === null && tournament.number_of_players > getRegUsers" (click)="acceptUser(t_user.user_id)">Accept</button>
+            </div>
+        </div>
+
+        <div *ngIf="tournament.team_type !== 0">
+            <div *ngIf="tournament !== null">
+                <p>Accepted teams {{getRegTeams}}/{{tournament.number_of_players}}:</p>
+                <div *ngFor="let t_team of getAcceptedTeams">
+                    WoW
+                    <span>{{t_team.name}}</span>
+                    <button [routerLink]="['/show-team', t_team.team_id]" routerLinkActive="active">Show team</button>
+                    <button *ngIf="tournament.created === null"  (click)="denyTeam(t_team.team_id)">Deny</button>
+                </div>
+            </div>
+            <p>Avalaible teams:</p>
+            <div *ngFor="let t_team of getAvalaibleTeams">
+                <span>{{t_team.name}}</span>
+                <div *ngIf="tournament !== null && t_team.allowed === null && tournament.number_of_players > getRegTeams">
+                    <button [routerLink]="['/show-team', t_team.team_id]" routerLinkActive="active">Show team</button>
+                    <button *ngIf="tournament.created === null" (click)="acceptTeam(t_team.team_id)">Accept</button>
+                    <button *ngIf="tournament.created === null" (click)="denyTeam(t_team.team_id)">Deny</button>
+                </div>
+            </div>
+    
+            <p>Denied teams:</p>
+            <div *ngFor="let t_team of getDeniedTeams">
+                <span>{{t_team.name}}</span>
+                <button [routerLink]="['/show-team', t_team.team_id]" routerLinkActive="active">Show team</button>
+                <button *ngIf="tournament !== null && tournament.created === null && tournament.number_of_players > getRegTeams" (click)="acceptTeam(t_team.team_id)">Accept</button>
+            </div>
+        </div>
+
+        <p>Avalaible referees:</p>
+        <div *ngFor="let referee of getAvalaibleReferees">
+            <span>{{referee.name}}</span>
+            <div *ngIf="tournament !== null && tournament.referee_id === null">
+                <button *ngIf="tournament.created === null" (click)="acceptReferee(referee.user_id)">Accept</button>
+                <button *ngIf="tournament.created === null" (click)="denyReferee(referee.user_id)">Deny</button>
+            </div>
+        </div>
+
+        <p>Denied referees:</p>
+        <div *ngFor="let t_referee of getDeniedReferees">
+            <span>{{t_referee.name}}</span>
+            <button (click)="showUser(t_referee.user_id)">Show user</button>
+            <button *ngIf="tournament !== null && tournament.created === null && tournament.referee_id === null" (click)="acceptReferee(t_referee.user_id)">Accept</button>
+        </div>
+
+        <button *ngIf="tournament !== null && tournament.created === null" [disabled]="canFinalize === false" (click)="finalizeTournament()">Finalize tournament</button>
+
+        <div *ngIf="tournament !== null && tournament.created === false">
+            <app-spider-tournament [tournament]="tournament"></app-spider-tournament>
+        </div>
+
     </div>
 </div>

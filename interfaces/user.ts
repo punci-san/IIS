@@ -4,4 +4,5 @@ export interface IUser {
     admin: boolean;
     team: number;
     description: string;
+    banned: boolean;
 }

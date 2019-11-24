@@ -8,6 +8,7 @@ CREATE TABLE users (
 	team_id int DEFAULT NULL,		-- NULL user has no team, ID of team
 	description varchar(255) DEFAULT '',
 	date_of_birth TIMESTAMP,
+	banned boolean DEFAULT FALSE,	-- Can be banned
 	PRIMARY KEY (id)
 )ENGINE=InnoDB;
 
@@ -39,7 +40,7 @@ CREATE TABLE tournaments(
 	referee_id int DEFAULT NULL,
 	tournament_start timestamp,
 	sponsors varchar(255) DEFAULT '',
-	created boolean DEFAULT FALSE,
+	created boolean DEFAULT NULL,	-- NULL registration and accept phase, FALSE spider creation phase, TRUE referee phase where he can add statistics
 	PRIMARY KEY (id)
 )ENGINE=InnoDB;
 
@@ -49,7 +50,7 @@ CREATE TABLE tournament_registrations(
 	referee boolean DEFAULT FALSE,
 	user_id int DEFAULT NULL,	-- First player
 	team_id int DEFAULT NULL,	-- First player
-	allowed bool DEFAULT FALSE,
+	allowed bool DEFAULT NULL,
 	PRIMARY KEY (id)
 )ENGINE=InnoDB;
 

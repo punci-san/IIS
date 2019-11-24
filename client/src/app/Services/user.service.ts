@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { IUser } from '../../../../interfaces/user';
 import { userKeyValue, timeout } from '../../../../settings/variables';
-import { registerPage, loginPage, usersPage, teamUserPage, teamAdminPage } from '../../../../settings/routes';
+import { registerPage, loginPage, usersPage, teamUserPage, teamAdminPage, usersBanPage, usersUnbanPage } from '../../../../settings/routes';
+import { Router } from '@angular/router';
 
 @Injectable({
   providedIn: 'root'
@@ -11,7 +12,9 @@ export class UserService {
   private filteredUsers: IUser[];
   private currFilter: string;
 
-  constructor() {
+  constructor(
+    private router: Router
+  ) {
     this.users = [];
     this.filteredUsers = [];
     this.currFilter = '';
@@ -27,6 +30,19 @@ export class UserService {
     const value: string = localStorage.getItem(userKeyValue);
 
     if (value == null) {
+      return null;
+    }
+
+    let usr: IUser;
+    try {
+      usr = JSON.parse(value) as IUser;
+    } catch (error) {
+      return null;
+    }
+
+    if (usr.banned === true) {
+      this.logout();
+      this.router.navigate(['user-log_reg'], { queryParams: { succ: false, msg: 'Your account is banned. Contact admin.'}});
       return null;
     }
 
@@ -261,6 +277,56 @@ export class UserService {
       };
 
       http.send(null);
+    });
+  }
+
+  public banUser(userID: number): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const http = new XMLHttpRequest();
+      const data = {
+        user_id: userID,
+      };
+
+      http.open('POST', usersBanPage, true);
+
+      http.setRequestHeader('Content-Type', 'application/json');
+      this.addAuthentication(http);
+
+      http.onreadystatechange = () => {
+        if (http.readyState === 4 && http.status === 200) {
+          this.loadUsers();
+          return resolve();
+        } else if (http.readyState === 4 && http.status !== 200) {
+          return reject();
+        }
+      };
+
+      http.send(JSON.stringify(data));
+    });
+  }
+
+  public unBanUser(userID: number): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const http = new XMLHttpRequest();
+      const data = {
+        user_id: userID,
+      };
+
+      http.open('POST', usersUnbanPage, true);
+
+      http.setRequestHeader('Content-Type', 'application/json');
+      this.addAuthentication(http);
+
+      http.onreadystatechange = () => {
+        if (http.readyState === 4 && http.status === 200) {
+          this.loadUsers();
+          return resolve();
+        } else if (http.readyState === 4 && http.status !== 200) {
+          return reject();
+        }
+      };
+
+      http.send(JSON.stringify(data));
     });
   }
 }
