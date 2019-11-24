@@ -17,6 +17,9 @@ export const teamRequestAcceptPage = `${mainPage}teamrequest-accept`;
 export const teamRequestDenyPage = `${mainPage}teamrequest-deny`;
 
 export const tournamentPage = `${mainPage}tournament`;
+export const tournamentFinalizePage = `${mainPage}tournament-finalize`;
+export const tournamentStartPage = `${mainPage}tournament-start`;
+
 export const tournamentRegistrationPage = `${mainPage}tournament-registration`;
 export const tournamentRegistrationRefereeAcceptPage = `${mainPage}tournament-registration-referee-accept`;
 export const tournamentRegistrationRefereeDenyPage = `${mainPage}tournament-registration-referee-deny`;

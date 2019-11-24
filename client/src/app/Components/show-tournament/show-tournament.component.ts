@@ -9,6 +9,7 @@ import { UserService } from 'src/app/Services/user.service';
 import { RED, GREEN } from '../../../../../settings/variables';
 import { ITeam } from '../../../../../interfaces/team';
 import { TeamService } from 'src/app/Services/team.service';
+import { teamType } from '../../../../../settings/tournament_config';
 
 @Component({
   selector: 'app-show-tournament',
@@ -69,6 +70,10 @@ export class ShowTournamentComponent implements OnInit {
   }
 
   public canJoinAsReferee(userID: number): boolean {
+    if (this.tournament.created !== null) {
+      return false;
+    }
+
     if (this.tournament.referee_id !== null) {
       return false;
     }
@@ -84,6 +89,10 @@ export class ShowTournamentComponent implements OnInit {
   }
 
   public canJoinAsTeam(teamID: number): boolean {
+    if (this.tournament.created !== null) {
+      return false;
+    }
+
     if (this.tournament.team_type === ITeamType.PvP) {
       return false;
     }
@@ -109,6 +118,10 @@ export class ShowTournamentComponent implements OnInit {
   }
 
   public canJoinAsUser(userID: number): boolean {
+    if (this.tournament.created !== null) {
+      return false;
+    }
+
     // Check if given tournament is for users
     if (this.tournament.team_type !== ITeamType.PvP) {
       return false;
@@ -589,6 +602,94 @@ export class ShowTournamentComponent implements OnInit {
       this.msg = 'There was and error. Please try again.';
       this.msgColor = RED;
     });
+  }
+
+  public get canFinalize(): boolean {
+    if (this.tournament === null) {
+      return false;
+    }
+
+    if (this.tournament.referee_id === null) {
+      return false;
+    }
+
+    if (this.tournament.team_type === ITeamType.PvP && this.tournament.number_of_players !== this.getAcceptedUsers.length) {
+      return false;
+    }
+
+    if (this.tournament.team_type !== ITeamType.PvP && this.tournament.number_of_players !== this.getAcceptedTeams.length) {
+      return false;
+    }
+
+    return true;
+  }
+
+  public finalizeTournament(): void {
+    if (this.canFinalize === false) {
+      this.showMsg = true;
+      this.msg = 'Can´t finalize. Referee is missing or the number of players is not filled.';
+      this.msgColor = RED;
+      return;
+    }
+    this.tournamentService.finalizeTournament(this.tournamentID)
+    .then(() => {
+      this.tournamentService.getTournament(this.tournamentID)
+      .then((tournament: ITournament) => {
+        this.tournament = tournament;
+      })
+      .catch(() => {
+        this.router.navigate([''], { queryParams: { succ: false, msg: 'Given tournament does not exist', listing: 'tournament'}});
+      });
+      this.showMsg = true;
+      this.msg = 'You have finalized selection, now you can select which teams to play against.';
+      this.msgColor = GREEN;
+    })
+    .catch(() => {
+      this.showMsg = true;
+      this.msg = 'There was and error. Please try again.';
+      this.msgColor = RED;
+    });
+  }
+
+  public startTournament(): void {
+    this.tournamentService.startTournament(this.tournamentID)
+    .then(() => {
+      this.tournamentService.getTournament(this.tournamentID)
+      .then((tournament: ITournament) => {
+        this.tournament = tournament;
+      })
+      .catch(() => {
+        this.router.navigate([''], { queryParams: { succ: false, msg: 'Given tournament does not exist', listing: 'tournament'}});
+      });
+      this.showMsg = true;
+      this.msg = 'You have started tournament, now only referee can add statistics.';
+      this.msgColor = GREEN;
+    })
+    .catch(() => {
+      this.showMsg = true;
+      this.msg = 'There was and error. Please try again.';
+      this.msgColor = RED;
+    });
+  }
+
+  public deleteTournament(): void {
+    this.tournamentService.deleteTournament(this.tournamentID)
+    .then(() => {
+      this.router.navigate([''], { queryParams: { succ: true, msg: 'Tournament has been deleted.', listing: 'tournament'}});
+    })
+    .catch(() => {
+      this.showMsg = true;
+      this.msg = 'There was and error. Please try again.';
+      this.msgColor = RED;
+    });
+  }
+
+  public getTeamType(index: number): string {
+    if (index < 0 || index >= teamType.length) {
+      return '';
+    }
+
+    return teamType[index];
   }
 
   public showUser(userID: number): void {

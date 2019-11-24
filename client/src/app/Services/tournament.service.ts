@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { ITournament } from '../../../../interfaces/tournament';
 import { timeout } from '../../../../settings/variables';
-import { tournamentPage } from '../../../../settings/routes';
+import { tournamentPage, tournamentFinalizePage, tournamentStartPage } from '../../../../settings/routes';
 import { UserService } from './user.service';
 
 
@@ -122,6 +122,80 @@ export class TournamentService {
       };
 
       http.send(JSON.stringify(data));
+    });
+  }
+
+  public finalizeTournament(tournamentID: number): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const http = new XMLHttpRequest();
+
+      const data = {
+        tournament_id: tournamentID,
+      };
+
+      http.open('POST', tournamentFinalizePage, true);
+
+      this.userService.addAuthentication(http);
+      http.setRequestHeader('Content-Type', 'application/json');
+
+      http.onreadystatechange = () => {
+        if (http.readyState === 4 && http.status === 200) {
+          this.loadTournaments();
+          return resolve();
+        } else if (http.readyState === 4 && http.status !== 200) {
+          return reject();
+        }
+      };
+
+      http.send(JSON.stringify(data));
+    });
+  }
+
+  public startTournament(tournamentID: number): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const http = new XMLHttpRequest();
+
+      const data = {
+        tournament_id: tournamentID,
+      };
+
+      http.open('POST', tournamentStartPage, true);
+
+      this.userService.addAuthentication(http);
+      http.setRequestHeader('Content-Type', 'application/json');
+
+      http.onreadystatechange = () => {
+        if (http.readyState === 4 && http.status === 200) {
+          this.loadTournaments();
+          return resolve();
+        } else if (http.readyState === 4 && http.status !== 200) {
+          return reject();
+        }
+      };
+
+      http.send(JSON.stringify(data));
+    });
+  }
+
+  public deleteTournament(tournamentID: number): Promise<any> {
+    return new Promise((resolve, reject) => {
+      const http = new XMLHttpRequest();
+
+      const page = `${tournamentPage}/${tournamentID}`;
+      http.open('DELETE', page, true);
+
+      this.userService.addAuthentication(http);
+
+      http.onreadystatechange = () => {
+        if (http.readyState === 4 && http.status === 200) {
+          this.loadTournaments();
+          return resolve();
+        } else if (http.readyState === 4 && http.status !== 200) {
+          return reject();
+        }
+      };
+
+      http.send(null);
     });
   }
 }

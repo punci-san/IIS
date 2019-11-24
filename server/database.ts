@@ -343,8 +343,30 @@ export class Database {
              );
      }
 
+     public deleteTournament(tournamentID: number): Promise<void> {
+         return new Promise((resolve, reject) => {
+            this.tournamentRegDatabase.deleteTournamentReg(tournamentID)
+            .then(() => {
+                this.tournamentDatabase.deleteTournament(tournamentID)
+                .then(() => {
+                    return resolve();
+                })
+                .catch(() => {
+                    return reject();
+                });
+            })
+            .catch(() => {
+                return reject();
+            });
+         });
+     }
+
      public clearTournamentReferee(tournamentID: number): Promise<void> {
          return this.tournamentDatabase.clearTournamentReferee(tournamentID);
+     }
+
+     public updateTournamentCreation(tournamentID: number, created: boolean): Promise<void> {
+         return this.tournamentDatabase.updateTournamentCreation(tournamentID, created);
      }
 
      /**
@@ -1271,9 +1293,35 @@ class TournamentDatabase {
                     creator_id: result[0].creator_id,
                     referee_id: result[0].referee_id,
                     tournament_start: result[0].tournament_start,
-                    created: (result[0].created === 0) ? false : true,
+                    created: (result[0].created === null) ? null : (result[0].created === 0) ? false : true,
                     sponsors: result[0].sponsors,
                 });
+            });
+        });
+    }
+
+    public updateTournamentCreation(tournamentID: number, created: boolean): Promise<void> {
+        return new Promise((resolve, reject) => {
+            if (this.connection === null) {
+                return reject();
+            }
+
+            const uCreated = (created === true) ? "true" : "false";
+
+            this.connection.query(`UPDATE tournaments SET created=${uCreated} WHERE id='${tournamentID}';`, (err: mysql.MysqlError, result, field: mysql.FieldInfo[]) => {
+                if (err !== null) {
+                    return reject();
+                }
+
+                if (result === null) {
+                    return reject();
+                }
+
+                if (result !== undefined && result.affectedRows === 1) {
+                    return resolve();
+                }
+
+                return reject();
             });
         });
     }
@@ -1303,88 +1351,22 @@ class TournamentDatabase {
         });
     }
 
-    public deleteTeamRequestByID(id: number): Promise<void> {
-        return new Promise((resolve, reject) => {
-            if (this.connection === null) {
-                return reject();
-            }
-            this.connection.query(`DELETE FROM team_requests WHERE id='${id}'`, (queryErr: mysql.MysqlError, result, field: mysql.FieldInfo[]) => {
-                if (queryErr !== null) {
-                    return reject();
-                }
-
-                if (result === null) {
-                    return reject();
-                }
-
-                return resolve();
-            });
-        });
-    }
-
-    public deleteTeamRequestByUserID(userID: number): Promise<void> {
+    public deleteTournament(tournamentID: number): Promise<void> {
         return new Promise((resolve, reject) => {
             if (this.connection === null) {
                 return reject();
             }
 
-            this.connection.query(`DELETE FROM team_requests WHERE user_id='${userID}'`, (queryErr: mysql.MysqlError, result, field: mysql.FieldInfo[]) => {
+            this.connection.query(`DELETE FROM tournaments WHERE id='${tournamentID}'`, (queryErr: mysql.MysqlError, result, field: mysql.FieldInfo[]) => {
                 if (queryErr !== null) {
                     return reject();
                 }
 
-                if (result === null) {
-                    return reject();
+                if (result !== undefined && result.affectedRows === 1) {
+                    return resolve();
                 }
 
-                return resolve();
-            });
-        });
-    }
-
-    public deleteTeamRequestByTeamID(teamID: number): Promise<void> {
-        return new Promise((resolve, reject) => {
-            if (this.connection === null) {
                 return reject();
-            }
-
-            this.connection.query(`DELETE FROM team_requests WHERE team_id='${teamID}'`, (queryErr: mysql.MysqlError, result, field: mysql.FieldInfo[]) => {
-                if (queryErr !== null) {
-                    return reject();
-                }
-
-                if (result === null) {
-                    return reject();
-                }
-
-                return resolve();
-            });
-        });
-    }
-
-    public teamRequestExist(teamID: number, userID: number): Promise<ITeamRequest> {
-        return new Promise((resolve, reject) => {
-            if (this.connection === null) {
-                return reject();
-            }
-
-            this.connection.query(`SELECT * FROM team_requests WHERE team_id='${teamID}' AND user_id='${userID}'`, (queryErr: mysql.MysqlError, result, field: mysql.FieldInfo[]) => {
-                if (queryErr !== null) {
-                    return reject();
-                }
-                if (result === null) {
-                    return reject();
-                }
-
-                if (result.length === 0) {
-                    return reject();
-                }
-
-                return resolve({
-                    id: result[0].id,
-                    user_id: result[0].user_id,
-                    team_id: result[0].team_id,
-                });
             });
         });
     }
@@ -1570,12 +1552,13 @@ class TournamentRegistrationDatabase {
         });
     }
 
-    public deleteTeamRequestByID(id: number): Promise<void> {
+    public deleteTournamentReg(tournamentID: number): Promise<void> {
         return new Promise((resolve, reject) => {
             if (this.connection === null) {
                 return reject();
             }
-            this.connection.query(`DELETE FROM team_requests WHERE id='${id}'`, (queryErr: mysql.MysqlError, result, field: mysql.FieldInfo[]) => {
+
+            this.connection.query(`DELETE FROM tournament_registrations WHERE tournament_id='${tournamentID}'`, (queryErr: mysql.MysqlError, result, field: mysql.FieldInfo[]) => {
                 if (queryErr !== null) {
                     return reject();
                 }
@@ -1585,73 +1568,6 @@ class TournamentRegistrationDatabase {
                 }
 
                 return resolve();
-            });
-        });
-    }
-
-    public deleteTeamRequestByUserID(userID: number): Promise<void> {
-        return new Promise((resolve, reject) => {
-            if (this.connection === null) {
-                return reject();
-            }
-
-            this.connection.query(`DELETE FROM team_requests WHERE user_id='${userID}'`, (queryErr: mysql.MysqlError, result, field: mysql.FieldInfo[]) => {
-                if (queryErr !== null) {
-                    return reject();
-                }
-
-                if (result === null) {
-                    return reject();
-                }
-
-                return resolve();
-            });
-        });
-    }
-
-    public deleteTeamRequestByTeamID(teamID: number): Promise<void> {
-        return new Promise((resolve, reject) => {
-            if (this.connection === null) {
-                return reject();
-            }
-
-            this.connection.query(`DELETE FROM team_requests WHERE team_id='${teamID}'`, (queryErr: mysql.MysqlError, result, field: mysql.FieldInfo[]) => {
-                if (queryErr !== null) {
-                    return reject();
-                }
-
-                if (result === null) {
-                    return reject();
-                }
-
-                return resolve();
-            });
-        });
-    }
-
-    public teamRequestExist(teamID: number, userID: number): Promise<ITeamRequest> {
-        return new Promise((resolve, reject) => {
-            if (this.connection === null) {
-                return reject();
-            }
-
-            this.connection.query(`SELECT * FROM team_requests WHERE team_id='${teamID}' AND user_id='${userID}'`, (queryErr: mysql.MysqlError, result, field: mysql.FieldInfo[]) => {
-                if (queryErr !== null) {
-                    return reject();
-                }
-                if (result === null) {
-                    return reject();
-                }
-
-                if (result.length === 0) {
-                    return reject();
-                }
-
-                return resolve({
-                    id: result[0].id,
-                    user_id: result[0].user_id,
-                    team_id: result[0].team_id,
-                });
             });
         });
     }

@@ -40,7 +40,7 @@ CREATE TABLE tournaments(
 	referee_id int DEFAULT NULL,
 	tournament_start timestamp,
 	sponsors varchar(255) DEFAULT '',
-	created boolean DEFAULT FALSE,
+	created boolean DEFAULT NULL,	-- NULL registration and accept phase, FALSE spider creation phase, TRUE referee phase where he can add statistics
 	PRIMARY KEY (id)
 )ENGINE=InnoDB;
 
