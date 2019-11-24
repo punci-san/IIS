@@ -75,6 +75,68 @@ export class RouterHandler {
                 });
             });
 
+        app.route("/user-ban")
+            .post((req: Request, res: Response) => {
+                this.isAuthenticated(req)
+                .then((usr: IUser) => {
+                    if (usr.admin === false) {
+                        return res.status(401).send();
+                    }
+
+                    const userID: number = Number(req.body.user_id);
+
+                    if (isNaN(userID)) {
+                        return res.status(500).send();
+                    }
+
+                    if (userID === usr.id) {
+                        return res.status(500).send();
+                    }
+
+                    this.database.banUser(userID)
+                    .then(() => {
+                        return res.send();
+                    })
+                    .catch(() => {
+                        return res.status(500).send();
+                    });
+                })
+                .catch(() => {
+                    return res.status(401).send();
+                });
+            });
+
+        app.route("/user-unban")
+            .post((req: Request, res: Response) => {
+                this.isAuthenticated(req)
+                .then((usr: IUser) => {
+                    if (usr.admin === false) {
+                        return res.status(401).send();
+                    }
+
+                    const userID: number = Number(req.body.user_id);
+
+                    if (isNaN(userID)) {
+                        return res.status(500).send();
+                    }
+
+                    if (userID === usr.id) {
+                        return res.status(500).send();
+                    }
+
+                    this.database.unBanUser(userID)
+                    .then(() => {
+                        return res.send();
+                    })
+                    .catch(() => {
+                        return res.status(500).send();
+                    });
+                })
+                .catch(() => {
+                    return res.status(401).send();
+                });
+            });
+
         app.route("/teamuser/:id")
             .get((req: Request, res: Response) => {
                 if (req.params.id === undefined) {
@@ -565,10 +627,7 @@ export class RouterHandler {
                     const tournamentID: number = Number(req.body.tournament_id);
                     const userID: number = isNaN(Number(req.body.user_id)) ? null : Number(req.body.user_id);
                     const teamID: number = isNaN(Number(req.body.team_id)) ? null : Number(req.body.team_id);
-                    const referee: boolean = req.body.referee;
-
-                    console.log(req.body.referee);
-                    console.log(typeof req.body.referee);
+                    const referee: boolean = (req.body.referee === undefined) ? null : req.body.referee;
 
                     if (isNaN(tournamentID)) {
                         return res.status(500).send();
@@ -609,6 +668,202 @@ export class RouterHandler {
                 })
                 .catch(() => {
                     return res.status(404).send();
+                });
+            });
+
+        app.route("/tournament-registration-referee-accept")
+            .post((req: Request, res: Response) => {
+                this.isAuthenticated(req)
+                .then((usr: IUser) => {
+                    const tournamentID: number = Number(req.body.tournament_id);
+                    const userID: number = Number(req.body.user_id);
+
+                    if (isNaN(tournamentID) || isNaN(userID)) {
+                        return res.status(404).send();
+                    }
+
+                    this.database.getTournament(tournamentID)
+                    .then((t: ITournament) => {
+                        if (t.creator_id !== usr.id) {
+                            return res.status(401).send();
+                        }
+
+                        this.database.acceptTournamentRegReferee(tournamentID, userID)
+                        .then(() => {
+                            return res.send();
+                        })
+                        .catch(() => {
+                            return res.status(404).send();
+                        });
+                    })
+                    .catch(() => {
+                        return res.status(404).send();
+                    });
+                })
+                .catch(() => {
+                    return res.status(401).send();
+                });
+            });
+
+        app.route("/tournament-registration-referee-deny")
+            .post((req: Request, res: Response) => {
+                this.isAuthenticated(req)
+                .then((usr: IUser) => {
+                    const tournamentID: number = Number(req.body.tournament_id);
+                    const userID: number = Number(req.body.user_id);
+
+                    if (isNaN(tournamentID) || isNaN(userID)) {
+                        return res.status(404).send();
+                    }
+
+                    this.database.getTournament(tournamentID)
+                    .then((t: ITournament) => {
+                        if (t.creator_id !== usr.id) {
+                            return res.status(401).send();
+                        }
+
+                        this.database.denyTournamentRegReferee(tournamentID, userID)
+                        .then(() => {
+                            return res.send();
+                        })
+                        .catch(() => {
+                            return res.status(404).send();
+                        });
+                    })
+                    .catch(() => {
+                        return res.status(404).send();
+                    });
+                })
+                .catch(() => {
+                    return res.status(401).send();
+                });
+            });
+
+        app.route("/tournament-registration-referee-clear")
+            .post((req: Request, res: Response) => {
+                this.isAuthenticated(req)
+                .then((usr: IUser) => {
+                    const tournamentID: number = Number(req.body.tournament_id);
+
+                    if (isNaN(tournamentID)) {
+                        console.log("NaN");
+                        return res.status(404).send();
+                    }
+
+                    this.database.getTournament(tournamentID)
+                    .then((t: ITournament) => {
+                        if (t.creator_id !== usr.id) {
+                            console.log("NOT CREATOR");
+                            return res.status(401).send();
+                        }
+
+                        const refereeID: number = t.referee_id;
+
+                        this.database.clearTournamentReg(tournamentID, refereeID, null)
+                        .then(() => {
+                            this.database.clearTournamentReferee(tournamentID)
+                            .then(() => {
+                                return res.send();
+                            })
+                            .catch(() => {
+                                console.log("TOURNAMENT CLEARING.");
+                                return res.status(404).send();
+                            });
+                        })
+                        .catch(() => {
+                            console.log("TOURNAMENT REG CLEARING.");
+                            return res.status(404).send();
+                        });
+                    })
+                    .catch(() => {
+                        console.log("NOT LOGGED.");
+                        return res.status(404).send();
+                    });
+                })
+                .catch(() => {
+                    return res.status(401).send();
+                });
+            });
+
+        app.route("/tournament-registration-accept")
+            .post((req: Request, res: Response) => {
+                this.isAuthenticated(req)
+                .then((usr: IUser) => {
+                    const tournamentID: number = Number(req.body.tournament_id);
+                    const userID: number = isNaN(Number(req.body.user_id)) ? null : Number(req.body.user_id);
+                    const teamID: number = isNaN(Number(req.body.team_id)) ? null : Number(req.body.team_id);
+
+                    if (isNaN(tournamentID) || (userID === null && teamID === null)) {
+                        return res.status(404).send();
+                    }
+
+                    this.database.getTournament(tournamentID)
+                    .then((t: ITournament) => {
+                        if (t.creator_id !== usr.id) {
+                            return res.status(401).send();
+                        }
+                        const countTeams: boolean = (teamID === null && userID !== null) ? false : true;
+
+                        this.database.countAcceptedRegs(tournamentID, countTeams)
+                        .then((count: number) => {
+
+                            if (count > t.number_of_players) {
+                                return res.status(500).send();
+                            }
+
+                            this.database.acceptTournamentReg(tournamentID, userID, teamID)
+                            .then(() => {
+                                return res.send();
+                            })
+                            .catch(() => {
+                                return res.status(404).send();
+                            });
+                        })
+                        .catch(() => {
+                            return res.status(404).send();
+                        });
+                    })
+                    .catch(() => {
+                        return res.status(404).send();
+                    });
+                })
+                .catch(() => {
+                    return res.status(401).send();
+                });
+            });
+
+        app.route("/tournament-registration-deny")
+            .post((req: Request, res: Response) => {
+                this.isAuthenticated(req)
+                .then((usr: IUser) => {
+                    const tournamentID: number = Number(req.body.tournament_id);
+                    const userID: number = isNaN(Number(req.body.user_id)) ? null : Number(req.body.user_id);
+                    const teamID: number = isNaN(Number(req.body.team_id)) ? null : Number(req.body.team_id);
+
+                    if (isNaN(tournamentID) || (userID === null && teamID === null)) {
+                        return res.status(404).send();
+                    }
+
+                    this.database.getTournament(tournamentID)
+                    .then((t: ITournament) => {
+                        if (t.creator_id !== usr.id) {
+                            return res.status(401).send();
+                        }
+
+                        this.database.denyTournamentReg(tournamentID, userID, teamID)
+                        .then(() => {
+                            return res.send();
+                        })
+                        .catch(() => {
+                            return res.status(404).send();
+                        });
+                    })
+                    .catch(() => {
+                        return res.status(404).send();
+                    });
+                })
+                .catch(() => {
+                    return res.status(401).send();
                 });
             });
     }

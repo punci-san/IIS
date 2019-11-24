@@ -110,6 +110,14 @@ export class Database {
         return this.userDatabase.getTeamuserS(teamID);
     }
 
+    public banUser(userID: number): Promise<void> {
+        return this.userDatabase.banUser(userID);
+    }
+
+    public unBanUser(userID: number): Promise<void> {
+        return this.userDatabase.unBanUser(userID);
+    }
+
     /**
      * TEAMS
      */
@@ -335,6 +343,10 @@ export class Database {
              );
      }
 
+     public clearTournamentReferee(tournamentID: number): Promise<void> {
+         return this.tournamentDatabase.clearTournamentReferee(tournamentID);
+     }
+
      /**
       * TOURNAMENT REGISTRATION REQUESTS
       */
@@ -345,6 +357,50 @@ export class Database {
 
     public addTournamentReg(tournamentID: number, userID: number, teamID: number, referee: boolean): Promise<number> {
         return this.tournamentRegDatabase.add(tournamentID, userID, teamID, referee);
+    }
+
+    public clearTournamentReg(tournamentID: number, userID: number, teamID: number): Promise<void> {
+        return this.tournamentRegDatabase.clearReg(tournamentID, userID, teamID);
+    }
+
+    public acceptTournamentRegReferee(tournamentID: number, userID: number): Promise<any> {
+        return new Promise((resolve, reject) => {
+            this.tournamentDatabase.addReferee(tournamentID, userID)
+            .then(() => {
+                this.tournamentRegDatabase.denyAllRefereesTourReg(tournamentID)
+                .then(() => {
+                    this.tournamentRegDatabase.allowDenyTournamentReg(tournamentID, userID, null, true)
+                    .then(() => {
+                        return resolve();
+                    })
+                    .catch(() => {
+                        return reject();
+                    });
+                })
+                .catch(() => {
+                return reject();
+                });
+            })
+            .catch(() => {
+                return reject();
+            });
+        });
+    }
+
+    public denyTournamentRegReferee(tournamentID: number, userID: number): Promise<any> {
+        return this.tournamentRegDatabase.allowDenyTournamentReg(tournamentID, userID, null, false);
+    }
+
+    public acceptTournamentReg(tournamentID: number, userID: number, teamID: number): Promise<any> {
+        return this.tournamentRegDatabase.allowDenyTournamentReg(tournamentID, userID, teamID, true);
+    }
+
+    public denyTournamentReg(tournamentID: number, userID: number, teamID: number): Promise<any> {
+        return this.tournamentRegDatabase.allowDenyTournamentReg(tournamentID, userID, teamID, false);
+    }
+
+    public countAcceptedRegs(tournamentID: number, countTeams: boolean): Promise<number> {
+        return this.tournamentRegDatabase.countAcceptedReg(tournamentID, countTeams);
     }
 }
 
@@ -358,6 +414,56 @@ class UserDatabase {
 
     public setConnection(conn: mysql.Connection): void {
         this.connection = conn;
+    }
+
+    public banUser(userID: number): Promise<void> {
+        return new Promise((resolve, reject) => {
+            if (this.connection === null) {
+                return reject();
+            }
+
+            // UPDATE `users` SET `name` = 'aaaaaaa' WHERE `users`.`id` = 1;
+            this.connection.query(`UPDATE users SET banned=true WHERE id = '${userID}';`, (err: mysql.MysqlError, result, field: mysql.FieldInfo[]) => {
+                if (err !== null) {
+                    return reject();
+                }
+
+                if (result === null) {
+                    return reject();
+                }
+
+                if (result !== undefined && result.affectedRows === 1) {
+                    return resolve();
+                }
+
+                return reject();
+            });
+        });
+    }
+
+    public unBanUser(userID: number): Promise<void> {
+        return new Promise((resolve, reject) => {
+            if (this.connection === null) {
+                return reject();
+            }
+
+            // UPDATE `users` SET `name` = 'aaaaaaa' WHERE `users`.`id` = 1;
+            this.connection.query(`UPDATE users SET banned=false WHERE id = '${userID}';`, (err: mysql.MysqlError, result, field: mysql.FieldInfo[]) => {
+                if (err !== null) {
+                    return reject();
+                }
+
+                if (result === null) {
+                    return reject();
+                }
+
+                if (result !== undefined && result.affectedRows === 1) {
+                    return resolve();
+                }
+
+                return reject();
+            });
+        });
     }
 
     public authenticate(username: string, password: string): Promise<IUser> {
@@ -385,8 +491,9 @@ class UserDatabase {
                     id: result[0].id,
                     name: result[0].name,
                     team: result[0].team_id,
-                    admin: result[0].admin !== null && result[0].admin === 1,
+                    admin: (result[0].admin !== null && result[0].admin === 1) ? true : false,
                     description: result[0].description,
+                    banned: (result[0].banned !== null && result[0].banned === 1) ? true : false,
                 });
             });
         });
@@ -444,9 +551,10 @@ class UserDatabase {
                     users.push({
                         id: res.id,
                         name: res.name,
-                        admin: res.admin,
+                        admin: (res.admin !== null && res.admin === 1) ? true : false,
                         team: res.team_id,
                         description: res.description,
+                        banned: (res.banned !== null && res.banned === 1) ? true : false,
                     });
                 }
 
@@ -472,9 +580,10 @@ class UserDatabase {
                     return resolve({
                         id: result[0].id,
                         name: result[0].name,
-                        admin: result[0].admin,
+                        admin: (result[0].admin !== null && result[0].admin === 1) ? true : false,
                         team: result[0].team_id,
                         description: result[0].description,
+                        banned: (result[0].banned !== null && result[0].banned === 1) ? true : false,
                     });
                 }
 
@@ -599,9 +708,10 @@ class UserDatabase {
                     users.push({
                         id: res.id,
                         name: res.name,
-                        admin: res.admin,
+                        admin: (res.admin !== null && res.admin === 1) ? true : false,
                         team: res.team_id,
                         description: res.description,
+                        banned: (res.banned !== null && res.banned === 1) ? true : false,
                     });
                 }
 
@@ -625,9 +735,11 @@ class UserDatabase {
                     if (result !== undefined && result.length > 0) {
                         return resolve({
                             id: result[0].id,
-                            admin: result[0].admin !== null && result[0].admin === 1,
+                            admin: (result[0].admin !== null && result[0].admin === 1) ? true : false,
                             name: result[0].name,
                             team: result[0].team_id,
+                            description: result[0].description,
+                            banned: (result[0].banned !== null && result[0].banned === 1) ? true : false,
                         } as IUser);
                     }
 
@@ -1068,6 +1180,31 @@ class TournamentDatabase {
         });
     }
 
+    public addReferee(tournamentID: number, userID: number): Promise<void> {
+        return new Promise((resolve, reject) => {
+            if (this.connection === null) {
+                return reject();
+            }
+
+            // UPDATE `users` SET `name` = 'aaaaaaa' WHERE `users`.`id` = 1;
+            this.connection.query(`UPDATE tournaments SET referee_id='${userID}' WHERE id = '${tournamentID}';`, (err: mysql.MysqlError, result, field: mysql.FieldInfo[]) => {
+                if (err !== null) {
+                    return reject();
+                }
+
+                if (result === null) {
+                    return reject();
+                }
+
+                if (result !== undefined && result.affectedRows === 1) {
+                    return resolve();
+                }
+
+                return reject();
+            });
+        });
+    }
+
     public getTournaments(): Promise<ITournament[]> {
         return new Promise((resolve, reject) => {
             if (this.connection === null) {
@@ -1137,6 +1274,31 @@ class TournamentDatabase {
                     created: (result[0].created === 0) ? false : true,
                     sponsors: result[0].sponsors,
                 });
+            });
+        });
+    }
+
+    public clearTournamentReferee(tournamentID: number): Promise<void> {
+        return new Promise((resolve, reject) => {
+            if (this.connection === null) {
+                return reject();
+            }
+
+            // UPDATE `users` SET `name` = 'aaaaaaa' WHERE `users`.`id` = 1;
+            this.connection.query(`UPDATE tournaments SET referee_id=NULL WHERE id = '${tournamentID}';`, (err: mysql.MysqlError, result, field: mysql.FieldInfo[]) => {
+                if (err !== null) {
+                    return reject();
+                }
+
+                if (result === null) {
+                    return reject();
+                }
+
+                if (result !== undefined && result.affectedRows === 1) {
+                    return resolve();
+                }
+
+                return reject();
             });
         });
     }
@@ -1270,6 +1432,37 @@ class TournamentRegistrationDatabase {
         });
     }
 
+    public clearReg(tournamentID: number, userID: number, teamID: number): Promise<void> {
+        return new Promise((resolve, reject) => {
+            if (this.connection === null) {
+                return reject();
+            }
+
+            const searchQuery = (userID !== null) ? `user_id='${userID}'` : (teamID !== null) ? `team_id='${teamID}'` : null;
+
+            if (searchQuery === null) {
+                return reject();
+            }
+
+            // UPDATE `users` SET `name` = 'aaaaaaa' WHERE `users`.`id` = 1;
+            this.connection.query(`UPDATE tournament_registrations SET allowed=NULL WHERE tournament_id = '${tournamentID}' AND ${searchQuery};`, (err: mysql.MysqlError, result, field: mysql.FieldInfo[]) => {
+                if (err !== null) {
+                    return reject();
+                }
+
+                if (result === null) {
+                    return reject();
+                }
+
+                if (result !== undefined && result.affectedRows === 1) {
+                    return resolve();
+                }
+
+                return reject();
+            });
+        });
+    }
+
     public getAll(tournamentID: number): Promise<ITournamentRegistrations[]> {
         return new Promise((resolve, reject) => {
             if (this.connection === null) {
@@ -1290,13 +1483,89 @@ class TournamentRegistrationDatabase {
                         id: res.id,
                         user_id: res.user_id,
                         team_id: res.team_id,
-                        referee: res.referee,
+                        referee: (res.referee !== null && res.referee === 1) ? true : false,
                         tournament_id: res.tournament_id,
-                        allowed: (res.allowed === 0) ? false : true,
+                        allowed: (res.allowed === null) ? null : (res.allowed === 0) ? false : true,
                     });
                 }
 
                 return resolve(tournaments);
+            });
+        });
+    }
+
+    public denyAllRefereesTourReg(tournamentID: number): Promise<void> {
+        return new Promise((resolve, reject) => {
+            if (this.connection === null) {
+                return reject();
+            }
+
+            // UPDATE `users` SET `name` = 'aaaaaaa' WHERE `users`.`id` = 1;
+            this.connection.query(`UPDATE tournament_registrations SET allowed=false WHERE tournament_id = '${tournamentID}' AND referee=true`, (err: mysql.MysqlError, result, field: mysql.FieldInfo[]) => {
+                if (err !== null) {
+                    return reject();
+                }
+
+                if (result === null) {
+                    return reject();
+                }
+
+                return resolve();
+            });
+        });
+    }
+
+    public countAcceptedReg(tournamentID: number, countTeams: boolean): Promise<number> {
+        return new Promise((resolve, reject) => {
+            if (this.connection === null) {
+                return reject();
+            }
+
+            const countQuery = (countTeams) ? "team_id != NULL" : "user_id != NULL";
+
+            // UPDATE `users` SET `name` = 'aaaaaaa' WHERE `users`.`id` = 1;
+            this.connection.query(`SELECT id FROM tournament_registrations WHERE tournament_id = '${tournamentID}' AND allowed=true AND ${countQuery}`, (err: mysql.MysqlError, result, field: mysql.FieldInfo[]) => {
+                if (err !== null) {
+                    return reject();
+                }
+
+                if (result === null) {
+                    return reject();
+                }
+
+                return resolve(result.length);
+            });
+        });
+    }
+
+    public allowDenyTournamentReg(tournamentID: number, userID: number, teamID: number, allow: boolean): Promise<void> {
+        return new Promise((resolve, reject) => {
+            if (this.connection === null) {
+                return reject();
+            }
+
+            const allowed = (allow === true) ? "true" : "false";
+            const searchQuery = (userID !== null) ? `user_id='${userID}'` : (teamID !== null) ? `team_id='${teamID}'` : null;
+
+            if (searchQuery === null) {
+                return reject();
+            }
+
+            // UPDATE `users` SET `name` = 'aaaaaaa' WHERE `users`.`id` = 1;
+            this.connection.query(`UPDATE tournament_registrations SET allowed=${allowed} WHERE tournament_id = '${tournamentID}' AND ${searchQuery};`, (err: mysql.MysqlError, result, field: mysql.FieldInfo[]) => {
+                if (err !== null) {
+                    return reject();
+                }
+
+                if (result === null) {
+                    return reject();
+                }
+
+                if (result !== undefined && result.affectedRows === 1) {
+                    return resolve();
+                }
+
+                return reject();
             });
         });
     }

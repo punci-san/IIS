@@ -3,5 +3,9 @@
     <div *ngFor="let user of listUsers" class="user">
       {{user.name}}
       <button (click)="showUser(user.id)">Show</button>
+      <div *ngIf="getCurrUser !== null && getCurrUser.admin === true && getCurrUser.id !== user.id">
+        <button *ngIf="user.banned === false" (click)="banUser(user.id)">Ban user</button>
+        <button *ngIf="user.banned === true" (click)="unBanUser(user.id)">Unban user</button>
+      </div>
     </div>
 </div>

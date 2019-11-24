@@ -25,4 +25,30 @@ export class UserListingComponent implements OnInit {
   public showUser(userID: number): void {
     this.router.navigate(['show-user'], { queryParams: { id: userID}});
   }
+
+  public get getCurrUser(): IUser {
+    return this.userService.getLoggedData;
+  }
+
+  public banUser(userID: number): void {
+    this.userService.banUser(userID)
+    .then(() => {
+      this.router.navigate([''], { queryParams: { succ: true, msg: 'User has been banned.', listing: 'user'}});
+    })
+    .catch(() => {
+      this.router.navigate([''], { queryParams:
+        { succ: false, msg: 'There was a problem while banning user. Please try again.', listing: 'user'}});
+    });
+  }
+
+  public unBanUser(userID: number): void {
+    this.userService.unBanUser(userID)
+    .then(() => {
+      this.router.navigate([''], { queryParams: { succ: true, msg: 'User has been unbanned.', listing: 'user'}});
+    })
+    .catch(() => {
+      this.router.navigate([''], { queryParams:
+        { succ: false, msg: 'There was a problem while unbanning user. Please try again.', listing: 'user'}});
+    });
+  }
 }

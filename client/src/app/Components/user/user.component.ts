@@ -95,6 +95,7 @@ export class UserComponent implements OnInit {
         team: null,
         description: this.user.description,
         name: this.user.name,
+        banned: this.user.banned,
       };
 
       this.userService.updateUser(usr, null)
