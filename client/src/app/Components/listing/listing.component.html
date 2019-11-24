@@ -1,9 +1,10 @@
-<div>
+<div id="wrapper">
     <div *ngIf="showMsg" class="message" [ngStyle]="{'background-color': msgColor}">
         <span>{{msg}}</span>
         <button (click)="closeMessage()">x</button>
     </div>
     <div class="topbar-switch">
+<<<<<<< HEAD
         <button
             *ngIf="getCurrData !== null"
             (click)="selectedListing='mytournament'"
@@ -23,6 +24,11 @@
             [ngStyle]="{'background-color':selectedListing === 'user' ? selColor : defColor }">
             Users</button>  
 
+=======
+        <button (click)="selectedListing='match'">Matches</button>  
+        <button (click)="selectedListing='team'">Teams</button>  
+        <button (click)="selectedListing='user'">Users</button>  
+>>>>>>> development
     </div>
     <div *ngIf="selectedListing === 'tournament'">
         <app-tournament-listing></app-tournament-listing>
