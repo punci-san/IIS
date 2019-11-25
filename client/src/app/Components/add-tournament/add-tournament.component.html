@@ -1,42 +1,62 @@
-<div>
+<div class="wrapper">
 
     <div *ngIf="showMsg" class="message" [ngStyle]="{'background-color': msgColor}">
         <span>{{msg}}</span>
         <button (click)="closeMessage()">x</button>
     </div>
+    <div class="tourney-form">
+        <h1>Create New Tournament</h1>
+        <div class="left_box">
+            <div>
+                <label for="tournament_name">Tournament name:</label>
+                <input #tournament_name type="text" name="tournament_name" id="tournament_name">
+            </div>
+            
+            <div>
+                <label for="number_of_players">Nubmer of players/teams:</label>
+                <select #number_of_players name="number_of_players" id="number_of_players">
+                    <option *ngFor="let nop of numberOfPlayers" value="{{nop}}">{{nop}}</option>
+                </select>
+            </div>
 
-    <label for="tournament_name">Tournament name:</label>
-    <input #tournament_name type="text" name="tournament_name" id="tournament_name">
-    
-    <label for="number_of_players">Nubmer of players/teams:</label>
-    <select #number_of_players name="number_of_players" id="number_of_players">
-        <option *ngFor="let nop of numberOfPlayers" value="{{nop}}">{{nop}}</option>
-    </select>
+            <div>
+                <label for="number_of_players">Tournament type:</label>
+                <select #tournament_type name="tournament_type" id="tournament_type">
+                    <option *ngFor="let tt of tournamentType; let i = index" value="{{i}}">{{tt}}</option>
+                </select>
+            </div>
 
-    <label for="number_of_players">Tournament type:</label>
-    <select #tournament_type name="tournament_type" id="tournament_type">
-        <option *ngFor="let tt of tournamentType; let i = index" value="{{i}}">{{tt}}</option>
-    </select>
+            <div>
+                <label for="tournament_fee">Registration fee (€):</label>
+                <input #tournament_fee type="number" name="tournament_fee" id="tournament_fee" value="0">
+            </div>
 
-    <label for="tournament_fee">Tournament registration fee:</label>
-    <input #tournament_fee type="number" name="tournament_fee" id="tournament_fee" value="0">
-    
-    <label for="tournament_description">Tournament description:</label>
-    <textarea #tournament_description name="tournament_description" id="tournament_description" cols="30" rows="10" maxlength="255"></textarea>    
+            <div>
+                <label for="tournament_start">Tournament opening:</label>
+                <input #tournament_start type="date" name="tournament_start" id="tournament_start" value="{{getCurrentDate()}}">
+            </div>
 
-    <label for="tournament_start">Tournament start date:</label>
-    <input #tournament_start type="date" name="tournament_start" id="tournament_start" value="{{getCurrentDate()}}">
-    
-    <label for="tournament_sponsors">Tournament sponsors:</label>
-    <input #tournament_sponsors type="text" name="tournament_sponsors" id="tournament_sponsors">
+            <div>
+                <label for="tournament_sponsors">Tournament sponsors:</label>
+                <input #tournament_sponsors type="text" name="tournament_sponsors" id="tournament_sponsors">
+            </div>
+        </div>
+        <div class="right_box">
+            <div>
+                <label for="tournament_description">Tournament description:</label>
+                <textarea #tournament_description name="tournament_description" id="tournament_description" cols="30" rows="10" maxlength="255"></textarea>    
+            </div>
+        </div>
+    </div>
 
-
-    <button (click)="addTournament(
-        tournament_name.value,
-        number_of_players.value,
-        tournament_type.value,
-        tournament_fee.value,
-        tournament_description.value,
-        tournament_start.value,
-        tournament_sponsors.value)">Add tournament</button>
+    <div id="confirm_btn">
+        <button (click)="addTournament(
+            tournament_name.value,
+            number_of_players.value,
+            tournament_type.value,
+            tournament_fee.value,
+            tournament_description.value,
+            tournament_start.value,
+            tournament_sponsors.value)">Add tournament</button>
+    </div>
 </div>

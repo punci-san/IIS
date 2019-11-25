@@ -6,21 +6,17 @@
     <div class="topbar-switch">
             <button
             *ngIf="getCurrData !== null"
-            (click)="selectedListing='mytournament'"
-            [ngStyle]="{'background-color':selectedListing === 'mytournament' ? selColor : defColor }">
+            (click)="selectedListing='mytournament'">
             My tournaments</button> 
 
             <button 
-            (click)="selectedListing='tournament'"
-            [ngStyle]="{'background-color':selectedListing === 'tournament' ? selColor : defColor }">
+            (click)="selectedListing='tournament'">
             Tournaments</button>  
             <button 
-            (click)="selectedListing='team'"
-            [ngStyle]="{'background-color':selectedListing === 'team' ? selColor : defColor }">
+            (click)="selectedListing='team'">
             Teams</button>  
             <button 
-            (click)="selectedListing='user'"
-            [ngStyle]="{'background-color':selectedListing === 'user' ? selColor : defColor }">
+            (click)="selectedListing='user'">
             Users</button>
     </div>
     <div *ngIf="selectedListing === 'tournament'">

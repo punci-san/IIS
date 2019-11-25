@@ -1,0 +1,104 @@
+.tourney-form {
+    display: flow-root;
+    margin: 0px auto 0px auto;
+    padding-top: 60px;
+    max-width: 900px;
+    font-size: 18px;
+}
+
+.left_box > div {
+    display: flow-root;
+    margin-bottom: 18px;
+    margin-left: 30px;
+}
+
+.left_box {
+    float: left;
+    width: 450px;
+}
+
+.right_box {
+    float: left;
+    width: 450px;
+}
+
+.right_box label {
+    width: 100%;
+}
+
+.right_box div {
+    margin-left: 30px;
+}
+
+textarea {
+    margin-top: 18px;
+    width: 420px;
+    resize: none;
+}
+
+.tourney-form label {
+    float: left;
+}
+
+.tourney-form input, select {
+    float: right;
+    width: 200px;
+    padding: 0px 0px 0px 0px;
+    border-width: 1px 1px 1px 1px;
+    border-radius: 3px;
+    border-color: black;
+}
+
+#confirm_btn {
+    padding-bottom: 70px;
+}
+
+#confirm_btn button {
+    display: block;
+    margin: 50px auto 0px auto;
+    border-radius: 3px;
+    border-width: 2px 2px 2px 2px;
+    padding: 10px 25px 10px 25px;
+    border-color: black;
+    font-size: 18px;
+}
+
+#confirm_btn button:hover {
+    background-color: #65656540;
+}
+
+h1 {
+    text-align: left;
+    margin-left: 30px;
+    margin-bottom: 80px;
+    padding-bottom: 15px;
+    border-bottom: 2px;
+    border-bottom-style: solid;
+}
+.message {
+    width: 100%;
+    height: 30px;
+    display: inline-flex;
+}
+.message button {
+    margin: 0px;
+    padding: 0px 14px 3px 14px;
+    font-size: 18px; 
+    background-color: black;   
+    border: none;
+    color: white;
+}
+
+.message button:hover {
+    background-color: #404D53;
+}
+
+.message span {
+    color: white;
+    margin: 0;
+    margin-top: 5px;
+    font-size: medium;
+    margin-left: auto;
+    margin-right: auto;
+}
+
