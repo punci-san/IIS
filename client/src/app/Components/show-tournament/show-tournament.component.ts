@@ -703,4 +703,9 @@ export class ShowTournamentComponent implements OnInit {
   public closeMessage(): void {
     this.showMsg = false;
   }
+
+
+  /**
+   * 
+   */
 }

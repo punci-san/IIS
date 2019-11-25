@@ -102,10 +102,9 @@
         </div>
 
         <button *ngIf="tournament !== null && tournament.created === null" [disabled]="canFinalize === false" (click)="finalizeTournament()">Finalize tournament</button>
-
-        <div *ngIf="tournament !== null && tournament.created === false">
-            <app-spider-tournament [tournament]="tournament"></app-spider-tournament>
-        </div>
-
+         
+    </div>
+    <div *ngIf="tournament !== null">
+        <app-spider [tournament]="tournament"></app-spider>
     </div>
 </div>

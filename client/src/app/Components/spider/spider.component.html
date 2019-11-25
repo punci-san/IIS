@@ -1,0 +1,15 @@
+<input #row_inp type="text">
+<input #col_inp type="text">
+<button (click)="selectMatch(row_inp.value, col_inp.value)">Click</button>
+
+<div *ngIf="tournament !== null && row !== null && column !== null">
+    <div *ngIf="getCurrUser !== null && tournament.created !== null && tournament.creator_id !== getCurrUser.id && tournament.referee_id !== getCurrUser.id">
+        <p>Showing statistics</p>
+    </div>
+    <div *ngIf="getCurrUser !== null && tournament.created === false && tournament.creator_id === getCurrUser.id">
+        <p>Showing matches adding.</p>
+    </div>
+    <div *ngIf="getCurrUser !== null && tournament.created === true && tournament.referee_id === getCurrUser.id">
+        <p>Showing referee statistics adding.</p>
+    </div>
+</div>

@@ -1,6 +1,7 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
 
 import { AppRoutingModule } from './app-routing.module';
 import { TopbarComponent } from './Components/topbar/topbar.component';
@@ -16,7 +17,7 @@ import { ShowTeamComponent } from './Components/show-team/show-team.component';
 import { AddTournamentComponent } from './Components/add-tournament/add-tournament.component';
 import { TournamentListingComponent } from './Components/tournament-listing/tournament-listing.component';
 import { ShowTournamentComponent } from './Components/show-tournament/show-tournament.component';
-import { SpiderTournamentComponent } from './Components/spider-tournament/spider-tournament.component';
+import { SpiderComponent } from './Components/spider/spider.component';
 
 @NgModule({
   declarations: [
@@ -33,12 +34,13 @@ import { SpiderTournamentComponent } from './Components/spider-tournament/spider
     AddTournamentComponent,
     TournamentListingComponent,
     ShowTournamentComponent,
-    SpiderTournamentComponent
+    SpiderComponent,
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
-    FormsModule
+    FormsModule,
+    NgbModule,
   ],
   providers: [
   ],
