@@ -4,51 +4,58 @@
         <button (click)="closeMessage()">x</button>
     </div>
 
+    <div class="profile_form">
 
-    <div class="current-team">
-        <div *ngIf="user.team !== null && team !== null">
-            <p>{{team.name}}</p>
+        <h1>Edit Your Profile</h1>
+
+        <div class="boxes">
+            <div class="left_box">
+                <div class="input">
+                    <label for="user_name">Name:</label>
+                    <input [(ngModel)]="user.name" type="text" name="user_name" id="user_name">
+                </div>
+                <div class="input">
+                    <label for="user_name">Password:</label>
+                    <input [(ngModel)]="pass1" type="password" name="user_pass1" id="user_pass1">
+                </div>
+                <div class="input">
+                    <label for="user_name">Retype password:</label>
+                    <input [(ngModel)]="pass2" type="password" name="user_pass2" id="user_pass2">
+                </div>
+                <div class="current-team">
+                    <div *ngIf="user.team !== null && team !== null">
+                        <p>Team name:</p>
+                        <p>{{team.name}}</p>
+                        <div *ngIf="user.id === team.creator_id">
+                            <button (click)="deteleTeam()">Delete team and all its members</button>
+                        </div>
+                        <div *ngIf="user.id !== team.creator_id">
+                            <button (click)="leaveTeam()">Leave team</button>
+                        </div>
+                    </div>
+                    <div *ngIf="user.team === null">
+                        <p id="modify">You are currently in no team.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="right_box">
+                <div class="input">
+                    <label for="user_description">Additional user information:</label>
+                    <textarea [(ngModel)]="user.description" name="user_description" id="user_description" cols="30" rows="10"></textarea>
+                </div>
+            </div>
+        </div>
+        <div class="update-button">
+                <button (click)="updateData()">Update data</button>
+        </div>
+        <p>Delete user</p>
+        <div *ngIf="user !== null && team !== null ">
             <div *ngIf="user.id === team.creator_id">
-                <button (click)="deteleTeam()">Delete team and all its members</button>
+               You cannot delete your account, change team admin or delete team first!
             </div>
             <div *ngIf="user.id !== team.creator_id">
-                <button (click)="leaveTeam()">Leave team</button>
+                <button (click)="deleteUser(user.id)">Delete this user</button>
             </div>
-        </div>
-        <div *ngIf="user.team === null">
-            <p>You are currently in no team.</p>
-        </div>
-    </div>
-
-    <p>Update data</p>
-    <div class="input">
-        <label for="user_name">Name:</label>
-        <input [(ngModel)]="user.name" type="text" name="user_name" id="user_name">
-    </div>
-    <div class="input">
-        <label for="user_description">Description:</label>
-        <textarea [(ngModel)]="user.description" name="user_description" id="user_description" cols="30" rows="10"></textarea>
-    </div>
-    <div class="input">
-        <label for="user_name">Password:</label>
-        <input [(ngModel)]="pass1" type="password" name="user_pass1" id="user_pass1">
-    </div>
-    <div class="input">
-        <label for="user_name">Retype password:</label>
-        <input [(ngModel)]="pass2" type="password" name="user_pass2" id="user_pass2">
-    </div>
-        
-    <div class="update-button">
-        <button (click)="updateData()">Update data</button>
-    </div>
-
-    <p>Delete user</p>
-    <div *ngIf="user !== null && team !== null ">
-        <div *ngIf="user.id === team.creator_id">
-            You cannot delete your account, change team admin or delete team first!
-        </div>
-        <div *ngIf="user.id !== team.creator_id">
-            <button (click)="deleteUser(user.id)">Delete this user</button>
         </div>
     </div>
 </div>

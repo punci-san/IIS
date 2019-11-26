@@ -3,15 +3,21 @@
         <span>{{msg}}</span>
         <button (click)="closeMessage()">x</button>
     </div>
-    <div class="input-field">
-        <label for="team_name">Team name:</label>
-        <input #team_name type="text" name="team" id="team_name">
-    </div>
-    <div class="input-field">
-        <label for="team_logo">Logo:</label>
-        <input #team_logo type="file" name="file" id="team_logo">
-    </div>
-    <div class="add-button">
-        <button (click)="addTeam(team_name.value, team_logo.files)">Add team</button>
+    <div class="team_form">
+        <h1>Create New Team</h1>
+        <div class="input-field">
+            <label for="team_name">Team name:</label>
+            <input #team_name type="text" name="team" id="team_name">
+        </div>
+        <div class="input-field" id="align_input">
+            <label for="team_logo">Logo:</label>
+            <span class="filewrap">
+                Browse
+                <input #team_logo type="file" name="file" id="team_logo">
+            </span>
+        </div>
+        <div class="add-button">
+            <button (click)="addTeam(team_name.value, team_logo.files)">Add team</button>
+        </div>
     </div>
 </div>

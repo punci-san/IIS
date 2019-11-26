@@ -1,0 +1,122 @@
+.profile_form {
+    display: block;
+    margin: 0px auto 0px auto;
+    padding-top: 60px;
+    max-width: 900px;
+    font-size: 18px;
+}
+
+.current-team {
+    margin-left: 10px;
+    margin-top: -15px;
+}
+
+.current-team  div:first-child {
+    display: block;
+}
+
+.current-team div:first-child p{
+    display: inline-block;
+    margin-bottom: 15px;
+}
+
+.current-team div:first-child p:first-child {
+    margin-right: 70px;
+}
+
+.current-team div button {
+    margin: 0 auto;
+    border-radius: 3px;
+    border-width: 2px 2px 2px 2px;
+    padding: 3px 15px 3px 15px;
+    border-color: black;
+    font-size: 15px;
+}
+
+.current-team div button:hover {
+    background-color: #65656540;
+}
+
+#modify{
+    font-weight: bold;
+    font-size: 23px;
+    margin-top: -15px;
+    margin-left: 10px;
+}
+
+.boxes {
+    margin-top: 50px;
+    padding-left: 5px;
+    padding-right: 5px;
+    display: flow-root;
+}
+
+.left_box {
+    float: left;
+    width: 350px;
+    padding-right: 5px;
+    margin-top: 37px;
+}
+
+.left_box .input {
+    display: flow-root;
+    margin-right: 40px;
+    margin-left: 10px;
+}
+
+.left_box .input > label {
+    float: left;
+    margin-bottom: 15px;
+}
+
+.left_box .input > input {
+    float: right;
+}
+
+.right_box {
+    float: left;
+    width: 525px;
+}
+
+.right_box .input {
+    margin-left: 10px;
+}
+
+.right_box .input > label {
+    display: block;
+    margin-bottom: 15px;
+}
+
+.right_box .input > textarea {
+    width: 100%;
+    resize: none;
+}
+
+input {
+    border-radius: 3px;
+    border-width: 1px 1px 1px 1px;
+    border-color: black;
+}
+
+.update-button button {
+    display: block;
+    margin: 0 auto;
+    margin-top: 50px;
+    border-radius: 3px;
+    border-width: 2px 2px 2px 2px;
+    padding: 10px 22px 10px 22px;
+    border-color: black;
+    font-size: 18px;
+}
+
+.update-button button:hover {
+    background-color: #65656540;
+}
+
+h1 {
+    text-align: left;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 2px;
+    border-bottom-style: solid;
+}
