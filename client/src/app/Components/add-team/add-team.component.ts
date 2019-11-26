@@ -40,6 +40,12 @@ export class AddTeamComponent implements OnInit {
   public addTeam(teamName: string, file: FileList): void {
     this.showMsg = false;
 
+    if (teamName === '') {
+      this.msg = 'Please fill out name of team.';
+      this.msgColor = RED;
+      this.showMsg = true;
+    }
+
     this.teamService.addTeam(teamName, file)
     .then(() => {
       this.router.navigate([''], { queryParams: { succ: true, msg: 'You have been created team and have been added to it.'}});

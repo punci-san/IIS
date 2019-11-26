@@ -8,6 +8,8 @@ import { ITeam, ITeamRequest } from "../interfaces/team";
 import { ITournament, ITeamType } from "../interfaces/tournament";
 import { teamType, numberOfPlayers } from "../settings/tournament_config";
 import { ITournamentRegistrations } from "../interfaces/tournament-registrations";
+import { IMatch } from "../interfaces/match";
+import { IMatchEvent } from "../interfaces/match_event";
 
 const varcharLen = 255;
 
@@ -28,6 +30,8 @@ export class RouterHandler {
         this.addTeamRequests(app);
         this.addTournamentRoutes(app);
         this.addTournamentRegistrationRoutes(app);
+        this.addMatchRoutes(app);
+        this.addMatchEventRoutes(app);
 
         // Path not found
         app.route("*")
@@ -649,6 +653,54 @@ export class RouterHandler {
                 });
             });
 
+        app.route("/tournament-start")
+            .post((req: Request, res: Response) => {
+                this.isAuthenticated(req)
+                .then((usr: IUser) => {
+                    const tournamentID: number = Number(req.body.tournament_id);
+
+                    if (isNaN(tournamentID)) {
+                        return res.status(500).send();
+                    }
+
+                    this.database.getTournament(tournamentID)
+                    .then((t: ITournament) => {
+                        if (t.creator_id !== usr.id) {
+                            return res.status(401).send();
+                        }
+
+                        if (t.created !== false) {
+                            return res.status(500).send();
+                        }
+
+                        this.database.countAcceptedRegs(tournamentID, t.team_type !== ITeamType.PvP)
+                        .then((count: number) => {
+
+                            if (count !== t.number_of_players && t.referee_id === null) {
+                                return res.status(500).send();
+                            }
+
+                            this.database.updateTournamentCreation(tournamentID, true)
+                            .then(() => {
+                                return res.send();
+                            })
+                            .catch(() => {
+                                return res.status(500).send();
+                            });
+                        })
+                        .catch(() => {
+                            return res.status(500).send();
+                        });
+                    })
+                    .catch(() => {
+                        return res.status(404).send();
+                    });
+                })
+                .catch(() => {
+                    return res.status(401).send();
+                });
+            });
+
         app.route("/tournament/:id")
         .get((req: Request, res: Response) => {
             if (req.params.id === undefined) {
@@ -978,6 +1030,201 @@ export class RouterHandler {
             });
     }
 
+    private addMatchRoutes(app: Express): void {
+        app.route("/match")
+            .post((req: Request, res: Response) => {
+                const tournamentID: number = Number(req.body.tournament_id);
+                const user1: number = (req.body.user_1 === null) ? null : Number(req.body.user_1);
+                const user2: number = (req.body.user_2 === null) ? null : Number(req.body.user_2);
+                const team1: number = (req.body.team_1 === null) ? null : Number(req.body.team_1);
+                const team2: number = (req.body.team_2 === null) ? null : Number(req.body.team_2);
+                const row: number = Number(req.body.row);
+                const column: number = Number(req.body.column);
+
+                if (isNaN(tournamentID) || isNaN(row) || isNaN(column)) {
+                    return res.status(500).send();
+                }
+
+                if ((user1 === null && user2 === null) && isNaN(team1) && isNaN(team2)) {
+                    return res.status(500).send();
+                }
+
+                if ((team1 === null && team2 === null) && isNaN(user1) && isNaN(user2)) {
+                    return res.status(500).send();
+                }
+
+                // Check if tournament exist
+                this.database.getTournament(tournamentID)
+                .then((t: ITournament) => {
+                    // User needs to be registered
+                    this.isAuthenticated(req)
+                    .then((usr: IUser) => {
+                        // Only creator can add match
+                        if (t.creator_id !== usr.id) {
+                            return res.status(401).send();
+                        }
+
+                        // Or system can add match
+                        this.database.addMatch(tournamentID, user1, user2, team1, team2, row, column)
+                        .then(() => {
+                            return res.send();
+                        })
+                        .catch(() => {
+                            return res.status(500).send();
+                        });
+                    })
+                    .catch(() => {
+                        if (this.isSystem(req) === false) {
+                            return res.status(401).send();
+                        }
+                        // Or system can add match
+                        this.database.addMatch(tournamentID, user1, user2, team1, team2, row, column)
+                        .then(() => {
+                            return res.send();
+                        })
+                        .catch(() => {
+                            return res.status(500).send();
+                        });
+                    });
+                })
+                .catch(() => {
+                    return res.status(404).send();
+                });
+            });
+
+        app.route("/match/:id")
+            .get((req: Request, res: Response) => {
+                const tournamentID: number = Number(req.params.id);
+
+                // Check if tournament exist
+                this.database.getTournament(tournamentID)
+                .then((t: ITournament) => {
+                    // User needs to be logged in
+                    this.isAuthenticated(req)
+                    .then((usr: IUser) => {
+                        this.database.getMatches(tournamentID)
+                        .then((ms: IMatch[]) => {
+                            return res.json(ms);
+                        })
+                        .catch(() => {
+                            return res.status(404).send();
+                        });
+                    })
+                    .catch(() => {
+                        return res.status(401).send();
+                    });
+                })
+                .catch(() => {
+                    return res.status(404).send();
+                });
+            })
+            .delete((req: Request, res: Response) => {
+                this.isAuthenticated(req)
+                .then((usr: IUser) => {
+                    const matchID: number = Number(req.params.id);
+
+                    if (isNaN(matchID)) {
+                        return res.status(404).send();
+                    }
+
+                    this.database.deleteMatch(matchID)
+                    .then(() => {
+                        return res.send();
+                    })
+                    .catch(() => {
+                        return res.status(404).send();
+                    });
+                })
+                .catch(() => {
+                    return res.status(401).send();
+                });
+            });
+    }
+
+    private addMatchEventRoutes(app: Express): void {
+        app.route("/match-event")
+            .post((req: Request, res: Response) => {
+                this.isAuthenticated(req)
+                .then((usr: IUser) => {
+
+                    const tournamentID: number = Number(req.body.tournament_id);
+                    const matchID: number = Number(req.body.match_id);
+                    const teamID: number = (req.body.team_id === null) ? null : Number(req.body.team_id);
+                    const scorerID: number = Number(req.body.scorer_id);
+                    const assisterID: number = (req.body.assister_id === null) ? null : Number(req.body.assister_id);
+                    if (isNaN(tournamentID) || isNaN(matchID) || isNaN(scorerID)) {
+                        return res.status(500).send();
+                    }
+
+                    this.database.getTournament(tournamentID)
+                    .then((t: ITournament) => {
+                        // User is not referee, exit
+                        if (t.referee_id !== usr.id) {
+                            return res.status(401).send();
+                        }
+
+                        this.database.addMatchEvent(matchID, teamID, scorerID, assisterID)
+                        .then(() => {
+                            return res.send();
+                        })
+                        .catch(() => {
+                            return res.status(500).send();
+                        });
+                    })
+                    .catch(() => {
+                        return res.status(404).send();
+                    });
+                })
+                .catch(() => {
+                    return res.status(401).send();
+                });
+            });
+
+        app.route("/match-event/:id")
+            .get((req: Request, res: Response) => {
+                this.isAuthenticated(req)
+                .then((usr: IUser) => {
+                    const matchEventID: number = Number(req.params.id);
+
+                    if (isNaN(matchEventID)) {
+                        return res.status(404).send();
+                    }
+
+                    this.database.getMatchEvents(matchEventID)
+                    .then((matchEvents: IMatchEvent[]) => {
+                        return res.json(matchEvents);
+                    })
+                    .catch(() => {
+                        return res.status(404).send();
+                    });
+                })
+                .catch(() => {
+                    return res.status(401).send();
+                });
+            })
+            .delete((req: Request, res: Response) => {
+                this.isAuthenticated(req)
+                .then((usr: IUser) => {
+                    const matchEventID: number = Number(req.params.id);
+
+                    if (isNaN(matchEventID)) {
+                        return res.status(404).send();
+                    }
+
+                    this.database.deleteMatchEvent(matchEventID)
+                    .then(() => {
+                        return res.send();
+                    })
+                    .catch(() => {
+                        return res.status(404).send();
+                    });
+                })
+                .catch(() => {
+                    return res.status(401).send();
+                });
+            });
+    }
+
     private isAuthenticated(req: Request): Promise<IUser> {
         return new Promise((resolve, reject) => {
             const user: string = req.get("Authorization");
@@ -994,5 +1241,9 @@ export class RouterHandler {
                 return reject();
             });
         });
+    }
+
+    private isSystem(req: Request): boolean {
+        return req.get("System") !== undefined;
     }
 }

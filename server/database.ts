@@ -4,6 +4,8 @@ import { IUser } from "../interfaces/user";
 import { ITeam, ITeamRequest } from "../interfaces/team";
 import { ITournament } from "../interfaces/tournament";
 import { ITournamentRegistrations } from "../interfaces/tournament-registrations";
+import { IMatch } from "../interfaces/match";
+import { IMatchEvent } from "../interfaces/match_event";
 
 const dbServer = "localhost";
 const user = "xskuta04";
@@ -18,6 +20,8 @@ export class Database {
     private teamRequestsDatabase: TeamRequestsDatabase;
     private tournamentDatabase: TournamentDatabase;
     private tournamentRegDatabase: TournamentRegistrationDatabase;
+    private matchDatabase: MatchDatabase;
+    private matchEventDatabase: MatchEventDatabase;
 
     constructor() {
         // Connect to database
@@ -27,8 +31,11 @@ export class Database {
             password: pass,
             database,
         });
+
         this.userDatabase = container.resolve(UserDatabase);
         this.teamDatabase = container.resolve(TeamDatabase);
+        this.matchDatabase = container.resolve(MatchDatabase);
+        this.matchEventDatabase = container.resolve(MatchEventDatabase);
         this.teamRequestsDatabase = container.resolve(TeamRequestsDatabase);
         this.tournamentDatabase = container.resolve(TournamentDatabase);
         this.tournamentRegDatabase = container.resolve(TournamentRegistrationDatabase);
@@ -37,6 +44,8 @@ export class Database {
             if (err === null) {
                 this.userDatabase.setConnection(this.connection);
                 this.teamDatabase.setConnection(this.connection);
+                this.matchDatabase.setConnection(this.connection);
+                this.matchEventDatabase.setConnection(this.connection);
                 this.teamRequestsDatabase.setConnection(this.connection);
                 this.tournamentDatabase.setConnection(this.connection);
                 this.tournamentRegDatabase.setConnection(this.connection);
@@ -423,6 +432,38 @@ export class Database {
 
     public countAcceptedRegs(tournamentID: number, countTeams: boolean): Promise<number> {
         return this.tournamentRegDatabase.countAcceptedReg(tournamentID, countTeams);
+    }
+
+    /**
+     * Match requests
+     */
+
+    public addMatch(tournamentID: number, user1: number, user2: number, team1: number, team2: number, row: number, column: number): Promise<number> {
+        return this.matchDatabase.addMatch(tournamentID, user1, user2, team2, team2, row, column);
+    }
+
+    public getMatches(tournamentID: number): Promise<IMatch[]> {
+        return this.matchDatabase.getMatches(tournamentID);
+    }
+
+    public deleteMatch(matchID: number): Promise<void> {
+        return this.matchDatabase.deleteMatch(matchID);
+    }
+
+    /**
+     * Match event requests
+     */
+
+    public addMatchEvent(matchID: number, teamID: number, scorerID: number, assisterID: number): Promise<number> {
+        return this.matchEventDatabase.addEvent(matchID, teamID, scorerID, assisterID);
+    }
+
+    public getMatchEvents(matchID: number): Promise<IMatchEvent[]> {
+        return this.matchEventDatabase.getMatchEvents(matchID);
+    }
+
+    public deleteMatchEvent(matchEventID: number): Promise<void> {
+        return this.matchEventDatabase.deleteEvent(matchEventID);
     }
 }
 
@@ -1568,6 +1609,197 @@ class TournamentRegistrationDatabase {
                 }
 
                 return resolve();
+            });
+        });
+    }
+}
+
+@singleton()
+class MatchDatabase {
+    private connection: mysql.Connection;
+
+    constructor() {
+        this.connection = null;
+    }
+
+    public setConnection(conn: mysql.Connection): void {
+        this.connection = conn;
+    }
+
+    public addMatch(tournamentID: number, user1: number, user2: number, team1: number, team2: number, row: number, column: number): Promise<number> {
+        return new Promise((resolve, reject) => {
+            if (this.connection === null) {
+                return reject();
+            }
+
+            const uUser1: string = (user1 === null) ? "null" : `'${user1}'`;
+            const uUser2: string = (user2 === null) ? "null" : `'${user2}'`;
+            const uTeam1: string = (team1 === null) ? "null" : `'${team1}'`;
+            const uTeam2: string = (team2 === null) ? "null" : `'${team2}'`;
+
+            this.connection.query(
+                `INSERT INTO matches (tournament_id, user_1, user_2, team_1, team_2, tournament_row, tournament_column) VALUES
+                ('${tournamentID}',${uUser1},${uUser2},${uTeam1},${uTeam2},'${row}','${column}');`, (err: mysql.MysqlError, result, field: mysql.FieldInfo[]) => {
+                if (err !== null) {
+                    console.log(err);
+                    return reject();
+                }
+
+                if (result === null) {
+                    return reject();
+                }
+
+                if (result.affectedRows !== undefined && result.affectedRows > 0) {
+                    return resolve(result.insertId);
+                }
+
+                return reject();
+            });
+        });
+    }
+
+    public getMatches(tournamentID: number): Promise<IMatch[]> {
+        return new Promise((resolve, reject) => {
+            if (this.connection === null) {
+                return reject();
+            }
+            const matches: IMatch[] = [];
+
+            this.connection.query(`SELECT * FROM matches WHERE tournament_id='${tournamentID}'`, (queryErr: mysql.MysqlError, result, field: mysql.FieldInfo[]) => {
+                if (queryErr !== null) {
+                    return reject();
+                }
+                if (result === null) {
+                    return reject();
+                }
+
+                for (const res of result) {
+                    matches.push({
+                        id: res.id,
+                        user1: (res.user_1 === null) ? null : res.user_1,
+                        user2: (res.user_2 === null) ? null : res.user_2,
+                        team1: (res.team_1 === null) ? null : res.team_1,
+                        team2: (res.team_2 === null) ? null : res.team_2,
+                        tournamentID: res.tournament_id,
+                        row: res.tournament_row,
+                        column: res.tournament_column,
+                    });
+                }
+
+                return resolve(matches);
+            });
+        });
+    }
+
+    public deleteMatch(matchID: number): Promise<void> {
+        return new Promise((resolve, reject) => {
+            if (this.connection === null) {
+                return reject();
+            }
+
+            this.connection.query(`DELETE FROM matches WHERE id='${matchID}'`, (queryErr: mysql.MysqlError, result, field: mysql.FieldInfo[]) => {
+                if (queryErr !== null) {
+                    return reject();
+                }
+
+                if (result !== undefined && result.affectedRows === 1) {
+                    return resolve();
+                }
+
+                return reject();
+            });
+        });
+    }
+}
+
+@singleton()
+class MatchEventDatabase {
+    private connection: mysql.Connection;
+
+    constructor() {
+        this.connection = null;
+    }
+
+    public setConnection(conn: mysql.Connection): void {
+        this.connection = conn;
+    }
+
+    public addEvent(matchID: number, teamID: number, scorerID: number, assisterID: number): Promise<number> {
+        return new Promise((resolve, reject) => {
+            if (this.connection === null) {
+                return reject();
+            }
+
+            const uTeam: string = (teamID === null) ? "null" : `'${teamID}'`;
+            const uAssister: string = (assisterID === null) ? "null" : `${assisterID}`;
+
+            this.connection.query(
+                `INSERT INTO match_events (match_id, team_id, scorer_id, assister_id) VALUES
+                ('${matchID}',${uTeam},${scorerID},${uAssister}');`, (err: mysql.MysqlError, result, field: mysql.FieldInfo[]) => {
+                if (err !== null) {
+                    console.log(err);
+                    return reject();
+                }
+
+                if (result === null) {
+                    return reject();
+                }
+
+                if (result.affectedRows !== undefined && result.affectedRows > 0) {
+                    return resolve(result.insertId);
+                }
+
+                return reject();
+            });
+        });
+    }
+
+    public getMatchEvents(matchID: number): Promise<IMatchEvent[]> {
+        return new Promise((resolve, reject) => {
+            if (this.connection === null) {
+                return reject();
+            }
+            const matches: IMatchEvent[] = [];
+
+            this.connection.query(`SELECT * FROM match_events WHERE tournament_id='${matchID}'`, (queryErr: mysql.MysqlError, result, field: mysql.FieldInfo[]) => {
+                if (queryErr !== null) {
+                    return reject();
+                }
+                if (result === null) {
+                    return reject();
+                }
+
+                for (const res of result) {
+                    matches.push({
+                        id: res.id,
+                        match_id: res.match_id,
+                        team_id: (res.team_id === null) ? null : res.team_id,
+                        scorer_id: res.scorer_id,
+                        assister_id: res.assister_id,
+                    });
+                }
+
+                return resolve(matches);
+            });
+        });
+    }
+
+    public deleteEvent(matchEventID: number): Promise<void> {
+        return new Promise((resolve, reject) => {
+            if (this.connection === null) {
+                return reject();
+            }
+
+            this.connection.query(`DELETE FROM match_events WHERE id='${matchEventID}'`, (queryErr: mysql.MysqlError, result, field: mysql.FieldInfo[]) => {
+                if (queryErr !== null) {
+                    return reject();
+                }
+
+                if (result !== undefined && result.affectedRows === 1) {
+                    return resolve();
+                }
+
+                return reject();
             });
         });
     }

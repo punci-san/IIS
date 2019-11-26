@@ -27,3 +27,7 @@ export const tournamentRegistrationRefereeClearPage = `${mainPage}tournament-reg
 
 export const tournamentRegAcceptPage = `${mainPage}tournament-registration-accept`;
 export const tournamentRegDenyPage = `${mainPage}tournament-registration-deny`;
+
+export const matchPage = `${mainPage}match`;
+
+export const matchEventPage = `${mainPage}match-event`;
