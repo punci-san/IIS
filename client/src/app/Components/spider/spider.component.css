@@ -169,10 +169,8 @@ h2 {
     padding-bottom: 0;
     border-right: 1px dashed #e5e5e5;
     border-bottom: 0;
+    padding-left:0;
   }
-}
-.tournament-bracket__round:last-child .tournament-bracket__list {
-  border: 0;
 }
 .tournament-bracket__item {
   display: flex;
@@ -246,10 +244,6 @@ h2 {
   }
   .tournament-bracket__round:last-child .tournament-bracket__item::after {
     display: none;
-  }
-  .tournament-bracket__round:nth-last-child(2) .tournament-bracket__item::after {
-    border-radius: 0;
-    border-right: 0;
   }
 }
 @media (min-width: 72em) {
@@ -325,16 +319,6 @@ h2 {
     transform: translate(0, -1px);
   }
 }
-.tournament-bracket__round:last-child .tournament-bracket__match::before,
-.tournament-bracket__round:last-child .tournament-bracket__match::after {
-  border-left: 0;
-}
-.tournament-bracket__round:last-child .tournament-bracket__match::before {
-  border-bottom-left-radius: 0;
-}
-.tournament-bracket__round:last-child .tournament-bracket__match::after {
-  display: none;
-}
 .tournament-bracket__round:first-child .tournament-bracket__match::before,
 .tournament-bracket__round:first-child .tournament-bracket__match::after {
   display: none;
@@ -385,29 +369,6 @@ h2 {
   .tournament-bracket__content .tournament-bracket__team:first-child .tournament-bracket__score {
     order: 2;
   }
-}
-.tournament-bracket__content .tournament-bracket__team:last-child {
-  width: 50%;
-  order: 2;
-  text-align: left;
-}
-@media (min-width: 38em) and (max-width: 52em) {
-  .tournament-bracket__content .tournament-bracket__team:last-child {
-    align-items: flex-start;
-  }
-}
-@media (min-width: 38em) {
-  .tournament-bracket__content .tournament-bracket__team:last-child .tournament-bracket__country {
-    justify-content: flex-start;
-  }
-}
-@media (min-width: 38em) and (max-width: 52em) {
-  .tournament-bracket__content .tournament-bracket__team:last-child .tournament-bracket__country {
-    align-items: flex-start;
-  }
-}
-.tournament-bracket__content .tournament-bracket__team:last-child .tournament-bracket__code {
-  order: 1;
 }
 .tournament-bracket__table {
   width: 100%;
@@ -480,9 +441,6 @@ h2 {
 .tournament-bracket__team:first-child .tournament-bracket__score {
   flex-direction: row-reverse;
   padding-left: 0.75em;
-}
-.tournament-bracket__team:last-child .tournament-bracket__score {
-  padding-right: 0.75em;
 }
 .tournament-bracket__number {
   display: inline-block;

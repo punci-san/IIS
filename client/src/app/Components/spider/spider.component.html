@@ -310,7 +310,7 @@
 </div>
 
 
-<div *ngIf="tournament !== null && tournament.created !== null" class="container">
+<div *ngIf="tournament !== null" class="container">
     <div class="tournament-bracket tournament-bracket--rounded">
         <div *ngFor="let roundName of getRounds();let i_col = index" class="tournament-bracket__round tournament-bracket__round">
             <h3 class="tournament-bracket__round-title">{{roundName}}</h3>
