@@ -1,39 +1,69 @@
 .add-team {
     width: 100%;
     margin: 0;
-    margin-top: 5px;
+}
+
+.team_form {
+    max-width: 900px;
+    margin: 0px auto 0px auto;
+    margin-top: 100px;
 }
 
 .input-field {
     margin: 0;
     display: block;
     margin-top: 10px;
-    margin-left: 17%;
+    margin-left: 30px;
+    margin-bottom: 20px;
 }
 .input-field label {
-    display: block;
+    margin-right: 50px;
 }
 
-.input-field input {
-    display: block;
+#align_input label {
+    margin-right: 95px;
+}
+
+input[type="file"] {
+    display: none;
+}
+
+.filewrap {
+    border: 1px solid black;
+    display: inline-block;
+    padding: 2px 47px;
+    cursor: pointer;
+    font-size: 16px;
 }
 
 .add-button {
     margin: 0px;
     display: block;
-    margin-left: 17%;
+    margin-left: 30px;
     margin-top: 10px;
 }
 
-button {
-    background-color: #4CAF50; /* Green */
-    margin-top: 5px;
-    border: none;
-    color: white;
-    padding: 7px 16px;
-    text-align: center;
-    text-decoration: none;
+.add-button button {
     display: inline-block;
-    font-size: 16px;
-    cursor: pointer;
+    margin-top: 30px;
+    border-radius: 3px;
+    padding: 7px 16px;
+    font-size: 18px;
+    text-align: center;
+    color: black;
+    border: 1px solid black;
+}
+
+.add-button button:hover {
+    background-color: #65656540;
+}
+
+h1 {
+    text-align: left;
+    margin-left: 30px;
+    margin-right: 30px;
+    margin-bottom: 60px;
+    padding-bottom: 15px;
+    border-bottom: 2px;
+    border-bottom-style: solid;
 }
