@@ -1,10 +1,10 @@
-USE xskuta04;
+use xskuta04;
 
 CREATE TABLE users (
 	id int NOT NULL AUTO_INCREMENT,
 	name varchar(255) NOT NULL,
 	pass varchar(255) NOT NULL,
-	admin bool,
+	admin boolean,
 	team_id int DEFAULT NULL,		-- NULL user has no team, ID of team
 	description varchar(255) DEFAULT '',
 	date_of_birth TIMESTAMP,
@@ -50,7 +50,7 @@ CREATE TABLE tournament_registrations(
 	referee boolean DEFAULT FALSE,
 	user_id int DEFAULT NULL,	-- First player
 	team_id int DEFAULT NULL,	-- First player
-	allowed bool DEFAULT NULL,
+	allowed boolean DEFAULT NULL,
 	PRIMARY KEY (id)
 )ENGINE=InnoDB;
 
