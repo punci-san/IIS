@@ -1187,6 +1187,7 @@ export class RouterHandler {
                     const matchEventID: number = Number(req.params.id);
 
                     if (isNaN(matchEventID)) {
+                        console.log(matchEventID);
                         return res.status(404).send();
                     }
 
@@ -1195,6 +1196,7 @@ export class RouterHandler {
                         return res.json(matchEvents);
                     })
                     .catch(() => {
+                        console.log("No matches found.");
                         return res.status(404).send();
                     });
                 })

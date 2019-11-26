@@ -12,6 +12,8 @@ import { MatchService } from 'src/app/Services/match.service';
 import { RED, GREEN } from '../../../../../settings/variables';
 import { TournamentService } from 'src/app/Services/tournament.service';
 import { Router } from '@angular/router';
+import { IMatchEvent } from '../../../../../interfaces/match_event';
+import { MatchEventService } from '../../Services/match-event.service';
 
 enum whatToShow {
   NOTHING = 'nothing',
@@ -42,6 +44,7 @@ export class SpiderComponent implements OnInit {
   private teams: ITeam[];
   private users: IUser[];
   private matches: IMatch[];
+  private matchEvents: IMatchEvent[];
 
   public selMatch1: string;
   public selMatch2: string;
@@ -54,6 +57,7 @@ export class SpiderComponent implements OnInit {
     private userService: UserService,
     private teamService: TeamService,
     private matchService: MatchService,
+    private matchEventService: MatchEventService,
     private tournamentRegService: TournamentRegistrationService,
     private tournamentService: TournamentService,
     private router: Router,
@@ -63,6 +67,7 @@ export class SpiderComponent implements OnInit {
     this.users = [];
     this.teams = [];
     this.matches = null;
+    this.matchEvents = [];
 
     this.showMsg = false;
     this.msg = '';
@@ -74,6 +79,7 @@ export class SpiderComponent implements OnInit {
       this.router.navigate([''], { queryParams: { succ: false, msg: 'Given tournament does not exist', listing: 'tournament'}});
       return;
     }
+
     this.tournamentRegService.getRegisterations(this.tournament.id)
     .then((trs: ITournamentRegistrations[]) => {
       this.tournamentRegistrations = trs;
@@ -98,6 +104,16 @@ export class SpiderComponent implements OnInit {
     this.row = Number(row);
     this.column = Number(column);
     this.selMatch = match;
+
+    if (this.selMatch !== null && this.selMatch !== undefined) {
+      this.matchEventService.getMatchEvents(this.selMatch.id)
+      .then((matchEvents: IMatchEvent[]) => {
+        this.matchEvents = matchEvents;
+      })
+      .catch(() => {
+        this.matchEvents = [];
+      });
+    }
   }
 
   public get getCurrUser(): IUser {
@@ -405,5 +421,87 @@ export class SpiderComponent implements OnInit {
       this.msg = 'There was a problem while trying start a tournament. Try again.';
       this.msgColor = RED;
     });
+  }
+
+  public listStatistics(): IMatchEvent[] {
+    const res: IMatchEvent[] = [];
+
+    for (const me of this.matchEvents) {
+      if (me.team_id == null) {
+        me.team_name = '';
+      } else {
+        me.team_name = this.getTeamName(me.team_id);
+      }
+
+      if (me.scorer_id == null) {
+        me.scorer_name = '';
+      } else {
+        me.scorer_name = this.getUserName(me.scorer_id);
+      }
+
+      if (me.assister_id == null) {
+        me.assister_name = '';
+      } else {
+        me.assister_name = this.getUserName(me.assister_id);
+      }
+
+      res.push(me);
+    }
+    return res;
+  }
+
+  public getAvalTeams(): INameValue[] {
+    const res: INameValue[] = [];
+    if (this.selMatch === null || this.selMatch === undefined) {
+      return res;
+    }
+
+    if (this.selMatch.team1 === null && this.selMatch.team2 === null) {
+      return res;
+    }
+
+    res.push({
+      name: this.getTeamName(this.selMatch.team1),
+      value: this.selMatch.team1,
+    });
+
+    res.push({
+      name: this.getTeamName(this.selMatch.team2),
+      value: this.selMatch.team2,
+    });
+
+    return res;
+  }
+
+  public getAvalUsers(): INameValue[] {
+    const res: INameValue[] = [];
+
+    if (this.selMatch === null || this.selMatch === undefined) {
+      return res;
+    }
+
+    if (this.selMatch.user1 !== null && this.selMatch.user2 !== null) {
+      res.push({
+        name: this.getUserName(this.selMatch.user1),
+        value: this.selMatch.user1,
+      });
+
+      res.push({
+        name: this.getUserName(this.selMatch.user2),
+        value: this.selMatch.user2,
+      });
+    }
+
+    if (this.selMatch.team1 === null && this.selMatch.team2 === null) {
+      return res;
+    }
+
+    for (const u of this.users) {
+      if (u.team === this.selMatch.team1) {
+        
+      }
+    }
+
+    return res;
   }
 }

@@ -1767,8 +1767,9 @@ class MatchEventDatabase {
             }
             const matches: IMatchEvent[] = [];
 
-            this.connection.query(`SELECT * FROM match_events WHERE tournament_id='${matchID}'`, (queryErr: mysql.MysqlError, result, field: mysql.FieldInfo[]) => {
+            this.connection.query(`SELECT * FROM match_events WHERE match_id='${matchID}'`, (queryErr: mysql.MysqlError, result, field: mysql.FieldInfo[]) => {
                 if (queryErr !== null) {
+                    console.log(queryErr);
                     return reject();
                 }
                 if (result === null) {
