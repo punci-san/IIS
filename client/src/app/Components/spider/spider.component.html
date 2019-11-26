@@ -1,3 +1,4 @@
+<!--
 <div class="container">
     <div class="tournament-bracket tournament-bracket--rounded">                                                     
       <div class="tournament-bracket__round tournament-bracket__round">
@@ -307,10 +308,9 @@
         </ul>
       </div>
     </div>
-</div>
+</div>-->
 
-
-<div *ngIf="tournament !== null" class="container">
+<div *ngIf="tournament !== null && tournament.created !== null" class="container">
     <div class="tournament-bracket tournament-bracket--rounded">
         <div *ngFor="let roundName of getRounds();let i_col = index" class="tournament-bracket__round tournament-bracket__round">
             <h3 class="tournament-bracket__round-title">{{roundName}}</h3>
@@ -318,10 +318,10 @@
                 <li *ngFor="let match of getMatches(i_col); let j_row = index" class="tournament-bracket__item">
                     <div class="tournament-bracket__match" tabindex="0" (click)="selectMatch(j_row,i_col, match)">
                         <div *ngIf="match === null && i_col === 0">
-                            <p>No match. Click here to add. {{i_col}} {{j_row}}</p>
+                            <p>Add match.</p>
                         </div>
                         <div *ngIf="match === null && i_col !== 0">
-                            <p>Match will be added automaticly. {{i_col}} {{j_row}}</p>
+                            <p>Match will be added.</p>
                         </div>
                         <div *ngIf="match !== null">
                             <span>Player1: {{match.name1}}</span>
@@ -377,11 +377,23 @@
     </div>
 
     <div *ngIf="whatToShow() === 'statistics'">
-        <p>Statistics</p>
+      <div *ngIf="selMatch === null">
+        <p>Given match does not exist yet.</p>
+      </div>
+
+      <div *ngIf="selMatch !== null">
+        <ul>
+          <li *ngFor="let stat of listStatistics()">
+            <div>
+              <p>stat.scorer_name</p>
+            </div>
+          </li>
+        </ul>
+      </div>
     </div>
 
     <div *ngIf="whatToShow() === 'statistics_adding'">
-        <p>Hello I am referee</p>
+      {{getAvalPlayersInMatch()}}
     </div>
 </div>
 <div *ngIf="tournament !== null && matches !== null && getCurrUser.id === tournament.creator_id && tournament.created === false">
