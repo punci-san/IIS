@@ -11,6 +11,12 @@ const dbServer = "localhost";
 const user = "xskuta04";
 const pass = "edurka6m";
 const database = "xskuta04";
+const convertToTimestamp = (date: Date): string => {
+    const year: number = date.getFullYear();
+    const month: number = date.getMonth();
+    const day: string = (date.getDate() < 10) ? `0${date.getDate()}` : `${date.getDate()}`;
+    return `${year}-${month + 1}-${day} 00:00:00`;
+  };
 
 @singleton()
 export class Database {
@@ -1217,13 +1223,13 @@ class TournamentDatabase {
                     sponsors
                     ) VALUES (
                         '${name}',
-                        '${dateCreated.toISOString()}',
+                        '${convertToTimestamp(new Date(dateCreated))}',
                         '${numberOfPlayers}',
                         '${teamType}',
                         '${registerFee}',
                         '${description}',
                         '${creatorID}',
-                        '${tournamentStart.toISOString()}',
+                        '${convertToTimestamp(new Date(tournamentStart))}',
                         '${sponsors}')`,
             (err: mysql.MysqlError, result, field: mysql.FieldInfo[]) => {
                 if (err !== null) {

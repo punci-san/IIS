@@ -58,6 +58,7 @@ export class SpiderComponent implements OnInit {
     private tournamentService: TournamentService,
     private router: Router,
   ) {
+
     this.tournamentRegistrations = [];
     this.users = [];
     this.teams = [];

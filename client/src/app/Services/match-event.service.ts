@@ -9,7 +9,7 @@ export class MatchEventService {
 
   constructor(
     private userService: UserService
-  ) { }
+  ) {}
 
   public addMatchEvent(
     tournamentID: number,
