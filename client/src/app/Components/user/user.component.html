@@ -48,7 +48,6 @@
         <div class="update-button">
                 <button (click)="updateData()">Update data</button>
         </div>
-        <p>Delete user</p>
         <div *ngIf="user !== null && team !== null ">
             <div *ngIf="user.id === team.creator_id">
                You cannot delete your account, change team admin or delete team first!

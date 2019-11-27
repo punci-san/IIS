@@ -11,10 +11,8 @@
         </div>
         <div class="input-field" id="align_input">
             <label for="team_logo">Logo:</label>
-            <span class="filewrap">
-                Browse
-                <input #team_logo type="file" name="file" id="team_logo">
-            </span>
+            <input #team_logo type="file" name="file" id="team_logo" class="inputfile">
+            <label for="team_logo">Browse</label>
         </div>
         <div class="add-button">
             <button (click)="addTeam(team_name.value, team_logo.files)">Add team</button>

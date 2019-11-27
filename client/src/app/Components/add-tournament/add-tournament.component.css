@@ -1,7 +1,10 @@
+.wrapper {
+    margin-top: 80px;
+}
+
 .tourney-form {
     display: flow-root;
     margin: 0px auto 0px auto;
-    padding-top: 60px;
     max-width: 900px;
     font-size: 18px;
 }
@@ -34,6 +37,7 @@ textarea {
     margin-top: 18px;
     width: 420px;
     resize: none;
+    height: 240px;
 }
 
 .tourney-form label {
@@ -47,10 +51,6 @@ textarea {
     border-width: 1px 1px 1px 1px;
     border-radius: 3px;
     border-color: black;
-}
-
-#confirm_btn {
-    padding-bottom: 70px;
 }
 
 #confirm_btn button {
@@ -69,8 +69,9 @@ textarea {
 
 h1 {
     text-align: left;
+    margin-top: 70px;
     margin-left: 30px;
-    margin-bottom: 80px;
+    margin-bottom: 50px;
     padding-bottom: 15px;
     border-bottom: 2px;
     border-bottom-style: solid;

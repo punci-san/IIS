@@ -1,7 +1,7 @@
 #wrapper {
     background-color: #6565651c;
-    widows: 100%;
-    height: 92.5vh;
+    width: 100%;
+    margin-top: 80px;
 }
 
 .topbar-switch {

@@ -8,7 +8,6 @@
 
 .current-team {
     margin-left: 10px;
-    margin-top: -15px;
 }
 
 .current-team  div:first-child {
@@ -39,7 +38,8 @@
 
 #modify{
     font-weight: bold;
-    font-size: 21px;
+    font-size: 25px;
+    margin-top: 25px;
 }
 
 .boxes {
@@ -51,7 +51,7 @@
 
 .left_box {
     float: left;
-    width: 350px;
+    width: 450px;
     padding-right: 5px;
     margin-top: 37px;
 }
@@ -60,11 +60,11 @@
     display: flow-root;
     margin-right: 40px;
     margin-left: 10px;
+    margin-bottom: 10px;
 }
 
 .left_box .input > label {
     float: left;
-    margin-bottom: 15px;
 }
 
 .left_box .input > input {
@@ -73,7 +73,7 @@
 
 .right_box {
     float: left;
-    width: 525px;
+    width: 440px;
 }
 
 .right_box .input {
@@ -88,6 +88,7 @@
 .right_box .input > textarea {
     width: 100%;
     resize: none;
+    height: 200px;
 }
 
 input {

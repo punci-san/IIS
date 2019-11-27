@@ -4,6 +4,7 @@
     padding-top: 60px;
     max-width: 900px;
     font-size: 18px;
+    margin-top: 80px;
 }
 
 h1 {
@@ -16,8 +17,6 @@ h1 {
 
 .boxes {
     display: flow-root;
-    margin-bottom: 25px;
-    border-bottom: 2px solid black;
 }
 
 .left_box {
@@ -37,32 +36,73 @@ h1 {
 
 .left_box .info p:first-child {
     float: left;
-    width: 150px;
+    width: 180px;
 }
 
 .left_box .info p:last-child {
     float: left;
 }
 
-.info button {
+.info {
+    margin-bottom: 10px;
+    display: flow-root;
+}
+
+.info button,
+#indent button {
     float: right;
     border-radius: 3px;
     border-width: 2px 2px 2px 2px;
-    padding: 3px 15px 3px 15px;
+    padding: 2px 10px 2px 10px;
     border-color: black;
     margin-right: 20px;
 }
 
+#indent {
+    display: flow-root;
+}
+
+#referees {
+    display: block;
+    width: 450px;
+    margin-bottom: 10px;
+}
+
+#position_btn {
+    display: inline-block;
+}
+
 #delete_tourney {
+    float: right;
+    display: inline-block;
     margin-top: 25px;
+    margin-right: 35px;
     border-radius: 3px;
     border-width: 2px 2px 2px 2px;
     padding: 10px 18px 10px 18px;
     border-color: black;
+    margin-bottom: 20px;
+}
+
+#finalize_tourney {
+    float: left;
+    display: inline-block;
+    margin-top: 25px;
+    margin-left: 15px;
+    border-radius: 3px;
+    border-width: 2px 2px 2px 2px;
+    padding: 10px 18px 10px 18px;
+    border-color: black;
+    color: black;
+    margin-bottom: 20px;
 }
 
 button:hover {
     background-color: #65656540;
+}
+
+#description_edit{
+    word-wrap: anywhere;
 }
 
 .right_box {
@@ -86,4 +126,10 @@ button:hover {
 
 .right_box .info p:last-child {
     float: left;
+}
+
+.wrapper {
+    display: flow-root;
+    margin-bottom: 25px;
+    border-bottom: 2px solid black;
 }
