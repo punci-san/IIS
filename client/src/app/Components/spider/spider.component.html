@@ -358,12 +358,12 @@
         <div *ngIf="column === 0">
             <label for="sel_Match1">Player 1: </label>
             <select [(ngModel)]="selMatch1" #sel_Match1 name="sel_Match1" id="sel_Match1">
-                <option *ngFor="let pl of getAvalaiblePlayers" value="{{pl.value}}">{{pl.name}}</option>
+                <option *ngFor="let pl of getAvalaiblePlayers" value="{{pl.value}}">{{pl.value}}:{{pl.name}}</option>
             </select>
     
             <label for="sel_Match2">Player 2: </label>
             <select [(ngModel)]="selMatch2" #sel_Match2 name="sel_Match2" id="sel_Match2">
-                <option *ngFor="let pl of getAvalaiblePlayers" value="{{pl.value}}">{{pl.name}}</option>
+                <option *ngFor="let pl of getAvalaiblePlayers" value="{{pl.value}}">{{pl.value}}:{{pl.name}}</option>
             </select>
             <button (click)="addMatch(sel_Match1.value, sel_Match2.value)">Add match</button>
         </div>
@@ -392,8 +392,46 @@
       </div>
     </div>
 
-    <div *ngIf="whatToShow() === 'statistics_adding'">
-      {{getAvalPlayersInMatch()}}
+    <div *ngIf="whatToShow() === 'statistics_adding' && selMatch !== null">
+      <div *ngIf="selMatch !== null">
+        <ul>
+          <li *ngFor="let stat of listStatistics()">
+            <div>
+              <p>{{stat.scorer_name}}</p>
+            </div>
+          </li>
+        </ul>
+        </div>
+      <div *ngIf="tournament.team_type === 0">
+        <label for="scorer_user">Scorer: </label>
+        <select [(ngModel)]="selScorer" name="scorer_user" id="scorer_user">
+          <option *ngFor="let m_user of getMatchUsers()" value="{{m_user.value}}">{{m_user.name}}</option>
+        </select>
+        <button (click)="addEvent()">Add event</button>
+
+      </div>
+      <div *ngIf="tournament.team_type !== 0">
+        <label for="team_select_1">{{getTeamName(selMatch.team1)}}</label>
+        <input id="team_select_1" type="radio" [checked]="selTeam === selMatch.team1"
+        name="team_select" (change)="selTeam=selMatch.team1">
+        
+        <label for="team_select_2">{{getTeamName(selMatch.team2)}}</label>
+        <input id="team_select_2" type="radio" [checked]="selTeam === selMatch.team2"
+        name="team_select" (change)="selTeam=selMatch.team2">
+
+        <label for="scorer_user">Scorer: </label>
+        <select [(ngModel)]="selScorer" name="scorer_user" id="scorer_user">
+          <option *ngFor="let m_user of getMatchUsers()" value="{{m_user.value}}">{{m_user.name}}</option>
+        </select>
+
+        <label for="assister_user">Assister: </label>
+        <select [(ngModel)]="selAssister" name="assister_user" id="assister_user">
+          <option *ngFor="let m_user of getMatchUsers()" value="{{m_user.value}}">{{m_user.name}}</option>
+        </select>
+
+        <button (click)="addEvent()">Add event</button>
+
+      </div>
     </div>
 </div>
 <div *ngIf="tournament !== null && matches !== null && getCurrUser.id === tournament.creator_id && tournament.created === false">

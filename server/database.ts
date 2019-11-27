@@ -445,7 +445,7 @@ export class Database {
      */
 
     public addMatch(tournamentID: number, user1: number, user2: number, team1: number, team2: number, row: number, column: number): Promise<number> {
-        return this.matchDatabase.addMatch(tournamentID, user1, user2, team2, team2, row, column);
+        return this.matchDatabase.addMatch(tournamentID, user1, user2, team1, team2, row, column);
     }
 
     public getMatches(tournamentID: number): Promise<IMatch[]> {
@@ -1741,7 +1741,7 @@ class MatchEventDatabase {
 
             this.connection.query(
                 `INSERT INTO match_events (match_id, team_id, scorer_id, assister_id) VALUES
-                ('${matchID}',${uTeam},${scorerID},${uAssister}');`, (err: mysql.MysqlError, result, field: mysql.FieldInfo[]) => {
+                ('${matchID}',${uTeam},'${scorerID}',${uAssister});`, (err: mysql.MysqlError, result, field: mysql.FieldInfo[]) => {
                 if (err !== null) {
                     console.log(err);
                     return reject();
