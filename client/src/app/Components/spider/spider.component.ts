@@ -39,6 +39,7 @@ export class SpiderComponent implements OnInit {
   public row: number = null;
   public column: number = null;
   public selMatch: IMatch = null;
+  public selTeam: number = null;
 
   private tournamentRegistrations: ITournamentRegistrations[];
   private teams: ITeam[];
@@ -48,6 +49,9 @@ export class SpiderComponent implements OnInit {
 
   public selMatch1: string;
   public selMatch2: string;
+
+  public selScorer: string;
+  public selAssister: string;
 
   private showMsg: boolean;
   private msg: string;
@@ -104,6 +108,10 @@ export class SpiderComponent implements OnInit {
     this.row = Number(row);
     this.column = Number(column);
     this.selMatch = match;
+
+    this.selTeam = null;
+    this.selScorer = null;
+    this.selAssister = null;
 
     if (this.selMatch !== null && this.selMatch !== undefined) {
       this.matchEventService.getMatchEvents(this.selMatch.id)
@@ -255,7 +263,7 @@ export class SpiderComponent implements OnInit {
 
       result.push({
         name: teamName,
-        value: tr.user_id,
+        value: tr.team_id,
       });
     }
 
@@ -379,6 +387,7 @@ export class SpiderComponent implements OnInit {
       this.selMatch = null;
       this.row = null;
       this.column = null;
+      this.selTeam = null;
 
       this.showMsg = true;
       this.msg = 'Match has been deleted.';
@@ -450,30 +459,7 @@ export class SpiderComponent implements OnInit {
     return res;
   }
 
-  public getAvalTeams(): INameValue[] {
-    const res: INameValue[] = [];
-    if (this.selMatch === null || this.selMatch === undefined) {
-      return res;
-    }
-
-    if (this.selMatch.team1 === null && this.selMatch.team2 === null) {
-      return res;
-    }
-
-    res.push({
-      name: this.getTeamName(this.selMatch.team1),
-      value: this.selMatch.team1,
-    });
-
-    res.push({
-      name: this.getTeamName(this.selMatch.team2),
-      value: this.selMatch.team2,
-    });
-
-    return res;
-  }
-
-  public getAvalUsers(): INameValue[] {
+  public getMatchUsers(): INameValue[] {
     const res: INameValue[] = [];
 
     if (this.selMatch === null || this.selMatch === undefined) {
@@ -496,12 +482,95 @@ export class SpiderComponent implements OnInit {
       return res;
     }
 
-    for (const u of this.users) {
-      if (u.team === this.selMatch.team1) {
-        
-      }
+    if (this.selTeam === null) {
+      return res;
+    }
+
+    const teamUsers: IUser[] = this.users.filter((u: IUser) => u.team === this.selTeam);
+
+    for (const tu of teamUsers) {
+      res.push({
+        name: tu.name,
+        value: tu.id,
+      });
     }
 
     return res;
+  }
+
+  public addEvent(): void {
+    this.showMsg = false;
+
+    if (this.tournament.team_type === ITeamType.PvP &&
+      (this.selMatch === null || this.selTeam !== null || this.selScorer === null || this.selAssister !== null)) {
+      this.selTeam = null;
+      this.selAssister = null;
+      this.selScorer = null;
+      this.selMatch = null;
+
+      this.msg = 'Selected value is wrong, please try again.';
+      this.msgColor = RED;
+      this.showMsg = true;
+      return;
+    }
+
+    if (this.tournament.team_type !== ITeamType.PvP &&
+      (this.selMatch === null || this.selTeam === null || this.selScorer === null)) {
+      this.selTeam = null;
+      this.selAssister = null;
+      this.selScorer = null;
+      this.selMatch = null;
+
+      this.msg = 'Selected value is wrong, please try again.';
+      this.msgColor = RED;
+      this.showMsg = true;
+      return;
+    }
+
+    const matchID: number = Number(this.selMatch.id);
+    const teamID: number = (this.selTeam === null) ? null : Number(this.selTeam);
+    const scorerID: number = Number(this.selScorer);
+    const assisterID: number = (this.selAssister === null) ? null : Number(this.selAssister);
+
+    if (scorerID === assisterID) {
+      this.msg = 'Scorer and assister can`t be the same person.';
+      this.msgColor = RED;
+      this.showMsg = true;
+      return;
+    }
+
+    console.log(this.tournament.id, this.selMatch.id, this.selTeam, this.selScorer, this.selAssister);
+    console.log(this.tournament.id, matchID, teamID, scorerID, assisterID);
+
+    this.matchEventService.addMatchEvent(
+      this.tournament.id,
+      matchID,
+      teamID,
+      scorerID,
+      assisterID,
+    )
+    .then(() => {
+      this.matchEventService.getMatchEvents(matchID)
+      .then((mes: IMatchEvent[]) => {
+        this.matchEvents = mes;
+      })
+      .catch(() => {
+        this.matchEvents = [];
+      });
+
+      this.selTeam = null;
+      this.selScorer = null;
+      this.selAssister = null;
+
+      this.msg = 'Match event added.';
+      this.msgColor = GREEN;
+      this.showMsg = true;
+    })
+    .catch(() => {
+      this.msg = 'There was a problem, please try again.';
+      this.msgColor = RED;
+      this.showMsg = true;
+      return;
+    });
   }
 }

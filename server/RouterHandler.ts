@@ -1152,6 +1152,9 @@ export class RouterHandler {
                     const teamID: number = (req.body.team_id === null) ? null : Number(req.body.team_id);
                     const scorerID: number = Number(req.body.scorer_id);
                     const assisterID: number = (req.body.assister_id === null) ? null : Number(req.body.assister_id);
+
+                    console.log(tournamentID, matchID, teamID, scorerID, assisterID);
+
                     if (isNaN(tournamentID) || isNaN(matchID) || isNaN(scorerID)) {
                         return res.status(500).send();
                     }
