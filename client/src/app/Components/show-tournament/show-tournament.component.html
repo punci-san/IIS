@@ -133,11 +133,11 @@
             </div>            
         </div>
         <div class="wrapper">
-            <div *ngIf="tournament !== null">
-                <button  id="delete_tourney" *ngIf="tournament.creator_id === getLoggedUser.id" (click)="deleteTournament()">Delete tournament</button>
-            </div>
             <div *ngIf="getLoggedUser !== null && tournament !== null && tournament.creator_id === getLoggedUser.id">
                 <button id="finalize_tourney" *ngIf="tournament !== null && tournament.created === null" [disabled]="canFinalize === false" (click)="finalizeTournament()">Finalize tournament</button>
+            </div>
+            <div *ngIf="tournament !== null">
+                <button  id="delete_tourney" *ngIf="tournament.creator_id === getLoggedUser.id" (click)="deleteTournament()">Delete tournament</button>
             </div>
         </div>
         <!--<div *ngIf="tournament !== null">            

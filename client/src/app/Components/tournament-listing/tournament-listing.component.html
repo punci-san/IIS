@@ -1,11 +1,12 @@
-<div>
-    <p *ngIf="creatorID !== undefined">My tournaments: </p>
-    <p *ngIf="creatorID === undefined">Tournaments: </p>
-
-</div>
-<div class="team-listing">
-    <div *ngFor="let tournament of getTournaments" class="team">
-      {{tournament.name}}
-      <button (click)="showTournament(tournament.id)">Show tournament</button>
-    </div>
+<div class="wrapper">
+  <div>
+      <h1 *ngIf="creatorID !== undefined">My Tournaments: </h1>
+      <h1 *ngIf="creatorID === undefined">Tournaments: </h1>
+  </div>
+  <div class="team-listing">
+      <div *ngFor="let tournament of getTournaments" class="team">
+        <p>{{tournament.name}}</p>
+        <button (click)="showTournament(tournament.id)">Show tournament</button>
+      </div>
+  </div>
 </div>
