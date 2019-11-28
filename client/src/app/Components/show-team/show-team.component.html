@@ -3,23 +3,32 @@
         <span>{{msg}}</span>
         <button (click)="closeMessage()">x</button>
     </div>
-    <div *ngIf="team !== null">
-        <p>{{team.name}}</p>
-        <div *ngFor="let tmUsers of teamUsers" class="user">
-            {{tmUsers.name}}
-            <button (click)="showUser(tmUsers.id)">Show</button>
-            <div *ngIf="getUser !== null && getUser.id === team.creator_id && team.creator_id !== tmUsers.id">
-                <button (click)="kickUser(tmUsers.id)">Kick</button>
-                <button (click)="makeTeamLeader(tmUsers.id)">Make team admin</button>
-            </div>
+    <div class="wrapper" *ngIf="team !== null">
+        <div>
+            <h1>{{team.name}}</h1>
         </div>
-        <div *ngIf="getUser !== null && getUser.id === team.creator_id">
-            <p>Requests:</p>
-            <div *ngFor="let tr of teamRequests">
-                <div *ngIf="getUserData(tr.user_id) !== null">
-                    <span>{{getUserData(tr.user_id).name}}</span>
-                    <button (click)="acceptJoin(tr.id)">Accept</button>
-                    <button (click)="denyJoin(tr.id)">Deny</button>
+        <div class="user-listing">
+            <h2>Players in team:</h2>
+            <div *ngFor="let tmUsers of teamUsers" class="user">
+                <p>{{tmUsers.name}}</p>
+                <div class="button_wrapper">
+                    <button *ngIf="getUser !== null && getUser.id === team.creator_id && team.creator_id !== tmUsers.id" (click)="makeTeamLeader(tmUsers.id)">Set Leader</button>
+                    <button *ngIf="getUser !== null && getUser.id === team.creator_id && team.creator_id !== tmUsers.id" (click)="kickUser(tmUsers.id)">Kick</button>
+                    <button (click)="showUser(tmUsers.id)">Show</button>
+                </div>
+                
+                
+            </div>
+            <div *ngIf="getUser !== null && getUser.id === team.creator_id">
+                <p>Requests:</p>
+                <div *ngFor="let tr of teamRequests">
+                    <div class="user" *ngIf="getUserData(tr.user_id) !== null">
+                        <p>{{getUserData(tr.user_id).name}}</p>
+                        <div class="button_wrapper">
+                            <button (click)="acceptJoin(tr.id)">Accept</button>
+                            <button (click)="denyJoin(tr.id)">Deny</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
