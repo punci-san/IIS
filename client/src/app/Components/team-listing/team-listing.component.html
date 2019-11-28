@@ -5,7 +5,7 @@
       <div *ngFor="let team of getTeams" class="team">
         <p>{{team.name}}</p>   
         <div class="button_wrapper">     
-          <button *ngIf="user !== null && user.team === null && joinSend(team.id) === false" (click)="joinTeam(team.id)">Join team</button>
+          <button *ngIf="user !== null && user.team === null && joinSend(team.id) === false" (click)="joinTeam(team.id)">Send request</button>
           <button [routerLink]="['/show-team', team.id]" routerLinkActive="active">Show team</button>
         </div>
       </div>

@@ -140,8 +140,8 @@
                 <button  id="delete_tourney" *ngIf="tournament.creator_id === getLoggedUser.id" (click)="deleteTournament()">Delete tournament</button>
             </div>
         </div>
-        <!--<div *ngIf="tournament !== null">            
+        <div *ngIf="tournament !== null">            
             <app-spider [tournament]="tournament"></app-spider>
-        </div> -->
+        </div>
     </div>
 </div>

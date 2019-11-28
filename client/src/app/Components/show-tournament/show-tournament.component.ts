@@ -548,12 +548,12 @@ export class ShowTournamentComponent implements OnInit {
       });
 
       this.showMsg = true;
-      this.msg = 'User denied.';
+      this.msg = 'User has been denied.';
       this.msgColor = GREEN;
     })
     .catch(() => {
       this.showMsg = true;
-      this.msg = 'There was and error. Please try again.';
+      this.msg = 'There was an error. Please try again.';
       this.msgColor = RED;
     });
   }
