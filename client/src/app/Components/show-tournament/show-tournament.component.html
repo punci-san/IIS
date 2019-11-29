@@ -88,22 +88,22 @@
                         </div>
                         <div class="info">
                             <p>Available teams:</p>
-                            <div *ngFor="let t_team of getAvalaibleTeams">
-                                <p>{{t_team.name}}</p>
-                                <div *ngIf="tournament !== null && t_team.allowed === null && tournament.number_of_players > getRegTeams">
-                                    <button [routerLink]="['/show-team', t_team.team_id]" routerLinkActive="active">Show team</button>
-                                    <button *ngIf="tournament.created === null" (click)="acceptTeam(t_team.team_id)">Accept</button>
-                                    <button *ngIf="tournament.created === null" (click)="denyTeam(t_team.team_id)">Deny</button>
-                                </div>
+                        </div>
+                        <div class="info" *ngFor="let t_team of getAvalaibleTeams">
+                            <p>{{t_team.name}}</p>
+                            <div *ngIf="tournament !== null && t_team.allowed === null && tournament.number_of_players > getRegTeams">
+                                <button [routerLink]="['/show-team', t_team.team_id]" routerLinkActive="active">Show team</button>
+                                <button *ngIf="tournament.created === null" (click)="acceptTeam(t_team.team_id)">Accept</button>
+                                <button *ngIf="tournament.created === null" (click)="denyTeam(t_team.team_id)">Deny</button>
                             </div>
                         </div>
                         <div class="info">
                             <p>Denied teams:</p>
-                            <div *ngFor="let t_team of getDeniedTeams">
-                                <p>{{t_team.name}}</p>
-                                <button [routerLink]="['/show-team', t_team.team_id]" routerLinkActive="active">Show team</button>
-                                <button *ngIf="tournament !== null && tournament.created === null && tournament.number_of_players > getRegTeams" (click)="acceptTeam(t_team.team_id)">Accept</button>
-                            </div>
+                        </div>
+                        <div class="info" *ngFor="let t_team of getDeniedTeams">
+                            <p>{{t_team.name}}</p>
+                            <button [routerLink]="['/show-team', t_team.team_id]" routerLinkActive="active">Show team</button>
+                            <button *ngIf="tournament !== null && tournament.created === null && tournament.number_of_players > getRegTeams" (click)="acceptTeam(t_team.team_id)">Accept</button>
                         </div>
                     </div>
 

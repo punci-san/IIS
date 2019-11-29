@@ -57,3 +57,8 @@ h1 {
     margin-bottom: auto;
     min-width: 185px;
 }
+
+.btn_wrapper {
+    margin-top: auto;
+    margin-bottom: auto;
+}

@@ -1,0 +1,42 @@
+.wrapper {
+    margin: 0px auto 0px auto;
+    max-width: 900px;
+    font-size: 18px;
+    margin-top: 140px;  
+}
+
+h1 {
+    text-align: left;
+    margin-top: 70px;
+    margin-left: 15px;
+    margin-right: 15px;
+    margin-bottom: 50px;
+    padding-bottom: 15px;
+    border-bottom: 2px;
+    border-bottom-style: solid;
+}
+
+.user_info {
+    margin-left: 15px;
+    margin-right: 15px;
+}
+
+.positioner {
+    display: block;
+}
+
+.positioner p {
+    display: inline-block;
+}
+
+.positioner p:first-child {
+    margin-right: 15px;
+}
+
+.positioner p:last-child {
+    word-wrap: anywhere;
+}
+
+#special {
+    font-weight: bold;
+}

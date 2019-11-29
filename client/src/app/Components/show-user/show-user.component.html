@@ -1,15 +1,30 @@
-<div>
-    <div class="team">
-        <div *ngIf="team === null">
-            <p>user is in no team.</p>
+<div class="wrapper">
+    <h1>User Information</h1>
+    <div class="user_info">
+        <div *ngIf="user !== null" class="user-data">
+            <div class="positioner">
+                <p>User name:</p>
+                <p>{{user.name}}</p>
+            </div>
+            <div class="positioner">
+                <p>About user:</p>
+                <p>{{user.description}}</p>
+            </div>
         </div>
-        <div *ngIf="team !== null">
-            <p>{{team.name}}</p>
-            <p>{{team.description}}</p>
+        <div class="team">
+            <div *ngIf="team !== null">
+                <div class="positioner">
+                    <p>Team name: </p>
+                    <p>{{team.name}}</p>
+                </div>
+                <div class="positioner">
+                    <!--<p>Description:</p>
+                    <p>{{team.description}}</p>-->
+                </div>
+            </div>
+            <div *ngIf="team === null">
+                <p id="special">User is in no team.</p>
+            </div>
         </div>
-    </div>
-    <div *ngIf="user !== null" class="user-data">
-        <p>{{user.name}}</p>
-        <p>{{user.description}}</p>
     </div>
 </div>
