@@ -27,6 +27,8 @@
     "cors": "^2.8.5",
     "express": "^4.17.1",
     "express-fileupload": "^1.1.6-alpha.6",
+    "express-multipart-file-parser": "^0.1.2",
+    "mime-types": "^2.1.25",
     "mysql": "github:mysqljs/mysql",
     "reflect-metadata": "^0.1.13",
     "tsyringe": "^3.3.0"

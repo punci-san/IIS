@@ -5,6 +5,7 @@
     </div>
     <div *ngIf="team !== null">
         <p>{{team.name}}</p>
+        <img src="{{getTeamLogo(team.file_name)}}">
         <div *ngFor="let tmUsers of teamUsers" class="user">
             {{tmUsers.name}}
             <button (click)="showUser(tmUsers.id)">Show</button>

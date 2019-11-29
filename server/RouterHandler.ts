@@ -10,19 +10,26 @@ import { teamType, numberOfPlayers } from "../settings/tournament_config";
 import { ITournamentRegistrations } from "../interfaces/tournament-registrations";
 import { IMatch } from "../interfaces/match";
 import { IMatchEvent } from "../interfaces/match_event";
+import { defaultTeamIcon } from "../settings/variables";
+import bodyParser = require("body-parser");
+import fileParser from "express-multipart-file-parser";
+import { UploadHandler } from "./upload_handler";
 
 const varcharLen = 255;
 
 @singleton()
 export class RouterHandler {
     private database: Database;
+    private uploadHandler: UploadHandler;
 
     constructor() {
         this.database = container.resolve(Database);
+        this.uploadHandler = container.resolve(UploadHandler);
     }
 
     public addRoutes(app: Express): void {
         app.use(cors());
+        app.use(bodyParser.urlencoded({extended: true}));
         app.use(json());
 
         this.addUserRoutes(app);
@@ -254,28 +261,35 @@ export class RouterHandler {
                 return res.json(JSON.stringify([]));
             });
         })
-        .post(
-            (req: Request, res: Response) => {
+        .post(fileParser, (req: Request, res: Response) => {
                 // Check if user is authenticated
                 this.isAuthenticated(req)
                 .then((user: IUser) => {
                     // Check if team was given
-                    if (req.body.team === undefined) {
-                        return res.status(401).send();
+                    if (req.body.team_name === undefined || req.body.team_name === null) {
+                        return res.status(500).send();
                     }
+
+                    // Check if shortcut was given
+                    if (req.body.team_shortcut === undefined || req.body.team_shortcut === null) {
+                        return res.status(500).send();
+                    }
+
+                    const fileName: string = this.uploadHandler.uploadFile(req.files[0]);
 
                     // When user already has a team skip
                     if (user.team !== null) {
-                        return res.status(401).send();
+                        return res.status(500).send();
                     }
 
                     // Create team and add user to that team
-                    this.database.addTeam(req.body.team, user)
-                    .then((usr: IUser) => {
-                        return res.json(usr);
+                    this.database.addTeam(req.body.team_name, req.body.team_shortcut, user,
+                        (fileName === null) ? defaultTeamIcon : fileName)
+                    .then(() => {
+                        return res.send();
                     })
                     .catch(() => {
-                        return res.status(401).send();
+                        return res.status(500).send();
                     });
                 })
                 .catch(() => {
@@ -381,6 +395,17 @@ export class RouterHandler {
                 .catch(() => {
                     return res.status(401).send();
                 });
+            });
+
+        app.route("/team-logo/:name")
+            .get((req: Request, res: Response) => {
+                const fileName: string = req.params.name;
+
+                if (fileName === null || fileName === undefined) {
+                    return res.sendFile(this.uploadHandler.getFilePath(defaultTeamIcon));
+                }
+
+                return res.sendFile(this.uploadHandler.getFilePath(fileName));
             });
     }
 
@@ -1092,19 +1117,27 @@ export class RouterHandler {
                 });
             });
 
-        app.route("/match/:id")
-            .get((req: Request, res: Response) => {
-                const tournamentID: number = Number(req.params.id);
+        app.route("/match-end")
+            .post((req: Request, res: Response) => {
+                this.isAuthenticated(req)
+                .then((usr: IUser) => {
+                    const tournamentID: number = (req.body.tournament_id === null) ? null : Number(req.body.tournament_id);
+                    const matchID: number = (req.body.match_id === null) ? null : Number(req.body.match_id);
 
-                // Check if tournament exist
-                this.database.getTournament(tournamentID)
-                .then((t: ITournament) => {
-                    // User needs to be logged in
-                    this.isAuthenticated(req)
-                    .then((usr: IUser) => {
-                        this.database.getMatches(tournamentID)
-                        .then((ms: IMatch[]) => {
-                            return res.json(ms);
+                    if (tournamentID === null || matchID === null) {
+                        return res.status(404).send();
+                    }
+
+                    this.database.getTournament(tournamentID)
+                    .then((t: ITournament) => {
+                        if (t.referee_id !== usr.id) {
+                            console.log("Not referee");
+                            return res.status(401).send();
+                        }
+
+                        this.database.endMatch(tournamentID, matchID)
+                        .then(() => {
+                            return res.send();
                         })
                         .catch(() => {
                             return res.status(404).send();
@@ -1112,6 +1145,27 @@ export class RouterHandler {
                     })
                     .catch(() => {
                         return res.status(401).send();
+                    });
+                })
+                .catch(() => {
+                    return res.status(401).send();
+                });
+            });
+
+        app.route("/match/:id")
+            .get((req: Request, res: Response) => {
+                const tournamentID: number = Number(req.params.id);
+
+                // Check if tournament exist
+                this.database.getTournament(tournamentID)
+                .then((t: ITournament) => {
+                    // Get all matches of given tournament
+                    this.database.getMatches(tournamentID)
+                    .then((ms: IMatch[]) => {
+                        return res.json(ms);
+                    })
+                    .catch(() => {
+                        return res.status(404).send();
                     });
                 })
                 .catch(() => {
@@ -1153,8 +1207,6 @@ export class RouterHandler {
                     const scorerID: number = Number(req.body.scorer_id);
                     const assisterID: number = (req.body.assister_id === null) ? null : Number(req.body.assister_id);
 
-                    console.log(tournamentID, matchID, teamID, scorerID, assisterID);
-
                     if (isNaN(tournamentID) || isNaN(matchID) || isNaN(scorerID)) {
                         return res.status(500).send();
                     }
@@ -1185,26 +1237,18 @@ export class RouterHandler {
 
         app.route("/match-event/:id")
             .get((req: Request, res: Response) => {
-                this.isAuthenticated(req)
-                .then((usr: IUser) => {
-                    const matchEventID: number = Number(req.params.id);
+                const matchEventID: number = Number(req.params.id);
 
-                    if (isNaN(matchEventID)) {
-                        console.log(matchEventID);
-                        return res.status(404).send();
-                    }
+                if (isNaN(matchEventID)) {
+                    return res.status(404).send();
+                }
 
-                    this.database.getMatchEvents(matchEventID)
-                    .then((matchEvents: IMatchEvent[]) => {
-                        return res.json(matchEvents);
-                    })
-                    .catch(() => {
-                        console.log("No matches found.");
-                        return res.status(404).send();
-                    });
+                this.database.getMatchEvents(matchEventID)
+                .then((matchEvents: IMatchEvent[]) => {
+                    return res.json(matchEvents);
                 })
                 .catch(() => {
-                    return res.status(401).send();
+                    return res.status(404).send();
                 });
             })
             .delete((req: Request, res: Response) => {

@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { UserService } from 'src/app/Services/user.service';
 import { Router } from '@angular/router';
 import { numberOfPlayers, teamType } from '../../../../../settings/tournament_config';
-import { RED, maxCharVal } from '../../../../../settings/variables';
+import { RED, maxCharLen } from '../../../../../settings/variables';
 import { TournamentService } from 'src/app/Services/tournament.service';
 
 @Component({
@@ -49,14 +49,43 @@ export class AddTournamentComponent implements OnInit {
     tournamentType: string,
     registerFee: string,
     description: string,
-    tournamentStart: Date,
+    tournamentStart: string,
     sponsors: string,
     ): void {
       this.showMsg = false;
-      if (name === '' || registerFee === '') {
+
+      if (name === '') {
         this.showMsg = true;
         this.msgColor = RED;
-        this.msg = 'Name and registration fee needs to be filled!';
+        this.msg = 'Name needs to be filled!';
+        return;
+      }
+
+      if (name.length > maxCharLen || name.length < 1) {
+        this.showMsg = true;
+        this.msgColor = RED;
+        this.msg = `Name needs to be between 1 and ${maxCharLen}`;
+        return;
+      }
+
+      if (description !== '' && (description.length > maxCharLen || description.length < 1)) {
+        this.showMsg = true;
+        this.msgColor = RED;
+        this.msg = `Description needs to be between 1 and ${maxCharLen}`;
+        return;
+      }
+
+      if (sponsors !== '' && (sponsors.length > maxCharLen || sponsors.length < 1)) {
+        this.showMsg = true;
+        this.msgColor = RED;
+        this.msg = `Sponsors needs to be between 1 and ${maxCharLen}`;
+        return;
+      }
+
+      if (tournamentStart === '') {
+        this.showMsg = true;
+        this.msgColor = RED;
+        this.msg = 'Tournament start date needs to be filled!';
         return;
       }
 
@@ -93,24 +122,12 @@ export class AddTournamentComponent implements OnInit {
         return;
       }
 
-      if (startDate.getDate() < new Date().getDate()) {
-        this.showMsg = true;
-        this.msgColor = RED;
-        this.msg = 'Please select new date!';
-        return;
-      }
+      const date: Date = new Date();
 
-      if (name.length > maxCharVal) {
+      if (startDate.getDate() < date.getDate() || startDate.getMonth() < date.getMonth() || startDate.getFullYear() < date.getFullYear()) {
         this.showMsg = true;
         this.msgColor = RED;
-        this.msg = `Too many characters in name, the limit is ${maxCharVal}`;
-        return;
-      }
-
-      if (description.length > maxCharVal) {
-        this.showMsg = true;
-        this.msgColor = RED;
-        this.msg = `Too many characters in description, the limit is ${maxCharVal}`;
+        this.msg = 'Date cant be lower than today!';
         return;
       }
 

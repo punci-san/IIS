@@ -15,10 +15,13 @@
   "dependencies": {
     "@types/express": "^4.17.1",
     "@types/express-fileupload": "^1.1.0",
+    "@types/mime-types": "^2.1.0",
     "@types/mysql": "^2.15.8",
     "cors": "^2.8.5",
     "express": "^4.17.1",
     "express-fileupload": "^1.1.6-alpha.6",
+    "express-multipart-file-parser": "^0.1.2",
+    "mime-types": "^2.1.25",
     "mysql": "github:mysqljs/mysql",
     "reflect-metadata": "^0.1.13",
     "tslint": "^5.20.0",

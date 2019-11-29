@@ -8,5 +8,10 @@ export interface IMatch {
     row: number;
     column: number;
     name1?: string;
+    shortcut1?: string;
     name2?: string;
+    shortcut2?: string;
+    score1: number;
+    score2: number;
+    finished: boolean;
 }

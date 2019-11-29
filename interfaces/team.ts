@@ -3,6 +3,8 @@ export interface ITeam {
     creator_id: number;
     name: string;
     description: string;
+    shortcut: string;
+    file_name: string;
 }
 
 export interface ITeamRequest {

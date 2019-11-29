@@ -74,6 +74,10 @@ export class ShowTeamComponent implements OnInit {
     return this.userService.getLoggedData;
   }
 
+  public getTeamLogo(fileName: string): string {
+    return this.teamService.getTeamLogo(fileName);
+  }
+
   public getUserData(userID: number) {
     const index: number = this.users.findIndex((usr: IUser) => usr.id === userID);
 

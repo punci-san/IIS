@@ -9,7 +9,7 @@ import { UserService } from 'src/app/Services/user.service';
 import { RED, GREEN } from '../../../../../settings/variables';
 import { ITeam } from '../../../../../interfaces/team';
 import { TeamService } from 'src/app/Services/team.service';
-import { teamType } from '../../../../../settings/tournament_config';
+import { teamType, teamNumber } from '../../../../../settings/tournament_config';
 
 @Component({
   selector: 'app-show-tournament',
@@ -65,7 +65,11 @@ export class ShowTournamentComponent implements OnInit {
     });
   }
 
-  public get getLoggedUser(): IUser {
+  public getTeamLogo(fileName: string): string {
+    return this.teamService.getTeamLogo(fileName);
+  }
+
+  public getLoggedUser(): IUser {
     return this.userService.getLoggedData;
   }
 
@@ -104,7 +108,7 @@ export class ShowTournamentComponent implements OnInit {
     const users: IUser[] = this.userService.getUsers;
     const count: number = users.filter((usr: IUser) => usr.team !== null && usr.team === teamID).length;
 
-    if (count >= this.tournament.number_of_players) {
+    if (count < teamNumber[this.tournament.team_type]) {
       return false;
     }
 
@@ -222,6 +226,7 @@ export class ShowTournamentComponent implements OnInit {
         }
 
         tr.name = users[index].name;
+        tr.file_name = '';
 
         tournamentRegistrations.push(tr);
       }
@@ -243,6 +248,7 @@ export class ShowTournamentComponent implements OnInit {
         }
 
         tr.name = users[index].name;
+        tr.file_name = '';
 
         tournamentRegistrations.push(tr);
       }
@@ -268,6 +274,7 @@ export class ShowTournamentComponent implements OnInit {
         }
 
         tr.name = teams[index].name;
+        tr.file_name = teams[index].file_name;
 
         tournamentRegistrations.push(tr);
       }
@@ -293,6 +300,7 @@ export class ShowTournamentComponent implements OnInit {
         }
 
         tr.name = teams[index].name;
+        tr.file_name = teams[index].file_name;
 
         tournamentRegistrations.push(tr);
       }
@@ -318,6 +326,7 @@ export class ShowTournamentComponent implements OnInit {
         }
 
         tr.name = teams[index].name;
+        tr.file_name = teams[index].file_name;
 
         tournamentRegistrations.push(tr);
       }
@@ -344,6 +353,7 @@ export class ShowTournamentComponent implements OnInit {
         }
 
         tr.name = users[index].name;
+        tr.file_name = '';
 
         tournamentRegistrations.push(tr);
       }
@@ -370,6 +380,7 @@ export class ShowTournamentComponent implements OnInit {
         }
 
         tr.name = users[index].name;
+        tr.file_name = '';
 
         tournamentRegistrations.push(tr);
       }
@@ -395,6 +406,7 @@ export class ShowTournamentComponent implements OnInit {
         }
 
         tr.name = users[index].name;
+        tr.file_name = '';
 
         tournamentRegistrations.push(tr);
       }
@@ -413,7 +425,7 @@ export class ShowTournamentComponent implements OnInit {
       (tr: ITournamentRegistrations) => tr.allowed === true && tr.team_id !== null).length;
   }
 
-  public get getCurrReferee(): IUser {
+  public getCurrReferee(): IUser {
     if (this.tournament === null || this.tournament.referee_id === null) {
       return null;
     }
@@ -692,7 +704,10 @@ export class ShowTournamentComponent implements OnInit {
     return teamType[index];
   }
 
-  public showUser(userID: number): void {
+  public showUser(userID): void {
+    console.log(userID);
+    return;
+
     this.router.navigate(['show-user'], { queryParams: { id: userID}});
   }
 
@@ -703,9 +718,4 @@ export class ShowTournamentComponent implements OnInit {
   public closeMessage(): void {
     this.showMsg = false;
   }
-
-
-  /**
-   * 
-   */
 }

@@ -8,19 +8,19 @@
         <h1>Create New Tournament</h1>
         <div class="left_box">
             <div>
-                <label for="tournament_name">Tournament name:</label>
+                <label for="tournament_name">Tournament name*:</label>
                 <input #tournament_name type="text" name="tournament_name" id="tournament_name">
             </div>
             
             <div>
-                <label for="number_of_players">Nubmer of players/teams:</label>
+                <label for="number_of_players">Nubmer of players/teams*:</label>
                 <select #number_of_players name="number_of_players" id="number_of_players">
                     <option *ngFor="let nop of numberOfPlayers" value="{{nop}}">{{nop}}</option>
                 </select>
             </div>
 
             <div>
-                <label for="number_of_players">Tournament type:</label>
+                <label for="number_of_players">Tournament type*:</label>
                 <select #tournament_type name="tournament_type" id="tournament_type">
                     <option *ngFor="let tt of tournamentType; let i = index" value="{{i}}">{{tt}}</option>
                 </select>
@@ -32,7 +32,7 @@
             </div>
 
             <div>
-                <label for="tournament_start">Tournament opening:</label>
+                <label for="tournament_start">Tournament opening*:</label>
                 <input #tournament_start type="date" name="tournament_start" id="tournament_start" value="{{getCurrentDate()}}">
             </div>
 
