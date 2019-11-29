@@ -59,7 +59,7 @@ export class TeamListingComponent implements OnInit {
         this.teamRequests = teamReqs;
       })
       .catch();
-      this.router.navigate([''], { queryParams: { succ: true, msg: 'Successfully send request to join team.', listing: 'team'}});
+      this.router.navigate([''], { queryParams: { succ: true, msg: 'Successfully sent request to join team.', listing: 'team'}});
     })
     .catch(() => {
       this.router.navigate([''], { queryParams: { succ: false, msg: 'There was an error while trying to send request.', listing: 'team'}});

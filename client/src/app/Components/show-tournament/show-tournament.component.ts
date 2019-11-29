@@ -641,7 +641,7 @@ export class ShowTournamentComponent implements OnInit {
         this.router.navigate([''], { queryParams: { succ: false, msg: 'Given tournament does not exist', listing: 'tournament'}});
       });
       this.showMsg = true;
-      this.msg = 'You have finalized selection, now you can select which teams to play against.';
+      this.msg = 'You have finalized selection, now you can select teams to play against.';
       this.msgColor = GREEN;
     })
     .catch(() => {

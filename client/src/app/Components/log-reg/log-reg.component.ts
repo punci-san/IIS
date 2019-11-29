@@ -86,7 +86,7 @@ export class LogRegComponent implements OnInit, OnDestroy {
       this.msgColor = GREEN;
     })
     .catch(() => {
-      this.msg = 'Username already exist.';
+      this.msg = 'Username already exists.';
       this.msgColor = RED;
       this.showMsg = true;
     });

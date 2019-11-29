@@ -68,14 +68,14 @@ export class AddTournamentComponent implements OnInit {
       if (isNaN(nop) || isNaN(fee) || isNaN(tourType)) {
         this.showMsg = true;
         this.msgColor = RED;
-        this.msg = 'Please check register fee and try again!';
+        this.msg = 'Please check registration fee and try again!';
         return;
       }
 
       if (fee < 0) {
         this.showMsg = true;
         this.msgColor = RED;
-        this.msg = 'Please check register fee and try again!';
+        this.msg = 'Please check registration fee and try again!';
         return;
       }
 

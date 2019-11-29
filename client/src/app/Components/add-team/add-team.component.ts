@@ -48,10 +48,10 @@ export class AddTeamComponent implements OnInit {
 
     this.teamService.addTeam(teamName, file)
     .then(() => {
-      this.router.navigate([''], { queryParams: { succ: true, msg: 'You have been created team and have been added to it.'}});
+      this.router.navigate([''], { queryParams: { succ: true, msg: 'You have successfully created team and you have been added to it.'}});
     })
     .catch(() => {
-      this.msg = 'Team with that name already exist.';
+      this.msg = 'Team with that name already exists.';
       this.msgColor = RED;
       this.showMsg = true;
     });
