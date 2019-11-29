@@ -324,12 +324,62 @@
                             <p>Match will be added.</p>
                         </div>
                         <div *ngIf="match !== null">
-                            <span>Player1: {{match.name1}}</span>
-                            <span>Player2: {{match.name2}}</span>
-                            <table class="tournament-bracket__table">
-                                <caption class="tournament-bracket__caption">
-                                    <span></span>
-                                </caption>
+                          <table class="tournament-bracket__table">
+                              <caption class="tournament-bracket__caption">
+                                <time>{{match.finished === true ? 'Finished' : ''}}</time>
+                              </caption>
+                              <thead class="sr-only">
+                                <tr>
+                                  <th>Country</th>
+                                  <th>Score</th>
+                                </tr>
+                              </thead>  
+                              <tbody *ngIf="tournament.team_type !== 0" class="tournament-bracket__content">
+                                <tr class="tournament-bracket__team {{match.score1 > match.score2 ? 'tournament-bracket__team--winner' : ''}}">
+                                  <td class="tournament-bracket__country">
+                                    <abbr class="tournament-bracket__code" title="{{getTeamName(match.team1)}}">{{getTeamShortcut(match.team1)}}</abbr>
+                                    <span class="tournament-bracket__flag" aria-label="Flag">
+                                      <img src="{{getLogoFromMatch(match, true)}}" width="25" height="25">
+                                    </span>
+                                  </td>
+                                  <td class="tournament-bracket__score">
+                                    <span class="tournament-bracket__number">{{match.score1}}</span>
+                                    <span class="tournament-bracket__medal tournament-bracket__medal--gold fa fa-trophy" aria-label="Gold medal"></span>
+                                  </td>
+                                </tr>
+                                <tr class="tournament-bracket__team {{match.score1 < match.score2 ? 'tournament-bracket__team--winner' : ''}}">
+                                  <td class="tournament-bracket__country">
+                                    <abbr class="tournament-bracket__code" title="{{getTeamName(match.team2)}}">{{getTeamShortcut(match.team2)}}</abbr>
+                                    <span class="tournament-bracket__flag" aria-label="Flag">
+                                      <img src="{{getLogoFromMatch(match, false)}}" width="25" height="25">
+                                    </span>
+                                  </td>
+                                  <td class="tournament-bracket__score">
+                                    <span class="tournament-bracket__number">{{match.score2}}</span>
+                                    <span class="tournament-bracket__medal tournament-bracket__medal--gold fa fa-trophy" aria-label="Gold medal"></span>
+                                  </td>
+                                </tr>
+                              </tbody>
+                              <tbody *ngIf="tournament.team_type === 0" class="tournament-bracket__content">
+                                  <tr class="tournament-bracket__team {{match.score1 > match.score2 ? 'tournament-bracket__team--winner' : ''}}">
+                                    <td class="tournament-bracket__country">
+                                      <abbr class="tournament-bracket__code" title="{{getUserDesc(match.user1)}}">{{getUserName(match.user1)}}</abbr>
+                                    </td>
+                                    <td class="tournament-bracket__score">
+                                      <span class="tournament-bracket__number">{{match.score1}}</span>
+                                      <span class="tournament-bracket__medal tournament-bracket__medal--gold fa fa-trophy" aria-label="Gold medal"></span>
+                                    </td>
+                                  </tr>
+                                  <tr class="tournament-bracket__team {{match.score1 < match.score2 ? 'tournament-bracket__team--winner' : ''}}">
+                                    <td class="tournament-bracket__country">
+                                      <abbr class="tournament-bracket__code" title="{{getUserDesc(match.user2)}}">{{getUserName(match.user2)}}</abbr>
+                                    </td>
+                                    <td class="tournament-bracket__score">
+                                      <span class="tournament-bracket__number">{{match.score2}}</span>
+                                      <span class="tournament-bracket__medal tournament-bracket__medal--gold fa fa-trophy" aria-label="Gold medal"></span>
+                                    </td>
+                                  </tr>
+                                </tbody>
                             </table>
                         </div>
                     </div>
@@ -382,27 +432,51 @@
       </div>
 
       <div *ngIf="selMatch !== null">
-        <ul>
-          <li *ngFor="let stat of listStatistics()">
-            <div>
-              <p>stat.scorer_name</p>
-            </div>
-          </li>
-        </ul>
+          <ul *ngIf="tournament.team_type === 0">
+            <li *ngFor="let stat of listStatistics()">
+              <div>
+                <p>Goal:</p>
+                <p>Scorer: {{stat.scorer_name}}</p>
+              </div>
+            </li>
+          </ul>
+          <ul *ngIf="tournament.team_type !== 0">
+            <li *ngFor="let stat of listStatistics()">
+              <div>
+                  <p>Goal:</p>
+                  <p>Team: {{stat.team_name}}</p>
+                  <p>Scorer: {{stat.scorer_name}}</p>
+                  <p *ngIf="stat.assister_id">Assister: {{stat.assister_name}}</p>
+              </div>
+            </li>
+          </ul>
       </div>
     </div>
 
     <div *ngIf="whatToShow() === 'statistics_adding' && selMatch !== null">
       <div *ngIf="selMatch !== null">
-        <ul>
+        <ul *ngIf="tournament.team_type === 0">
           <li *ngFor="let stat of listStatistics()">
             <div>
-              <p>{{stat.scorer_name}}</p>
+              <button *ngIf="getCurrUser() !== null && getCurrUser().id === tournament.referee_id && selMatch.finished === false" (click)="deleteMatchEvent(stat.id)">x</button>
+              <p>Goal:</p>
+              <p>Scorer: {{stat.scorer_name}}</p>
             </div>
           </li>
         </ul>
-        </div>
-      <div *ngIf="tournament.team_type === 0">
+        <ul *ngIf="tournament.team_type !== 0">
+          <li *ngFor="let stat of listStatistics()">
+            <div>
+                <button *ngIf="getCurrUser() !== null && getCurrUser().id === tournament.referee_id && selMatch.finished === false" (click)="deleteMatchEvent(stat.id)">x</button>
+                <p>Goal:</p>
+                <p>Team: {{stat.team_name}}</p>
+                <p>Scorer: {{stat.scorer_name}}</p>
+                <p *ngIf="stat.assister_id">Assister: {{stat.assister_name}}</p>
+            </div>
+          </li>
+        </ul>
+      </div>
+      <div *ngIf="selMatch !== null && selMatch.finished === false && tournament.team_type === 0">
         <label for="scorer_user">Scorer: </label>
         <select [(ngModel)]="selScorer" name="scorer_user" id="scorer_user">
           <option *ngFor="let m_user of getMatchUsers()" value="{{m_user.value}}">{{m_user.name}}</option>
@@ -410,7 +484,7 @@
         <button (click)="addEvent()">Add event</button>
 
       </div>
-      <div *ngIf="tournament.team_type !== 0">
+      <div *ngIf="selMatch !== null && selMatch.finished === false && tournament.team_type !== 0">
         <label for="team_select_1">{{getTeamName(selMatch.team1)}}</label>
         <input id="team_select_1" type="radio" [checked]="selTeam === selMatch.team1"
         name="team_select" (change)="selTeam=selMatch.team1">
@@ -430,10 +504,10 @@
         </select>
 
         <button (click)="addEvent()">Add event</button>
-
       </div>
+      <button *ngIf="selMatch !== null && selMatch.score1 !== selMatch.score2 && selMatch.finished === false" (click)="endMatch()">End match</button>
     </div>
 </div>
-<div *ngIf="tournament !== null && matches !== null && getCurrUser.id === tournament.creator_id && tournament.created === false">
+<div *ngIf="tournament !== null && matches !== null && getCurrUser() !== null && getCurrUser().id === tournament.creator_id && tournament.created === false">
     <button [disabled]="canStartTournament === false" (click)="startTounament()">Start tournament</button>
 </div>

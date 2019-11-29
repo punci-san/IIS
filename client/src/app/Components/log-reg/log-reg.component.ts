@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { RED, GREEN } from '../../../../../settings/variables';
+import { RED, GREEN, maxUsernameLen, maxCharLen } from '../../../../../settings/variables';
 import { UserService } from 'src/app/Services/user.service';
 import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -75,6 +75,20 @@ export class LogRegComponent implements OnInit, OnDestroy {
     if (pass1 !== pass2) {
       this.showMsg = true;
       this.msg = 'Given passwords do not match.';
+      this.msgColor = RED;
+      return;
+    }
+
+    if (pass1.length < 3 || pass1.length > maxUsernameLen) {
+      this.showMsg = true;
+      this.msg = `Password needs to be between 3 and ${maxUsernameLen}`;
+      this.msgColor = RED;
+      return;
+    }
+
+    if (user.length < 0 || user.length > maxUsernameLen) {
+      this.showMsg = true;
+      this.msg = `Username needs to be between 1 and ${maxUsernameLen}`;
       this.msgColor = RED;
       return;
     }

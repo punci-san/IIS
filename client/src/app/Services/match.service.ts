@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { IMatch } from '../../../../interfaces/match';
-import { matchPage } from '../../../../settings/routes';
+import { matchPage, matchEndPage } from '../../../../settings/routes';
 import { UserService } from './user.service';
 
 @Injectable({
@@ -97,6 +97,30 @@ export class MatchService {
       };
 
       http.send(null);
+    });
+  }
+
+  public endMatch(tournamentID: number, matchID: number): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const http = new XMLHttpRequest();
+      const data = {
+        tournament_id: tournamentID,
+        match_id: matchID,
+      };
+
+      http.open('POST', matchEndPage, true);
+      http.setRequestHeader('Content-Type', 'application/json');
+      this.userService.addAuthentication(http);
+
+      http.onreadystatechange = () => {
+        if (http.readyState === 4 && http.status === 200) {
+          return resolve();
+        } else if (http.readyState === 4 && http.status !== 200) {
+          return reject();
+        }
+      };
+
+      http.send(JSON.stringify(data));
     });
   }
 }

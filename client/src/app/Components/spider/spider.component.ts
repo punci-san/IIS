@@ -124,12 +124,16 @@ export class SpiderComponent implements OnInit {
     }
   }
 
-  public get getCurrUser(): IUser {
+  public getCurrUser(): IUser {
     return this.userService.getLoggedData;
   }
 
   public whatToShow(): whatToShow {
-    const user: IUser = this.getCurrUser;
+    const user: IUser = this.getCurrUser();
+
+    if (user === null) {
+      return whatToShow.STATISTICS;
+    }
 
     if (this.tournament.created === null) {
       return whatToShow.NOTHING;
@@ -168,7 +172,17 @@ export class SpiderComponent implements OnInit {
     return team.name;
   }
 
-  private getUserName(userID: number): string {
+  public getTeamShortcut(teamID: number): string {
+    const team: ITeam = this.teams.find((t: ITeam) => t.id === teamID);
+
+    if (team === undefined) {
+      return '';
+    }
+
+    return team.shortcut;
+  }
+
+  public getUserName(userID: number): string {
     const user: IUser = this.users.find((u: IUser) => u.id === userID);
 
     if (user === undefined) {
@@ -176,6 +190,16 @@ export class SpiderComponent implements OnInit {
     }
 
     return user.name;
+  }
+
+  public getUserDesc(userID: number): string {
+    const user: IUser = this.users.find((u: IUser) => u.id === userID);
+
+    if (user === undefined) {
+      return '';
+    }
+
+    return user.description;
   }
 
   /**
@@ -499,6 +523,7 @@ export class SpiderComponent implements OnInit {
   }
 
   public addEvent(): void {
+    console.log(this.selMatch);
     this.showMsg = false;
 
     if (this.tournament.team_type === ITeamType.PvP &&
@@ -539,9 +564,6 @@ export class SpiderComponent implements OnInit {
       return;
     }
 
-    console.log(this.tournament.id, this.selMatch.id, this.selTeam, this.selScorer, this.selAssister);
-    console.log(this.tournament.id, matchID, teamID, scorerID, assisterID);
-
     this.matchEventService.addMatchEvent(
       this.tournament.id,
       matchID,
@@ -558,6 +580,22 @@ export class SpiderComponent implements OnInit {
         this.matchEvents = [];
       });
 
+      this.matchService.getMatches(this.tournament.id)
+      .then((ms: IMatch[]) => {
+        this.matches = ms;
+
+        if (this.selMatch !== null) {
+          const match: IMatch = ms.find((m: IMatch) => m.id === this.selMatch.id);
+
+          if (match !== null) {
+            this.selMatch = match;
+          }
+        }
+      })
+      .catch(() => {
+        this.matches = [];
+      });
+
       this.selTeam = null;
       this.selScorer = null;
       this.selAssister = null;
@@ -572,5 +610,95 @@ export class SpiderComponent implements OnInit {
       this.showMsg = true;
       return;
     });
+  }
+
+  public deleteMatchEvent(matchEventID: number): void {
+    this.matchEventService.deleteMatchEvent(matchEventID)
+    .then(() => {
+      if (this.selMatch !== null) {
+        this.matchEventService.getMatchEvents(this.selMatch.id)
+        .then((mes: IMatchEvent[]) => {
+          this.matchEvents = mes;
+        })
+        .catch(() => {
+          this.matchEvents = [];
+        });
+      }
+
+      this.matchService.getMatches(this.tournament.id)
+      .then((ms: IMatch[]) => {
+        this.matches = ms;
+        if (this.selMatch !== null) {
+          const match: IMatch = ms.find((m: IMatch) => m.id === this.selMatch.id);
+
+          if (match !== null) {
+            this.selMatch = match;
+          }
+        }
+      })
+      .catch(() => {
+        this.matches = [];
+      });
+      this.msg = 'Match event removed.';
+      this.msgColor = GREEN;
+      this.showMsg = true;
+    })
+    .catch(() => {
+      this.msg = 'There was a problem, please try again.';
+      this.msgColor = RED;
+      this.showMsg = true;
+    });
+  }
+
+  public endMatch(): void {
+    this.showMsg = false;
+    if (this.selMatch === null) {
+      this.msg = 'Please show match before finishing one.';
+      this.msgColor = RED;
+      this.showMsg = true;
+      return;
+    }
+
+    this.matchService.endMatch(this.tournament.id, this.selMatch.id)
+    .then(() => {
+      this.matchService.getMatches(this.tournament.id)
+      .then((ms: IMatch[]) => {
+        this.matches = ms;
+
+        if (this.selMatch !== null) {
+          const match: IMatch = ms.find((m: IMatch) => m.id === this.selMatch.id);
+
+          if (match !== null) {
+            this.selMatch = match;
+          }
+        }
+      })
+      .catch(() => {
+        this.matches = [];
+      });
+      this.msg = 'Match ended.';
+      this.msgColor = GREEN;
+      this.showMsg = true;
+    })
+    .catch(() => {
+      this.msg = 'There was a problem, please try again.';
+      this.msgColor = RED;
+      this.showMsg = true;
+    });
+  }
+
+  public getLogoFromMatch(match: IMatch, first: boolean): string {
+    if (this.tournament.team_type === ITeamType.PvP) {
+      return '';
+    }
+    const teamID: number = (first === true) ? match.team1 : match.team2;
+
+    const team: ITeam = this.teams.find((t: ITeam) => t.id === teamID);
+
+    if (team === null) {
+      return this.teamService.getTeamLogo('undefined');
+    }
+
+    return this.teamService.getTeamLogo(team.file_name);
   }
 }

@@ -3,7 +3,7 @@ import { UserService } from '../../Services/user.service';
 import { Router } from '@angular/router';
 import { IUser } from '../../../../../interfaces/user';
 import { TeamService } from 'src/app/Services/team.service';
-import { RED } from '../../../../../settings/variables';
+import { RED, maxShortcutLen, maxCharLen } from '../../../../../settings/variables';
 
 @Component({
   selector: 'app-add-team',
@@ -37,18 +37,40 @@ export class AddTeamComponent implements OnInit {
     }
   }
 
-  public addTeam(teamName: string, file: FileList): void {
+  public addTeam(teamName: string, teamShortcut: string, file: FileList): void {
     this.showMsg = false;
 
     if (teamName === '') {
       this.msg = 'Please fill out name of team.';
       this.msgColor = RED;
       this.showMsg = true;
+      return;
     }
 
-    this.teamService.addTeam(teamName, file)
+    if (teamShortcut === '') {
+      this.msg = 'Please fill out team shortcut.';
+      this.msgColor = RED;
+      this.showMsg = true;
+      return;
+    }
+
+    if (teamName.length >= maxCharLen || teamName.length < 1) {
+      this.msg = `Name too long, please choose name between 1 and ${maxCharLen} characters`;
+      this.msgColor = RED;
+      this.showMsg = true;
+      return;
+    }
+
+    if (teamShortcut.length >= maxShortcutLen || teamShortcut.length < 1) {
+      this.msg = `Name too long, please choose name between 1 and ${maxShortcutLen} characters`;
+      this.msgColor = RED;
+      this.showMsg = true;
+      return;
+    }
+
+    this.teamService.addTeam(teamName, teamShortcut, file)
     .then(() => {
-      this.router.navigate([''], { queryParams: { succ: true, msg: 'You have been created team and have been added to it.'}});
+      this.router.navigate([''], { queryParams: { succ: true, msg: 'You have created team and have been added to it.'}});
     })
     .catch(() => {
       this.msg = 'Team with that name already exist.';
