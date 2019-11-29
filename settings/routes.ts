@@ -8,6 +8,7 @@ export const usersBanPage = `${mainPage}user-ban`;
 export const usersUnbanPage = `${mainPage}user-unban`;
 
 export const teamPage = `${mainPage}team`;
+export const teamLogoPage = `${mainPage}team-logo`;
 export const teamKickPage = `${mainPage}team-kick`;
 export const teamUserPage = `${mainPage}teamuser`;
 export const teamAdminPage = `${mainPage}team-admin`;
@@ -29,5 +30,6 @@ export const tournamentRegAcceptPage = `${mainPage}tournament-registration-accep
 export const tournamentRegDenyPage = `${mainPage}tournament-registration-deny`;
 
 export const matchPage = `${mainPage}match`;
+export const matchEndPage = `${mainPage}match-end`;
 
 export const matchEventPage = `${mainPage}match-event`;

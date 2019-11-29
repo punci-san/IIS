@@ -6,8 +6,12 @@
     <div class="team_form">
         <h1>Create New Team</h1>
         <div class="input-field">
-            <label for="team_name">Team name:</label>
-            <input #team_name type="text" name="team" id="team_name">
+            <label for="team_name">Team name*:</label>
+            <input #team_name type="text" name="team_name" id="team_name">
+        </div>
+        <div class="input-field">
+            <label for="team_shortcut">Team shortcut*:</label>
+            <input #team_shortcut type="text" name="team_shortcut" id="team_shortcut">
         </div>
         <div class="input-field" id="align_input">
             <label for="team_logo">Logo:</label>
@@ -15,7 +19,7 @@
             <label for="team_logo">Browse</label>
         </div>
         <div class="add-button">
-            <button (click)="addTeam(team_name.value, team_logo.files)">Add team</button>
+            <button (click)="addTeam(team_name.value, team_shortcut.value ,team_logo.files)">Add team</button>
         </div>
     </div>
 </div>

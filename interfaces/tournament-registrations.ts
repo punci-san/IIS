@@ -6,4 +6,5 @@ export interface ITournamentRegistrations {
     team_id: number;
     allowed: boolean;
     name?: string;
+    file_name?: string;
 }

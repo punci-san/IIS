@@ -5,7 +5,8 @@ import {
   teamRequestDenyPage,
   teamRequestAcceptPage,
   teamKickPage,
-  teamAdminPage } from '../../../../settings/routes';
+  teamAdminPage,
+  teamLogoPage} from '../../../../settings/routes';
 import { UserService } from './user.service';
 import { timeout } from '../../../../settings/variables';
 import { ITeam, ITeamRequest } from '../../../../interfaces/team';
@@ -31,6 +32,10 @@ export class TeamService {
     setInterval(() => {
       this.loadTeams();
     }, timeout);
+  }
+
+  public getTeamLogo(fileName: string): string {
+    return `${teamLogoPage}/${fileName}`;
   }
 
   public get getTeams(): ITeam[] {
@@ -64,24 +69,23 @@ export class TeamService {
     });
   }
 
-  public addTeam(name: string, file: FileList): Promise<any> {
+  public addTeam(teamName: string, teamShorcut: string, file: FileList): Promise<any> {
     return new Promise((resolve, reject) => {
       const http = new XMLHttpRequest();
 
-      const data = {
-        team: name
-      };
+      const formData: FormData = new FormData();
+      formData.append('file', file[0]);
+      formData.append('team_name', teamName);
+      formData.append('team_shortcut', teamShorcut);
 
       http.open('POST', teamPage, true);
-      http.setRequestHeader('Content-Type', 'application/json');
 
       this.userService.addAuthentication(http);
 
       http.onreadystatechange = () => {
         if (http.readyState === 4 && http.status === 200) {
           try {
-            const usr: IUser = JSON.parse(http.responseText);
-            this.userService.saveLoggedData(usr);
+            this.userService.loadUsers();
             this.loadTeams();
             return resolve();
           } catch (error) {
@@ -93,7 +97,7 @@ export class TeamService {
         }
       };
 
-      http.send(JSON.stringify(data));
+      http.send(formData);
     });
   }
 
@@ -270,6 +274,7 @@ export class TeamService {
 
       http.onreadystatechange = () => {
         if (http.readyState === 4 && http.status === 200) {
+          this.loadTeams();
           return resolve();
         } else if (http.readyState === 4 && http.status !== 200) {
           return reject();

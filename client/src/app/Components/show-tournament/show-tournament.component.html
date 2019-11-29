@@ -133,7 +133,8 @@
 
 
                 </div>
-                <!--<div *ngIf="tournament.created === true || tournament.created === false && (getLoggedUser() === null || (getLoggedUser() !== null && tournament.creator_id !== getLoggedUser().id))">
+                <!--<div *ngIf="tournament.created === true || tournament.created === false && (getLoggedUser() === null || (getLoggedUser() !== null && tournament.creator_id !== getLoggedUser().id))">-->
+                <div *ngIf="tournament.created !== null">
                     <div *ngIf="tournament.team_type !== 0">
                         <p>Teams: </p>
                         <div *ngFor="let t_team of getAcceptedTeams">
@@ -149,15 +150,15 @@
                             <button (click)="showUser(t_user.user_id)">Show user</button>
                         </div>
                     </div>
-                </div>-->
+                </div>
             </div>         
         </div>
         <div class="wrapper">
-            <div *ngIf="getLoggedUser !== null && tournament !== null && tournament.creator_id === getLoggedUser.id">
-                <button id="finalize_tourney" *ngIf="tournament !== null && tournament.created === null" [disabled]="canFinalize === false" (click)="finalizeTournament()">Finalize tournament</button>
+            <div>
+                <button  id="delete_tourney" *ngIf="tournament.creator_id === getLoggedUser().id" (click)="deleteTournament()">Delete tournament</button>
             </div>
-            <div *ngIf="tournament !== null">
-                <button  id="delete_tourney" *ngIf="tournament.creator_id === getLoggedUser.id" (click)="deleteTournament()">Delete tournament</button>
+            <div *ngIf="getLoggedUser() !== null && tournament.creator_id === getLoggedUser().id">
+                <button id="finalize_tourney" *ngIf="tournament.created === null" [disabled]="canFinalize === false" (click)="finalizeTournament()">Finalize tournament</button>
             </div>
         </div>
         <div>

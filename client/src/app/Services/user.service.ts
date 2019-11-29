@@ -80,7 +80,7 @@ export class UserService {
     });
   }
 
-  private loadUsers(): void {
+  public loadUsers(): void {
     const http = new XMLHttpRequest();
     http.open('GET', usersPage, true);
 

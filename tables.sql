@@ -15,6 +15,8 @@ CREATE TABLE users (
 CREATE TABLE teams(
 	id int NOT NULL AUTO_INCREMENT,
 	name varchar(255) NOT NULL,
+	shortcut varchar(255) NOT NULL,
+	file_name varchar(255) DEFAULT '',
 	creator_id int,
 	description varchar(255) DEFAULT '',
 	PRIMARY KEY (id)
@@ -63,6 +65,9 @@ CREATE TABLE matches(
 	team_2 int DEFAULT NULL,
 	tournament_row int,		-- Riadok
 	tournament_column int,		-- Stlpec
+	score1 int DEFAULT 0,
+	score2 int DEFAULT 0,
+	finished boolean default FALSE, -- Did the match ended or not,
 	PRIMARY KEY (id)
 )ENGINE=InnoDB;
 

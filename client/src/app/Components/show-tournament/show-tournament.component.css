@@ -74,7 +74,6 @@ h1 {
 
 #delete_tourney {
     float: right;
-    display: inline-block;
     margin-top: 25px;
     margin-right: 15px;
     border-radius: 3px;
@@ -88,7 +87,6 @@ h1 {
 
 #finalize_tourney {
     float: left;
-    display: inline-block;
     margin-top: 25px;
     margin-left: 15px;
     border-radius: 3px;
