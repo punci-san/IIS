@@ -705,9 +705,6 @@ export class ShowTournamentComponent implements OnInit {
   }
 
   public showUser(userID): void {
-    console.log(userID);
-    return;
-
     this.router.navigate(['show-user'], { queryParams: { id: userID}});
   }
 
