@@ -2,7 +2,7 @@
     display: flow-root;
     margin: 0px auto 0px auto;
     padding-top: 60px;
-    max-width: 900px;
+    max-width: 1200px;
     font-size: 18px;
     margin-top: 80px;
 }
@@ -110,7 +110,7 @@ button:hover {
 
 .right_box {
     float: left;
-    width: 400px;
+    width: 700px;
     margin-left: 25px;
 }
 
