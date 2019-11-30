@@ -2,7 +2,7 @@
   "name": "iss",
   "version": "1.0.0",
   "description": "",
-  "main": "dist/server.js",
+  "main": "dist/server/server/server.js",
   "scripts": {
     "build": "tsc --build tsconfig.json",
     "serve": "node ../dist/server/server/server.js",

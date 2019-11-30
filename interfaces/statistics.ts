@@ -12,6 +12,4 @@ export interface ITeamStatistics {
     matchesLost: number;
     scores: number;
     assistances: number;
-    bestScoreUserName: string;
-    bestScoreUserID: number;
 }

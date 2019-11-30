@@ -61,4 +61,8 @@ export class ShowUserComponent implements OnInit {
       this.router.navigate([''], { queryParams: { succ: true, msg: 'Given user does not exist', listing: 'user'}});
     });
   }
+
+  public showTeam(teamID: number): void {
+    this.router.navigate(['show-team'], { queryParams: { id: teamID}});
+  }
 }

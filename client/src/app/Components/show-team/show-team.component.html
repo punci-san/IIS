@@ -13,7 +13,7 @@
                 <p>{{tmUsers.name}}</p>
                 <div class="button_wrapper">
                     <button *ngIf="getUser !== null && getUser.id === team.creator_id && team.creator_id !== tmUsers.id" (click)="makeTeamLeader(tmUsers.id)">Set Leader</button>
-                    <button *ngIf="getUser !== null && getUser.id === team.creator_id && team.creator_id !== tmUsers.id" (click)="kickUser(tmUsers.id)">Kick</button>
+                    <!--<button *ngIf="getUser !== null && getUser.id === team.creator_id && team.creator_id !== tmUsers.id" (click)="kickUser(tmUsers.id)">Kick</button>-->
                     <button (click)="showUser(tmUsers.id)">Show</button>
                 </div>
                 
@@ -44,10 +44,6 @@
                 <p>Matches lost: {{teamStat.matchesLost}}</p>
                 <p>Scores: {{teamStat.scores}}</p>
                 <p>Assistances: {{teamStat.assistances}}</p>
-                <div *ngIf="teamStat.bestScoreUserID !== null && teamStat.bestScoreUserName !== null">
-                    <p>User: {{teamStat.bestScoreUserName}}</p>
-                    <button (click)="showUser(teamStat.bestScoreUserID)">Show</button>
-                </div>
             </div>
         </div>
     </div>

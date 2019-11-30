@@ -65,6 +65,7 @@ export class Database {
 
         this.connection.connect((err: mysql.MysqlError) => {
             if (err === null) {
+                console.log("Connected to database.");
                 this.userDatabase.setConnection(this.connection);
                 this.teamDatabase.setConnection(this.connection);
                 this.matchDatabase.setConnection(this.connection);
@@ -72,6 +73,8 @@ export class Database {
                 this.teamRequestsDatabase.setConnection(this.connection);
                 this.tournamentDatabase.setConnection(this.connection);
                 this.tournamentRegDatabase.setConnection(this.connection);
+            } else {
+                console.log(err);
             }
         });
     }
@@ -375,7 +378,19 @@ export class Database {
             .then(() => {
                 this.tournamentDatabase.deleteTournament(tournamentID)
                 .then(() => {
-                    return resolve();
+                    this.matchDatabase.deleteMatchByTournament(tournamentID)
+                    .then(() => {
+                        this.matchEventDatabase.deleteEventByTournament(tournamentID)
+                        .then(() => {
+                            return resolve();
+                        })
+                        .catch(() => {
+                            return reject();
+                        });
+                    })
+                    .catch(() => {
+                        return reject();
+                    });
                 })
                 .catch(() => {
                     return reject();
@@ -632,9 +647,9 @@ export class Database {
      * Match event requests
      */
 
-    public addMatchEvent(matchID: number, teamID: number, scorerID: number, assisterID: number): Promise<number> {
+    public addMatchEvent(tournamentID: number, matchID: number, teamID: number, scorerID: number, assisterID: number): Promise<number> {
         return new Promise((resolve, reject) => {
-            this.matchEventDatabase.addEvent(matchID, teamID, scorerID, assisterID)
+            this.matchEventDatabase.addEvent(tournamentID, matchID, teamID, scorerID, assisterID)
             .then((id: number) => {
                 this.incrementScore(matchID, teamID, scorerID)
                 .then(() => {
@@ -751,32 +766,30 @@ export class Database {
             .then((ms: IMatch[]) => {
                 this.matchEventDatabase.getMatchEventsByTeam(teamID)
                 .then((mes: IMatchEvent[]) => {
-                    const userStatistics: ITeamStatistics = {
+                    const teamStatistics: ITeamStatistics = {
                         matchesPlayed: 0,
                         matchesWin: 0,
                         matchesLost: 0,
                         scores: 0,
                         assistances: 0,
-                        bestScoreUserID: null,
-                        bestScoreUserName: "",
                     };
 
                     for (const m of ms) {
-                        userStatistics.matchesPlayed++;
+                        teamStatistics.matchesPlayed++;
 
                         if (m.team1 === teamID) {
                             if (m.score1 > m.score2) {
-                                userStatistics.matchesWin++;
+                                teamStatistics.matchesWin++;
                             } else {
-                                userStatistics.matchesLost++;
+                                teamStatistics.matchesLost++;
                             }
                         }
 
                         if (m.team2 === teamID) {
                             if (m.score1 < m.score2) {
-                                userStatistics.matchesWin++;
+                                teamStatistics.matchesWin++;
                             } else {
-                                userStatistics.matchesLost++;
+                                teamStatistics.matchesLost++;
                             }
                         }
                     }
@@ -784,15 +797,15 @@ export class Database {
                     for (const me of mes) {
                         if (me.team_id === teamID) {
                             if (me.scorer_id !== null) {
-                                userStatistics.scores++;
+                                teamStatistics.scores++;
                             }
                             if (me.assister_id !== null) {
-                                userStatistics.assistances++;
+                                teamStatistics.assistances++;
                             }
                         }
                     }
 
-                    return resolve(userStatistics);
+                    return resolve(teamStatistics);
 
                 })
                 .catch(() => {
@@ -2187,6 +2200,26 @@ class MatchDatabase {
         });
     }
 
+    public deleteMatchByTournament(tournamentID: number): Promise<void> {
+        return new Promise((resolve, reject) => {
+            if (this.connection === null) {
+                return reject();
+            }
+
+            this.connection.query(`DELETE FROM matches WHERE tournament_id='${tournamentID}'`, (queryErr: mysql.MysqlError, result, field: mysql.FieldInfo[]) => {
+                if (queryErr !== null) {
+                    return reject();
+                }
+
+                if (result !== undefined && result !== null && result.affectedRows >= 0) {
+                    return resolve();
+                }
+
+                return reject();
+            });
+        });
+    }
+
     public updateScores(matchID: number, score1: number, score2: number): Promise<void> {
         return new Promise((resolve, reject) => {
             if (this.connection === null) {
@@ -2249,7 +2282,7 @@ class MatchEventDatabase {
         this.connection = conn;
     }
 
-    public addEvent(matchID: number, teamID: number, scorerID: number, assisterID: number): Promise<number> {
+    public addEvent(tournamentID: number, matchID: number, teamID: number, scorerID: number, assisterID: number): Promise<number> {
         return new Promise((resolve, reject) => {
             if (this.connection === null) {
                 return reject();
@@ -2259,8 +2292,8 @@ class MatchEventDatabase {
             const uAssister: string = (assisterID === null) ? "null" : `${assisterID}`;
 
             this.connection.query(
-                `INSERT INTO match_events (match_id, team_id, scorer_id, assister_id) VALUES
-                ('${matchID}',${uTeam},'${scorerID}',${uAssister});`, (err: mysql.MysqlError, result, field: mysql.FieldInfo[]) => {
+                `INSERT INTO match_events (tournament_id, match_id, team_id, scorer_id, assister_id) VALUES
+                ('${tournamentID}','${matchID}',${uTeam},'${scorerID}',${uAssister});`, (err: mysql.MysqlError, result, field: mysql.FieldInfo[]) => {
                 if (err !== null) {
                     return reject();
                 }
@@ -2407,6 +2440,26 @@ class MatchEventDatabase {
             }
 
             this.connection.query(`DELETE FROM match_events WHERE id='${matchEventID}'`, (queryErr: mysql.MysqlError, result, field: mysql.FieldInfo[]) => {
+                if (queryErr !== null) {
+                    return reject();
+                }
+
+                if (result !== undefined && result.affectedRows === 1) {
+                    return resolve();
+                }
+
+                return reject();
+            });
+        });
+    }
+
+    public deleteEventByTournament(tournamentID: number): Promise<void> {
+        return new Promise((resolve, reject) => {
+            if (this.connection === null) {
+                return reject();
+            }
+
+            this.connection.query(`DELETE FROM match_events WHERE tournament_id='${tournamentID}'`, (queryErr: mysql.MysqlError, result, field: mysql.FieldInfo[]) => {
                 if (queryErr !== null) {
                     return reject();
                 }

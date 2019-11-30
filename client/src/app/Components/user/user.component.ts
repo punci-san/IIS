@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { IUser } from '../../../../../interfaces/user';
 import { UserService } from 'src/app/Services/user.service';
 import { Router } from '@angular/router';
-import { RED, GREEN } from '../../../../../settings/variables';
+import { RED, GREEN, maxCharLen } from '../../../../../settings/variables';
 import { TeamService } from 'src/app/Services/team.service';
 import { ITeam } from '../../../../../interfaces/team';
 import { IUserStatistics } from '../../../../../interfaces/statistics';
@@ -73,6 +73,22 @@ export class UserComponent implements OnInit {
         return;
       }
       pass = this.pass1;
+    }
+
+    if (this.user.name === '' ) {
+      this.user = this.userService.getLoggedData;
+      this.msg = 'Please fill in username.';
+      this.showMsg = true;
+      this.msgColor = RED;
+      return;
+    }
+
+    if (this.user.name.length < 1 || this.user.name.length > maxCharLen) {
+      this.user = this.userService.getLoggedData;
+      this.msg = `Username neesd to be between 1 and ${maxCharLen}`;
+      this.showMsg = true;
+      this.msgColor = RED;
+      return;
     }
 
     this.userService.updateUser(this.user, pass)

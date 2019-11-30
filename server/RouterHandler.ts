@@ -1266,7 +1266,7 @@ export class RouterHandler {
                             return res.status(401).send();
                         }
 
-                        this.database.addMatchEvent(matchID, teamID, scorerID, assisterID)
+                        this.database.addMatchEvent(tournamentID, matchID, teamID, scorerID, assisterID)
                         .then(() => {
                             return res.send();
                         })

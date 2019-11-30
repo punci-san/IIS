@@ -16,6 +16,8 @@
                 <div class="positioner">
                     <p>Team name: </p>
                     <p>{{team.name}}</p>
+                    <button [routerLink]="['/show-team', team.id]" routerLinkActive="active">Show</button>
+
                 </div>
             </div>
             <div *ngIf="team === null">
