@@ -129,11 +129,7 @@
                         <button (click)="showUser(t_referee.user_id)">Show user</button>
                         <button *ngIf="tournament.created === null && tournament.referee_id === null" (click)="acceptReferee(t_referee.user_id)">Accept</button>
                     </div>
-                    
-
-
                 </div>
-                <!--<div *ngIf="tournament.created === true || tournament.created === false && (getLoggedUser() === null || (getLoggedUser() !== null && tournament.creator_id !== getLoggedUser().id))">-->
                 <div *ngIf="tournament.created !== null">
                     <div *ngIf="tournament.team_type !== 0">
                         <p>Teams: </p>
@@ -151,17 +147,17 @@
                         </div>
                     </div>
                 </div>
-            </div>         
+            </div>
         </div>
         <div class="wrapper">
             <div>
-                <button  id="delete_tourney" *ngIf="tournament.creator_id === getLoggedUser().id" (click)="deleteTournament()">Delete tournament</button>
+                <button  id="delete_tourney" *ngIf="getLoggedUser() !== null && tournament.creator_id === getLoggedUser().id" (click)="deleteTournament()">Delete tournament</button>
             </div>
             <div *ngIf="getLoggedUser() !== null && tournament.creator_id === getLoggedUser().id">
                 <button id="finalize_tourney" *ngIf="tournament.created === null" [disabled]="canFinalize === false" (click)="finalizeTournament()">Finalize tournament</button>
             </div>
         </div>
-        <div>
+        <div *ngIf="tournament !== null && tournament.created !== null">
             <app-spider [tournament]="tournament"></app-spider>
         </div>
     </div>

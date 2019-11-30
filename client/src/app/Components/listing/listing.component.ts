@@ -18,13 +18,11 @@ enum Listing  {
   styleUrls: ['./listing.component.css']
 })
 export class ListingComponent implements OnInit, OnDestroy {
-  private selectedListing: Listing;
-  private selColor: string;
-  private defColor: string;
+  public selectedListing: string;
 
-  private showMsg: boolean;
-  private msg: string;
-  private msgColor: string;
+  public showMsg: boolean;
+  public msg: string;
+  public msgColor: string;
   private subscription: Subscription;
 
   constructor(
@@ -33,9 +31,6 @@ export class ListingComponent implements OnInit, OnDestroy {
     private userService: UserService,
   ) {
     this.selectedListing = Listing.TOURNAMENT;
-    this.selColor = SelectedGREEN;
-    this.defColor = GREEN;
-
     this.showMsg = false;
     this.subscription = null;
     this.msg = '';
@@ -71,6 +66,8 @@ export class ListingComponent implements OnInit, OnDestroy {
         this.selectedListing = Listing.USER;
       } else if (listing === 'mytournament') {
         this.selectedListing = Listing.MYTOURNAMENT;
+      } else {
+        this.selectedListing = Listing.TOURNAMENT;
       }
     }
 

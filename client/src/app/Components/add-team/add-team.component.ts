@@ -11,9 +11,9 @@ import { RED, maxShortcutLen, maxCharLen } from '../../../../../settings/variabl
   styleUrls: ['./add-team.component.css']
 })
 export class AddTeamComponent implements OnInit {
-  private showMsg: boolean;
-  private msg: string;
-  private msgColor: string;
+  public showMsg: boolean;
+  public msg: string;
+  public msgColor: string;
 
   constructor(
     private router: Router,

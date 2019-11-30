@@ -17,13 +17,23 @@
                     <p>Team name: </p>
                     <p>{{team.name}}</p>
                 </div>
-                <div class="positioner">
-                    <!--<p>Description:</p>
-                    <p>{{team.description}}</p>-->
-                </div>
             </div>
             <div *ngIf="team === null">
                 <p id="special">User is in no team.</p>
+            </div>
+        </div>
+
+        <div>
+            <p>Statistics: </p> 
+            <div *ngIf="userStat === null">
+                <p>No statistics</p>
+            </div>
+            <div *ngIf="userStat !== null">
+                <p>Matches played: {{userStat.matchesPlayed}}</p>
+                <p>Matches wins: {{userStat.matchesWin}}</p>
+                <p>Matches lost: {{userStat.matchesLost}}</p>
+                <p>Scores: {{userStat.scores}}</p>
+                <p>Assistances: {{userStat.assistances}}</p>
             </div>
         </div>
     </div>

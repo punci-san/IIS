@@ -33,3 +33,6 @@ export const matchPage = `${mainPage}match`;
 export const matchEndPage = `${mainPage}match-end`;
 
 export const matchEventPage = `${mainPage}match-event`;
+
+export const userStatistics = `${mainPage}user-statistics`;
+export const teamStatistics = `${mainPage}team-statistics`;

@@ -32,5 +32,23 @@
                 </div>
             </div>
         </div>
+
+        <div>
+            <p>Statistics: </p> 
+            <div *ngIf="teamStat === null">
+                <p>No statistics</p>
+            </div>
+            <div *ngIf="teamStat !== null">
+                <p>Matches played: {{teamStat.matchesPlayed}}</p>
+                <p>Matches wins: {{teamStat.matchesWin}}</p>
+                <p>Matches lost: {{teamStat.matchesLost}}</p>
+                <p>Scores: {{teamStat.scores}}</p>
+                <p>Assistances: {{teamStat.assistances}}</p>
+                <div *ngIf="teamStat.bestScoreUserID !== null && teamStat.bestScoreUserName !== null">
+                    <p>User: {{teamStat.bestScoreUserName}}</p>
+                    <button (click)="showUser(teamStat.bestScoreUserID)">Show</button>
+                </div>
+            </div>
+        </div>
     </div>
 </div>

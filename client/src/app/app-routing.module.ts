@@ -15,7 +15,7 @@ const routes: Routes = [
     component: ListingComponent,
   },
   {
-    path: 'user',
+    path: 'me',
     pathMatch: 'full',
     component: UserComponent,
   },

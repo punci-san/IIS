@@ -19,7 +19,7 @@ export class IIS {
     }
 
     private listen(): void {
-        this.app.use("/", express.static(path.join(__dirname + "./../client/")));
+        console.log(path.join(__dirname + "./../../client/"));
         this.app.use("/", Router);
         this.app.listen(port, (err) => {
             if (err) {

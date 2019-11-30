@@ -5,6 +5,8 @@ import { IUser } from '../../../../../interfaces/user';
 import { UserService } from 'src/app/Services/user.service';
 import { TeamService } from 'src/app/Services/team.service';
 import { ITeam } from '../../../../../interfaces/team';
+import { StatisticService } from 'src/app/Services/statistic.service';
+import { IUserStatistics } from '../../../../../interfaces/statistics';
 
 @Component({
   selector: 'app-show-user',
@@ -13,17 +15,20 @@ import { ITeam } from '../../../../../interfaces/team';
 })
 export class ShowUserComponent implements OnInit {
   private subscription: Subscription;
-  private user: IUser;
-  private team: ITeam;
+  public user: IUser;
+  public team: ITeam;
+  public userStat: IUserStatistics;
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private userService: UserService,
-    private teamService: TeamService
+    private teamService: TeamService,
+    private statService: StatisticService,
   ) {
     this.user = null;
     this.team = null;
+    this.userStat = null;
   }
 
   ngOnInit() {
@@ -32,6 +37,15 @@ export class ShowUserComponent implements OnInit {
       this.router.navigate([''], { queryParams: { succ: true, msg: 'Given user does not exist', listing: 'user'}});
       return;
     }
+
+    this.statService.getUserStatistic(userID)
+    .then((us: IUserStatistics) => {
+      this.userStat = us;
+    })
+    .catch(() => {
+      this.userStat = null;
+    });
+
     this.userService.getUser(userID)
     .then((usr: IUser) => {
       this.user = usr;

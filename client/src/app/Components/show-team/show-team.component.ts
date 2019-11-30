@@ -5,6 +5,8 @@ import { ITeam, ITeamRequest } from '../../../../../interfaces/team';
 import { IUser } from '../../../../../interfaces/user';
 import { UserService } from 'src/app/Services/user.service';
 import { RED, GREEN } from '../../../../../settings/variables';
+import { ITeamStatistics } from '../../../../../interfaces/statistics';
+import { StatisticService } from 'src/app/Services/statistic.service';
 
 @Component({
   selector: 'app-show-team',
@@ -13,20 +15,23 @@ import { RED, GREEN } from '../../../../../settings/variables';
 })
 export class ShowTeamComponent implements OnInit {
   private teamID: number;
-  private team: ITeam;
-  private teamUsers: IUser[];
-  private teamRequests: ITeamRequest[];
   private users: IUser[];
 
-  private showMsg: boolean;
-  private msg: string;
-  private msgColor: string;
+  public team: ITeam;
+  public teamUsers: IUser[];
+  public teamRequests: ITeamRequest[];
+  public showMsg: boolean;
+  public msg: string;
+  public msgColor: string;
+
+  public teamStat: ITeamStatistics;
 
   constructor(
     private router: Router,
     private route: ActivatedRoute,
     private teamService: TeamService,
-    private userService: UserService
+    private userService: UserService,
+    private statService: StatisticService,
     ) {
     this.team = null;
     this.users = [];
@@ -36,6 +41,8 @@ export class ShowTeamComponent implements OnInit {
     this.showMsg = false;
     this.msg = '';
     this.msgColor = '';
+
+    this.teamStat = null;
   }
 
   ngOnInit() {
@@ -43,6 +50,14 @@ export class ShowTeamComponent implements OnInit {
     if (isNaN(this.teamID)) {
       this.router.navigate([''], { queryParams: { succ: false, msg: 'Given team does not exist', listing: 'team'}});
     }
+
+    this.statService.getTeamStatistic(this.teamID)
+    .then((stat: ITeamStatistics) => {
+      this.teamStat = stat;
+    })
+    .catch(() => {
+      this.teamStat = null;
+    });
 
     this.teamService.getTeam(this.teamID)
     .then((teamData: ITeam) => {

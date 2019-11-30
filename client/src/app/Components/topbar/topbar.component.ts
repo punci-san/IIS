@@ -12,7 +12,7 @@ import { TournamentService } from 'src/app/Services/tournament.service';
   styleUrls: ['./topbar.component.css']
 })
 export class TopbarComponent implements OnInit {
-  private searchValue: string;
+  public searchValue: string;
 
   constructor(
     private userService: UserService,

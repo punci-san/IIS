@@ -44,7 +44,7 @@ export class SpiderComponent implements OnInit {
   private tournamentRegistrations: ITournamentRegistrations[];
   private teams: ITeam[];
   private users: IUser[];
-  private matches: IMatch[];
+  public matches: IMatch[];
   private matchEvents: IMatchEvent[];
 
   public selMatch1: string;
@@ -53,9 +53,9 @@ export class SpiderComponent implements OnInit {
   public selScorer: string;
   public selAssister: string;
 
-  private showMsg: boolean;
-  private msg: string;
-  private msgColor: string;
+  public showMsg: boolean;
+  public msg: string;
+  public msgColor: string;
 
   constructor(
     private userService: UserService,
@@ -162,7 +162,7 @@ export class SpiderComponent implements OnInit {
     return whatToShow.STATISTICS;
   }
 
-  private getTeamName(teamID: number): string {
+  public getTeamName(teamID: number): string {
     const team: ITeam = this.teams.find((t: ITeam) => t.id === teamID);
 
     if (team === undefined) {

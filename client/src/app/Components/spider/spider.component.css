@@ -326,6 +326,15 @@ h2 {
 .tournament-bracket__content {
   display: flex;
 }
+
+.tournament-bracket__content .tournament-bracket__team:last-child {
+
+  width: 50%;
+  order: 2;
+  text-align: left;
+
+}
+
 .tournament-bracket__content::after {
   content: ':';
   width: 1em;
