@@ -1,5 +1,4 @@
-export const mainPage = 'http://localhost:4201/';
-export const originPage = 'http://localhost:4200/';
+export const mainPage = 'http://178.128.202.218:4201/';
 export const loginPage = `${mainPage}login`;
 export const registerPage = `${mainPage}register`;
 export const usersPage = `${mainPage}user`;
@@ -33,3 +32,6 @@ export const matchPage = `${mainPage}match`;
 export const matchEndPage = `${mainPage}match-end`;
 
 export const matchEventPage = `${mainPage}match-event`;
+
+export const userStatistics = `${mainPage}user-statistics`;
+export const teamStatistics = `${mainPage}team-statistics`;

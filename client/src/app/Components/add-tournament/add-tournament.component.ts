@@ -14,9 +14,9 @@ export class AddTournamentComponent implements OnInit {
   public numberOfPlayers: number[];
   public tournamentType: string[];
 
-  private showMsg: boolean;
-  private msg: string;
-  private msgColor: string;
+  public showMsg: boolean;
+  public msg: string;
+  public msgColor: string;
 
   constructor(
     private userService: UserService,

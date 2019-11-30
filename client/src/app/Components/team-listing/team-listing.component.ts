@@ -11,7 +11,7 @@ import { Router } from '@angular/router';
   styleUrls: ['./team-listing.component.css']
 })
 export class TeamListingComponent implements OnInit {
-  private user: IUser;
+  public user: IUser;
   private teamRequests: ITeamRequest[];
 
   constructor(

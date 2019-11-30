@@ -5,6 +5,7 @@ import { ITeam, ITeamRequest } from "../interfaces/team";
 import { ITournament } from "../interfaces/tournament";
 import { ITournamentRegistrations } from "../interfaces/tournament-registrations";
 import { IMatch } from "../interfaces/match";
+import { ITeamStatistics, IUserStatistics } from "../interfaces/statistics";
 import { IMatchEvent } from "../interfaces/match_event";
 
 const dbServer = "localhost";
@@ -64,6 +65,7 @@ export class Database {
 
         this.connection.connect((err: mysql.MysqlError) => {
             if (err === null) {
+                console.log("Connected to database.");
                 this.userDatabase.setConnection(this.connection);
                 this.teamDatabase.setConnection(this.connection);
                 this.matchDatabase.setConnection(this.connection);
@@ -71,6 +73,8 @@ export class Database {
                 this.teamRequestsDatabase.setConnection(this.connection);
                 this.tournamentDatabase.setConnection(this.connection);
                 this.tournamentRegDatabase.setConnection(this.connection);
+            } else {
+                console.log(err);
             }
         });
     }
@@ -374,7 +378,19 @@ export class Database {
             .then(() => {
                 this.tournamentDatabase.deleteTournament(tournamentID)
                 .then(() => {
-                    return resolve();
+                    this.matchDatabase.deleteMatchByTournament(tournamentID)
+                    .then(() => {
+                        this.matchEventDatabase.deleteEventByTournament(tournamentID)
+                        .then(() => {
+                            return resolve();
+                        })
+                        .catch(() => {
+                            return reject();
+                        });
+                    })
+                    .catch(() => {
+                        return reject();
+                    });
                 })
                 .catch(() => {
                     return reject();
@@ -631,9 +647,9 @@ export class Database {
      * Match event requests
      */
 
-    public addMatchEvent(matchID: number, teamID: number, scorerID: number, assisterID: number): Promise<number> {
+    public addMatchEvent(tournamentID: number, matchID: number, teamID: number, scorerID: number, assisterID: number): Promise<number> {
         return new Promise((resolve, reject) => {
-            this.matchEventDatabase.addEvent(matchID, teamID, scorerID, assisterID)
+            this.matchEventDatabase.addEvent(tournamentID, matchID, teamID, scorerID, assisterID)
             .then((id: number) => {
                 this.incrementScore(matchID, teamID, scorerID)
                 .then(() => {
@@ -670,6 +686,127 @@ export class Database {
                     .catch(() => {
                         return reject();
                     });
+                })
+                .catch(() => {
+                    return reject();
+                });
+            })
+            .catch(() => {
+                return reject();
+            });
+        });
+    }
+
+    /**
+     * Statistics
+     */
+
+    public getUserStatistics(userID: number): Promise<IUserStatistics> {
+        return new Promise((resolve, reject) => {
+            this.matchDatabase.getMatchesByUser(userID)
+            .then((ms: IMatch[]) => {
+                this.matchEventDatabase.getMatchEventsByUser(userID)
+                .then((mes: IMatchEvent[]) => {
+                    const userStatistics: IUserStatistics = {
+                        matchesPlayed: 0,
+                        matchesWin: 0,
+                        matchesLost: 0,
+                        scores: 0,
+                        assistances: 0,
+                    };
+
+                    for (const m of ms) {
+                        userStatistics.matchesPlayed++;
+
+                        if (m.user1 === userID) {
+                            if (m.score1 > m.score2) {
+                                userStatistics.matchesWin++;
+                            } else {
+                                userStatistics.matchesLost++;
+                            }
+                        }
+
+                        if (m.user2 === userID) {
+                            if (m.score1 < m.score2) {
+                                userStatistics.matchesWin++;
+                            } else {
+                                userStatistics.matchesLost++;
+                            }
+                        }
+                    }
+
+                    for (const me of mes) {
+                        if (me.scorer_id === userID) {
+                            userStatistics.scores++;
+                        }
+
+                        if (me.assister_id === userID) {
+                            userStatistics.assistances++;
+                        }
+                    }
+
+                    return resolve(userStatistics);
+
+                })
+                .catch(() => {
+                    console.log("MatchesEvent getting failed.");
+                    return reject();
+                });
+            })
+            .catch(() => {
+                console.log("Matches getting failed.");
+                return reject();
+            });
+        });
+    }
+
+    public getTeamStatistics(teamID: number): Promise<ITeamStatistics> {
+        return new Promise((resolve, reject) => {
+            this.matchDatabase.getMatchesByTeam(teamID)
+            .then((ms: IMatch[]) => {
+                this.matchEventDatabase.getMatchEventsByTeam(teamID)
+                .then((mes: IMatchEvent[]) => {
+                    const teamStatistics: ITeamStatistics = {
+                        matchesPlayed: 0,
+                        matchesWin: 0,
+                        matchesLost: 0,
+                        scores: 0,
+                        assistances: 0,
+                    };
+
+                    for (const m of ms) {
+                        teamStatistics.matchesPlayed++;
+
+                        if (m.team1 === teamID) {
+                            if (m.score1 > m.score2) {
+                                teamStatistics.matchesWin++;
+                            } else {
+                                teamStatistics.matchesLost++;
+                            }
+                        }
+
+                        if (m.team2 === teamID) {
+                            if (m.score1 < m.score2) {
+                                teamStatistics.matchesWin++;
+                            } else {
+                                teamStatistics.matchesLost++;
+                            }
+                        }
+                    }
+
+                    for (const me of mes) {
+                        if (me.team_id === teamID) {
+                            if (me.scorer_id !== null) {
+                                teamStatistics.scores++;
+                            }
+                            if (me.assister_id !== null) {
+                                teamStatistics.assistances++;
+                            }
+                        }
+                    }
+
+                    return resolve(teamStatistics);
+
                 })
                 .catch(() => {
                     return reject();
@@ -1937,6 +2074,78 @@ class MatchDatabase {
         });
     }
 
+    public getMatchesByUser(userID: number): Promise<IMatch[]> {
+        return new Promise((resolve, reject) => {
+            if (this.connection === null) {
+                return reject();
+            }
+            const matches: IMatch[] = [];
+
+            this.connection.query(`SELECT * FROM matches WHERE user_1='${userID}' OR user_2='${userID}';`, (queryErr: mysql.MysqlError, result, field: mysql.FieldInfo[]) => {
+                if (queryErr !== null) {
+                    return reject();
+                }
+                if (result === null) {
+                    return reject();
+                }
+
+                for (const res of result) {
+                    matches.push({
+                        id: res.id,
+                        user1: (res.user_1 === null) ? null : res.user_1,
+                        user2: (res.user_2 === null) ? null : res.user_2,
+                        team1: (res.team_1 === null) ? null : res.team_1,
+                        team2: (res.team_2 === null) ? null : res.team_2,
+                        tournamentID: res.tournament_id,
+                        row: res.tournament_row,
+                        column: res.tournament_column,
+                        score1: res.score1,
+                        score2: res.score2,
+                        finished: (res.finished === 1) ? true : false,
+                    });
+                }
+
+                return resolve(matches);
+            });
+        });
+    }
+
+    public getMatchesByTeam(teamID: number): Promise<IMatch[]> {
+        return new Promise((resolve, reject) => {
+            if (this.connection === null) {
+                return reject();
+            }
+            const matches: IMatch[] = [];
+
+            this.connection.query(`SELECT * FROM matches WHERE team_1='${teamID}' OR team_2='${teamID}';`, (queryErr: mysql.MysqlError, result, field: mysql.FieldInfo[]) => {
+                if (queryErr !== null) {
+                    return reject();
+                }
+                if (result === null) {
+                    return reject();
+                }
+
+                for (const res of result) {
+                    matches.push({
+                        id: res.id,
+                        user1: (res.user_1 === null) ? null : res.user_1,
+                        user2: (res.user_2 === null) ? null : res.user_2,
+                        team1: (res.team_1 === null) ? null : res.team_1,
+                        team2: (res.team_2 === null) ? null : res.team_2,
+                        tournamentID: res.tournament_id,
+                        row: res.tournament_row,
+                        column: res.tournament_column,
+                        score1: res.score1,
+                        score2: res.score2,
+                        finished: (res.finished === 1) ? true : false,
+                    });
+                }
+
+                return resolve(matches);
+            });
+        });
+    }
+
     public getMatch(matchID: number): Promise<IMatch> {
         return new Promise((resolve, reject) => {
             if (this.connection === null) {
@@ -1983,6 +2192,26 @@ class MatchDatabase {
                 }
 
                 if (result !== undefined && result.affectedRows === 1) {
+                    return resolve();
+                }
+
+                return reject();
+            });
+        });
+    }
+
+    public deleteMatchByTournament(tournamentID: number): Promise<void> {
+        return new Promise((resolve, reject) => {
+            if (this.connection === null) {
+                return reject();
+            }
+
+            this.connection.query(`DELETE FROM matches WHERE tournament_id='${tournamentID}'`, (queryErr: mysql.MysqlError, result, field: mysql.FieldInfo[]) => {
+                if (queryErr !== null) {
+                    return reject();
+                }
+
+                if (result !== undefined && result !== null && result.affectedRows >= 0) {
                     return resolve();
                 }
 
@@ -2053,7 +2282,7 @@ class MatchEventDatabase {
         this.connection = conn;
     }
 
-    public addEvent(matchID: number, teamID: number, scorerID: number, assisterID: number): Promise<number> {
+    public addEvent(tournamentID: number, matchID: number, teamID: number, scorerID: number, assisterID: number): Promise<number> {
         return new Promise((resolve, reject) => {
             if (this.connection === null) {
                 return reject();
@@ -2063,8 +2292,8 @@ class MatchEventDatabase {
             const uAssister: string = (assisterID === null) ? "null" : `${assisterID}`;
 
             this.connection.query(
-                `INSERT INTO match_events (match_id, team_id, scorer_id, assister_id) VALUES
-                ('${matchID}',${uTeam},'${scorerID}',${uAssister});`, (err: mysql.MysqlError, result, field: mysql.FieldInfo[]) => {
+                `INSERT INTO match_events (tournament_id, match_id, team_id, scorer_id, assister_id) VALUES
+                ('${tournamentID}','${matchID}',${uTeam},'${scorerID}',${uAssister});`, (err: mysql.MysqlError, result, field: mysql.FieldInfo[]) => {
                 if (err !== null) {
                     return reject();
                 }
@@ -2090,6 +2319,68 @@ class MatchEventDatabase {
             const matches: IMatchEvent[] = [];
 
             this.connection.query(`SELECT * FROM match_events WHERE match_id='${matchID}'`, (queryErr: mysql.MysqlError, result, field: mysql.FieldInfo[]) => {
+                if (queryErr !== null) {
+                    return reject();
+                }
+
+                if (result === null) {
+                    return reject();
+                }
+
+                for (const res of result) {
+                    matches.push({
+                        id: res.id,
+                        match_id: res.match_id,
+                        team_id: (res.team_id === null) ? null : res.team_id,
+                        scorer_id: res.scorer_id,
+                        assister_id: res.assister_id,
+                    });
+                }
+
+                return resolve(matches);
+            });
+        });
+    }
+
+    public getMatchEventsByUser(userID: number): Promise<IMatchEvent[]> {
+        return new Promise((resolve, reject) => {
+            if (this.connection === null) {
+                return reject();
+            }
+            const matches: IMatchEvent[] = [];
+
+            this.connection.query(`SELECT * FROM match_events WHERE scorer_id='${userID}' OR assister_id='${userID}'`, (queryErr: mysql.MysqlError, result, field: mysql.FieldInfo[]) => {
+                if (queryErr !== null) {
+                    return reject();
+                }
+
+                if (result === null) {
+                    return reject();
+                }
+
+                for (const res of result) {
+                    matches.push({
+                        id: res.id,
+                        match_id: res.match_id,
+                        team_id: (res.team_id === null) ? null : res.team_id,
+                        scorer_id: res.scorer_id,
+                        assister_id: res.assister_id,
+                    });
+                }
+
+                return resolve(matches);
+            });
+        });
+    }
+
+    public getMatchEventsByTeam(teamID: number): Promise<IMatchEvent[]> {
+        return new Promise((resolve, reject) => {
+            if (this.connection === null) {
+                return reject();
+            }
+            const matches: IMatchEvent[] = [];
+
+            this.connection.query(`SELECT * FROM match_events WHERE team_id='${teamID}';`, (queryErr: mysql.MysqlError, result, field: mysql.FieldInfo[]) => {
                 if (queryErr !== null) {
                     return reject();
                 }
@@ -2149,6 +2440,26 @@ class MatchEventDatabase {
             }
 
             this.connection.query(`DELETE FROM match_events WHERE id='${matchEventID}'`, (queryErr: mysql.MysqlError, result, field: mysql.FieldInfo[]) => {
+                if (queryErr !== null) {
+                    return reject();
+                }
+
+                if (result !== undefined && result.affectedRows === 1) {
+                    return resolve();
+                }
+
+                return reject();
+            });
+        });
+    }
+
+    public deleteEventByTournament(tournamentID: number): Promise<void> {
+        return new Promise((resolve, reject) => {
+            if (this.connection === null) {
+                return reject();
+            }
+
+            this.connection.query(`DELETE FROM match_events WHERE tournament_id='${tournamentID}'`, (queryErr: mysql.MysqlError, result, field: mysql.FieldInfo[]) => {
                 if (queryErr !== null) {
                     return reject();
                 }

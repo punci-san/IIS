@@ -10,9 +10,9 @@ import { Subscription } from 'rxjs';
   styleUrls: ['./log-reg.component.css']
 })
 export class LogRegComponent implements OnInit, OnDestroy {
-  private showMsg: boolean;
-  private msg: string;
-  private msgColor: string;
+  public showMsg: boolean;
+  public msg: string;
+  public msgColor: string;
   private subscription: Subscription;
 
   constructor(

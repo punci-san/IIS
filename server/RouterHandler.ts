@@ -1,9 +1,10 @@
 import { singleton, container } from "tsyringe";
-import { Request, Response, json } from "express";
+import express, { Request, Response, json } from "express";
 import { Express } from "express-serve-static-core";
 import { Database } from "./database";
 import { IUser } from "../interfaces/user";
 import cors from "cors";
+import path from "path";
 import { ITeam, ITeamRequest } from "../interfaces/team";
 import { ITournament, ITeamType } from "../interfaces/tournament";
 import { teamType, numberOfPlayers } from "../settings/tournament_config";
@@ -14,6 +15,7 @@ import { defaultTeamIcon } from "../settings/variables";
 import bodyParser = require("body-parser");
 import fileParser from "express-multipart-file-parser";
 import { UploadHandler } from "./upload_handler";
+import { IUserStatistics } from "../interfaces/statistics";
 
 const varcharLen = 255;
 
@@ -32,8 +34,18 @@ export class RouterHandler {
         app.use(bodyParser.urlencoded({extended: true}));
         app.use(json());
 
+        app.use("/", express.static(path.join(__dirname + "./../../client/")));
+        app.use("/me", express.static(path.join(__dirname + "./../../client/")));
+        app.use("/show-user", express.static(path.join(__dirname + "./../../client/")));
+        app.use("/user-log_reg", express.static(path.join(__dirname + "./../../client/")));
+        app.use("/add-team", express.static(path.join(__dirname + "./../../client/")));
+        app.use("/show-team", express.static(path.join(__dirname + "./../../client/")));
+        app.use("/add-tournament", express.static(path.join(__dirname + "./../../client/")));
+        app.use("/show-tournament", express.static(path.join(__dirname + "./../../client/")));
+
         this.addUserRoutes(app);
         this.addTeamRoutes(app);
+        this.addStatisticRoutes(app);
         this.addTeamRequests(app);
         this.addTournamentRoutes(app);
         this.addTournamentRegistrationRoutes(app);
@@ -406,6 +418,42 @@ export class RouterHandler {
                 }
 
                 return res.sendFile(this.uploadHandler.getFilePath(fileName));
+            });
+    }
+
+    private addStatisticRoutes(app: Express): void {
+        app.route("/user-statistics/:id")
+            .get((req: Request, res: Response) => {
+                const userID: number = (req.params.id === null) ? NaN : Number(req.params.id);
+
+                if (isNaN(userID)) {
+                    return res.status(404).send();
+                }
+
+                this.database.getUserStatistics(userID)
+                .then((stat: IUserStatistics) => {
+                    return res.json(stat);
+                })
+                .catch(() => {
+                    return res.status(404).send();
+                });
+            });
+
+        app.route("/team-statistics/:id")
+            .get((req: Request, res: Response) => {
+                const teamID: number = (req.params.id === null) ? NaN : Number(req.params.id);
+
+                if (isNaN(teamID)) {
+                    return res.status(404).send();
+                }
+
+                this.database.getTeamStatistics(teamID)
+                .then((stat: IUserStatistics) => {
+                    return res.json(stat);
+                })
+                .catch(() => {
+                    return res.status(404).send();
+                });
             });
     }
 
@@ -1218,7 +1266,7 @@ export class RouterHandler {
                             return res.status(401).send();
                         }
 
-                        this.database.addMatchEvent(matchID, teamID, scorerID, assisterID)
+                        this.database.addMatchEvent(tournamentID, matchID, teamID, scorerID, assisterID)
                         .then(() => {
                             return res.send();
                         })

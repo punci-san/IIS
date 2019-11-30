@@ -40,7 +40,7 @@ CREATE TABLE tournaments(
 	description varchar(255) DEFAULT '',
 	creator_id int,			-- False means that it was just created and true means the players were accepted and matches created
 	referee_id int DEFAULT NULL,
-	tournament_start timestamp,
+	tournament_start timestamp DEFAULT CURRENT_TIMESTAMP,
 	sponsors varchar(255) DEFAULT '',
 	created boolean DEFAULT NULL,	-- NULL registration and accept phase, FALSE spider creation phase, TRUE referee phase where he can add statistics
 	PRIMARY KEY (id)
@@ -73,6 +73,7 @@ CREATE TABLE matches(
 
 CREATE TABLE match_events(
 	id int NOT NULL AUTO_INCREMENT,
+	tournament_id int,		-- Id tournamentu
 	match_id int,			-- ID zapasu
 	team_id int DEFAULT NULL,	-- ID Teamu ktorý dal gol
 	scorer_id int,			-- Id hraca ktory skoroval
@@ -90,6 +91,7 @@ ALTER TABLE team_requests ADD FOREIGN KEY (user_id) REFERENCES users(id);
 ALTER TABLE tournaments ADD FOREIGN KEY (creator_id) REFERENCES users(id);
 ALTER TABLE tournaments ADD FOREIGN KEY (referee_id) REFERENCES users(id);
 
+ALTER TABLE tournament_registrations ADD FOREIGN KEY (tournament_id) REFERENCES tournaments(id);
 ALTER TABLE tournament_registrations ADD FOREIGN KEY (user_id) REFERENCES users(id);
 ALTER TABLE tournament_registrations ADD FOREIGN KEY (team_id) REFERENCES teams(id);
 
@@ -99,6 +101,7 @@ ALTER TABLE matches ADD FOREIGN KEY (user_2) REFERENCES users(id);
 ALTER TABLE matches ADD FOREIGN KEY (team_1) REFERENCES teams(id);
 ALTER TABLE matches ADD FOREIGN KEY (team_2) REFERENCES teams(id);
 
+ALTER TABLE match_events ADD FOREIGN KEY (tournament_id) REFERENCES tournaments(id);
 ALTER TABLE match_events ADD FOREIGN KEY (match_id) REFERENCES matches(id);
 ALTER TABLE match_events ADD FOREIGN KEY (team_id) REFERENCES teams(id);
 ALTER TABLE match_events ADD FOREIGN KEY (scorer_id) REFERENCES users(id);

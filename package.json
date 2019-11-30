@@ -1,5 +1,5 @@
 {
-  "name": "webdemander",
+  "name": "rocket_league_tournament",
   "version": "1.0.0",
   "description": "Web application",
   "main": "index.js",
@@ -7,14 +7,16 @@
     "build:client": "cd client && ng build",
     "build:server": "cd server && npm run build",
     "build": "npm run build:client && npm run build:server",
-    "start:server": "cd dist && node server/server.js",
+    "start:server": "node dist/server/server/server.js",
     "start": "npm run start:server",
     "debug": "npm run build && npm run start",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prod:client": "ng build --aot --prod --base-href=http://178.128.202.218:4201/ --deploy-url=http://178.128.202.218:4201/",
+    "prod": "npm run prod:client && npm run build:server"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://gitlab.com/FrosT3a/webdemander.git"
+    "url": "git+https://github.com/punci-san/IIS.git"
   },
   "license": "ISC",
   "devDependencies": {

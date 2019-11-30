@@ -2,9 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { IUser } from '../../../../../interfaces/user';
 import { UserService } from 'src/app/Services/user.service';
 import { Router } from '@angular/router';
-import { RED, GREEN } from '../../../../../settings/variables';
+import { RED, GREEN, maxCharLen } from '../../../../../settings/variables';
 import { TeamService } from 'src/app/Services/team.service';
 import { ITeam } from '../../../../../interfaces/team';
+import { IUserStatistics } from '../../../../../interfaces/statistics';
+import { StatisticService } from 'src/app/Services/statistic.service';
 
 @Component({
   selector: 'app-user',
@@ -12,18 +14,20 @@ import { ITeam } from '../../../../../interfaces/team';
   styleUrls: ['./user.component.css']
 })
 export class UserComponent implements OnInit {
-  private user: IUser;
-  private showMsg: boolean;
-  private msg: string;
-  private msgColor: string;
-  private pass1: string;
-  private pass2: string;
-  private team: ITeam;
+  public user: IUser;
+  public showMsg: boolean;
+  public msg: string;
+  public msgColor: string;
+  public pass1: string;
+  public pass2: string;
+  public team: ITeam;
+  public userStat: IUserStatistics;
 
   constructor(
     private userService: UserService,
     private teamService: TeamService,
-    private router: Router
+    private router: Router,
+    private statService: StatisticService,
   ) {
     this.showMsg = false;
     this.msg = '';
@@ -33,6 +37,7 @@ export class UserComponent implements OnInit {
     this.pass2 = '';
 
     this.team = null;
+    this.userStat = null;
   }
 
   ngOnInit() {
@@ -41,6 +46,14 @@ export class UserComponent implements OnInit {
     if (this.user === null) {
       this.router.navigate(['user-log_reg'], { queryParams: { succ: false, msg: 'You need to be logged in to change your username.'}});
     }
+
+    this.statService.getUserStatistic(this.user.id)
+    .then((us: IUserStatistics) => {
+      this.userStat = us;
+    })
+    .catch(() => {
+      this.userStat = null;
+    });
 
     this.getTeamData();
   }
@@ -60,6 +73,22 @@ export class UserComponent implements OnInit {
         return;
       }
       pass = this.pass1;
+    }
+
+    if (this.user.name === '' ) {
+      this.user = this.userService.getLoggedData;
+      this.msg = 'Please fill in username.';
+      this.showMsg = true;
+      this.msgColor = RED;
+      return;
+    }
+
+    if (this.user.name.length < 1 || this.user.name.length > maxCharLen) {
+      this.user = this.userService.getLoggedData;
+      this.msg = `Username neesd to be between 1 and ${maxCharLen}`;
+      this.showMsg = true;
+      this.msgColor = RED;
+      return;
     }
 
     this.userService.updateUser(this.user, pass)

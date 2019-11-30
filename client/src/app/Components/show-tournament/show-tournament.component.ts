@@ -18,12 +18,12 @@ import { teamType, teamNumber } from '../../../../../settings/tournament_config'
 })
 export class ShowTournamentComponent implements OnInit {
   private tournamentID: number;
-  private tournament: ITournament;
+  public tournament: ITournament;
   private tournamentRegistrations: ITournamentRegistrations[];
 
-  private showMsg: boolean;
-  private msg: string;
-  private msgColor: string;
+  public showMsg: boolean;
+  public msg: string;
+  public msgColor: string;
 
   constructor(
     private teamService: TeamService,

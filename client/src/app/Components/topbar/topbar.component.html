@@ -29,7 +29,7 @@
         </div>
         <div *ngIf="getUserData !== null">
 
-            <button routerLink="/user">{{getUserData.name}}</button>
+            <button routerLink="/me">{{getUserData.name}}</button>
             <button (click)="logout()">Logout</button>
         </div>
     </div>
