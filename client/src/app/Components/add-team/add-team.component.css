@@ -13,6 +13,10 @@
     width: 145px;
 }
 
+#team_shortcut {
+    width: 145px;
+}
+
 .input-field {
     margin: 0;
     display: block;
@@ -21,11 +25,16 @@
     margin-bottom: 20px;
 }
 .input-field label {
-    margin-right: 50px;
+    margin-right: 70px;
 }
 
+#fix-mrg {
+ margin-right: 90px;
+}
+
+
 #align_input label {
-    margin-right: 100px;
+    margin-right: 150px;
 }
 
 .inputfile {

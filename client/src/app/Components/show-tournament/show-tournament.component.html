@@ -136,16 +136,20 @@
                 <!--<div *ngIf="tournament.created === true || tournament.created === false && (getLoggedUser() === null || (getLoggedUser() !== null && tournament.creator_id !== getLoggedUser().id))">-->
                 <div *ngIf="tournament.created !== null">
                     <div *ngIf="tournament.team_type !== 0">
-                        <p>Teams: </p>
-                        <div *ngFor="let t_team of getAcceptedTeams">
+                        <div class="info">
+                            <p>Teams: </p>
+                        </div>
+                        <div class="info" *ngFor="let t_team of getAcceptedTeams">
                             <img src="{{getTeamLogo(t_team.file_name)}}" width="50" height="50">
                             <p>{{t_team.name}}</p>
                             <button [routerLink]="['/show-team', t_team.team_id]" routerLinkActive="active">Show team</button>
                         </div>
                     </div>
                     <div *ngIf="tournament.team_type === 0">
-                        <p>Users: </p>
-                        <div *ngFor="let t_user of getAcceptedUsers">
+                        <div class="info">
+                            <p>Users: </p>
+                        </div>
+                        <div class="info" *ngFor="let t_user of getAcceptedUsers">
                             <p>{{t_user.name}}</p>
                             <button (click)="showUser(t_user.user_id)">Show user</button>
                         </div>
