@@ -24,9 +24,9 @@
                     <div *ngIf="user.team !== null && team !== null">
                         <p>Team name:</p>
                         <p>{{team.name}}</p>
-                        <div *ngIf="user.id === team.creator_id">
+                        <!--<div *ngIf="user.id === team.creator_id">
                             <button (click)="deteleTeam()">Delete team and all its members</button>
-                        </div>
+                        </div>-->
                         <div *ngIf="user.id !== team.creator_id">
                             <button (click)="leaveTeam()">Leave team</button>
                         </div>

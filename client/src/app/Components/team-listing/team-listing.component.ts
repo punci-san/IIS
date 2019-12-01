@@ -39,7 +39,13 @@ export class TeamListingComponent implements OnInit {
   }
 
   public joinSend(teamID: number): boolean {
-    return this.teamRequests.findIndex((tr: ITeamRequest) => tr.team_id === teamID) >= 0;
+    const user: IUser = this.userService.getLoggedData;
+
+    if (user === null) {
+      return true;
+    }
+
+    return this.teamRequests.findIndex((tr: ITeamRequest) => tr.team_id === teamID && tr.user_id === user.id) >= 0;
   }
 
   public joinTeam(teamID: number): void {

@@ -123,8 +123,10 @@ export class AddTournamentComponent implements OnInit {
       }
 
       const date: Date = new Date();
+      const dateTime: number = (((date.getFullYear() * 100) + date.getMonth()) * 100) + date.getDate();
+      const startDateTime: number = (((startDate.getFullYear() * 100) + startDate.getMonth()) * 100) + startDate.getDate();
 
-      if (startDate.getDate() < date.getDate() || startDate.getMonth() < date.getMonth() || startDate.getFullYear() < date.getFullYear()) {
+      if (startDateTime < dateTime) {
         this.showMsg = true;
         this.msgColor = RED;
         this.msg = 'Date cant be lower than today!';

@@ -13,7 +13,7 @@
                 <p>{{tmUsers.name}}</p>
                 <div class="button_wrapper">
                     <button *ngIf="getUser !== null && getUser.id === team.creator_id && team.creator_id !== tmUsers.id" (click)="makeTeamLeader(tmUsers.id)">Set Leader</button>
-                    <!--<button *ngIf="getUser !== null && getUser.id === team.creator_id && team.creator_id !== tmUsers.id" (click)="kickUser(tmUsers.id)">Kick</button>-->
+                    <button *ngIf="getUser !== null && getUser.id === team.creator_id && team.creator_id !== tmUsers.id" (click)="kickUser(tmUsers.id)">Kick</button>
                     <button (click)="showUser(tmUsers.id)">Show</button>
                 </div>
                 
