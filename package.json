@@ -10,7 +10,6 @@
     "start:server": "node dist/server/server/server.js",
     "start": "npm run start:server",
     "debug": "npm run build && npm run start",
-    "test": "echo \"Error: no test specified\" && exit 1",
     "prod:client": "ng build --aot --prod --base-href=http://178.128.202.218:4201/ --deploy-url=http://178.128.202.218:4201/",
     "prod": "npm run prod:client && npm run build:server"
   },

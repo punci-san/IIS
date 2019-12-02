@@ -1,9 +1,9 @@
-CREATE DATABASE xskuta04;
+CREATE DATABASE web_app;
 
-CREATE USER 'xskuta04'@'localhost' IDENTIFIED BY 'edurka6m';
-GRANT ALL PRIVILEGES ON * . * TO 'xskuta04'@'localhost';
+CREATE USER 'web_app_user'@'localhost' IDENTIFIED BY 'web_app_password';
+GRANT ALL PRIVILEGES ON * . * TO 'web_app_user'@'localhost';
 
-use xskuta04;
+use web_app;
 
 CREATE TABLE users (
 	id int NOT NULL AUTO_INCREMENT,
@@ -111,3 +111,6 @@ ALTER TABLE match_events ADD FOREIGN KEY (match_id) REFERENCES matches(id);
 ALTER TABLE match_events ADD FOREIGN KEY (team_id) REFERENCES teams(id);
 ALTER TABLE match_events ADD FOREIGN KEY (scorer_id) REFERENCES users(id);
 ALTER TABLE match_events ADD FOREIGN KEY (assister_id) REFERENCES users(id);
+
+INSERT INTO users (name, pass, admin) VALUES ('admin', 'admin', true);
+INSERT INTO users (name, pass, admin) VALUES ('user', 'user', false);
