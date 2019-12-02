@@ -24,9 +24,10 @@
                 <p id="special">User is in no team.</p>
             </div>
         </div>
+    </div>
 
-        <div>
-            <p>Statistics: </p> 
+    <h1>Statistics</h1> 
+        <div class="user_info">
             <div *ngIf="userStat === null">
                 <p>No statistics</p>
             </div>
@@ -38,5 +39,4 @@
                 <p>Assistances: {{userStat.assistances}}</p>
             </div>
         </div>
-    </div>
 </div>
