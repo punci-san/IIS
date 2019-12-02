@@ -480,3 +480,84 @@ h2 {
   margin-top: 50px;
   margin-left: 80px;
 }
+
+.text-right{
+  line-height: 2;
+  display: inline-block;
+  max-width: 50%;
+  float: right;
+
+}
+
+.every{
+  border-top: black 2px solid ;
+  
+}
+
+.statsForAll{
+  max-width: 100%;
+  border-top: black 2px solid ;
+}
+
+.statsForAll p{
+  line-height: 2;
+}
+
+.statsForAll ul{
+  list-style-type: none;
+}
+
+.stats{
+  display: inline-block;
+  max-width: 50%;
+  
+}
+h1{
+  text-align: center;
+}
+
+.text-right{
+  width:400px;
+  border-left: 2px black solid;
+}
+
+.text-right label
+{
+  display:block;
+}
+
+.stats ul{
+  list-style-type: none;
+}
+.teams h3{
+  text-align: center;
+}
+
+.teams label{
+  display: inline;
+  margin-right: 10px;
+}
+
+
+#team_select_1{
+  margin-right: 20px;
+}
+
+.player_stats label:first-child{
+  margin-right: 20px;
+}
+.player_stats select {
+  margin-right: 10px;
+}
+
+.player_stats h3{
+  text-align: center;
+}
+
+.player_stats label{
+  display:inline;
+}
+
+.referee_buttons button{
+  margin-right: 50px;
+}
