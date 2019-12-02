@@ -5,3 +5,7 @@ Go to main directory and run `sudo npm i` then run the same command in client/ a
 ### Usage
 
 When developing open 2 consoles. First for client where you go into client folder and run `ng serve` which will start development server on  adress `localhost:4200` and will automaticly rebuild client side on each save in client folder and second one where you go into server folder and run `sudo npm run debug` and you need to run this command each time you change something in server folder
+
+### Start
+
+Before starting application you need to create mysql database with file `tables.sql` located in main directory. After it is created use command `npm run build` in main directory to start project then go to `http://localhost:4201/`.

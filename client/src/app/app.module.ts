@@ -2,6 +2,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
+import {CookieService} from 'ngx-cookie-service';
 
 import { AppRoutingModule } from './app-routing.module';
 import { TopbarComponent } from './Components/topbar/topbar.component';
@@ -43,6 +44,7 @@ import { SpiderComponent } from './Components/spider/spider.component';
     NgbModule,
   ],
   providers: [
+    CookieService
   ],
   bootstrap: [AppComponent]
 })

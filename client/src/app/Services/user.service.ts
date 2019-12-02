@@ -3,9 +3,10 @@ import { IUser } from '../../../../interfaces/user';
 import { userKeyValue, timeout } from '../../../../settings/variables';
 import { registerPage, loginPage, usersPage, teamUserPage, teamAdminPage, usersBanPage, usersUnbanPage } from '../../../../settings/routes';
 import { Router } from '@angular/router';
+import { CookieService } from 'ngx-cookie-service';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class UserService {
   private users: IUser[];
@@ -13,7 +14,8 @@ export class UserService {
   private currFilter: string;
 
   constructor(
-    private router: Router
+    private router: Router,
+    private cookieService: CookieService,
   ) {
     this.users = [];
     this.filteredUsers = [];
@@ -27,7 +29,7 @@ export class UserService {
   }
 
   public get getLoggedData(): IUser {
-    const value: string = localStorage.getItem(userKeyValue);
+    const value: string = this.getCookie(userKeyValue);
 
     if (value == null) {
       return null;
@@ -133,7 +135,7 @@ export class UserService {
   }
 
   public saveLoggedData(user: IUser): void {
-    localStorage.setItem(userKeyValue, JSON.stringify(user));
+    this.setCookie(userKeyValue, user);
   }
 
   public login(username: string, password: string): Promise<void> {
@@ -190,7 +192,7 @@ export class UserService {
   }
 
   public logout(): void {
-    localStorage.removeItem(userKeyValue);
+    this.removeCookie(userKeyValue);
   }
 
   public addAuthentication(http: XMLHttpRequest): void {
@@ -328,5 +330,30 @@ export class UserService {
 
       http.send(JSON.stringify(data));
     });
+  }
+
+  private setCookie(key: string, user: IUser): void {
+    if (user === null || user === undefined) {
+      return;
+    }
+
+    const now: Date = new Date();
+    now.setMinutes(now.getMinutes() + 10);
+
+    console.log('Setting cookie.');
+
+    this.cookieService.set(key, JSON.stringify(user), now);
+  }
+
+  private getCookie(key: string): string {
+    if (this.cookieService.check(key)) {
+      return this.cookieService.get(key);
+    }
+
+    return null;
+  }
+
+  private removeCookie(key: string): void {
+    this.cookieService.delete(key);
   }
 }

@@ -2,7 +2,7 @@ import { mkdirSync, existsSync, writeFileSync } from "fs";
 import path from "path";
 import { singleton } from "tsyringe";
 import { extensions } from "mime-types";
-import { defaultTeamIcon } from "../settings/variables";
+import { defaultTeamIcon, defaultTeamIconPath } from "../settings/variables";
 
 @singleton()
 export class UploadHandler {
@@ -52,7 +52,12 @@ export class UploadHandler {
             return filePath;
         }
 
-        return path.join(this.uploadPath, defaultTeamIcon);
+        const defaultFilePath: string = path.join(__dirname, defaultTeamIconPath);
+
+        if (existsSync(defaultFilePath)) {
+            return defaultFilePath;
+        }
+        return null;
     }
 
     private createUploadFolder(): void {

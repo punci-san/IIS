@@ -1,3 +1,8 @@
+CREATE DATABASE xskuta04;
+
+CREATE USER 'xskuta04'@'localhost' IDENTIFIED BY 'edurka6m';
+GRANT ALL PRIVILEGES ON * . * TO 'xskuta04'@'localhost';
+
 use xskuta04;
 
 CREATE TABLE users (

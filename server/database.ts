@@ -7,11 +7,8 @@ import { ITournamentRegistrations } from "../interfaces/tournament-registrations
 import { IMatch } from "../interfaces/match";
 import { ITeamStatistics, IUserStatistics } from "../interfaces/statistics";
 import { IMatchEvent } from "../interfaces/match_event";
+import { dbServer, user, pass, database } from "../settings/database_config";
 
-const dbServer = "localhost";
-const user = "xskuta04";
-const pass = "edurka6m";
-const database = "xskuta04";
 const convertToTimestamp = (date: Date): string => {
     const year: number = date.getFullYear();
     const month: number = date.getMonth();

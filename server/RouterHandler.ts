@@ -414,10 +414,21 @@ export class RouterHandler {
                 const fileName: string = req.params.name;
 
                 if (fileName === null || fileName === undefined) {
-                    return res.sendFile(this.uploadHandler.getFilePath(defaultTeamIcon));
+                    const tmpPath: string = this.uploadHandler.getFilePath(defaultTeamIcon);
+
+                    if (tmpPath === null) {
+                        return res.status(404).send();
+                    }
+
+                    return res.sendFile(tmpPath);
+                }
+                const fPath: string = this.uploadHandler.getFilePath(fileName);
+
+                if (fPath === null) {
+                    return res.status(404).send();
                 }
 
-                return res.sendFile(this.uploadHandler.getFilePath(fileName));
+                return res.sendFile(fPath);
             });
     }
 

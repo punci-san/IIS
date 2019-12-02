@@ -6,6 +6,7 @@
     <div class="wrapper" *ngIf="team !== null">
         <div>
             <h1>{{team.name}}</h1>
+            <img src="{{getTeamLogo(team.file_name)}}">
         </div>
         <div class="user-listing">
             <h2>Players in team:</h2>

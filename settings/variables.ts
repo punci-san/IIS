@@ -6,4 +6,5 @@ export const timeout = 5000;
 export const maxCharLen = 255;
 export const maxShortcutLen = 5;
 export const maxUsernameLen = 16;
-export const defaultTeamIcon = '../../def_logo.png';
+export const defaultTeamIcon = 'def_logo.png';
+export const defaultTeamIconPath = '../../../def_logo.png';
