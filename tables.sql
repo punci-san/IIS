@@ -113,4 +113,13 @@ ALTER TABLE match_events ADD FOREIGN KEY (scorer_id) REFERENCES users(id);
 ALTER TABLE match_events ADD FOREIGN KEY (assister_id) REFERENCES users(id);
 
 INSERT INTO users (name, pass, admin) VALUES ('admin', 'admin', true);
-INSERT INTO users (name, pass, admin) VALUES ('user', 'user', false);
+INSERT INTO users (name, pass, admin) VALUES ('creator', 'creator', false);
+INSERT INTO users (name, pass, admin) VALUES ('referee', 'referee', false);
+INSERT INTO users (name, pass, admin) VALUES ('user0', 'user0', false);
+INSERT INTO users (name, pass, admin) VALUES ('user1', 'user1', false);
+INSERT INTO users (name, pass, admin) VALUES ('user2', 'user2', false);
+INSERT INTO users (name, pass, admin) VALUES ('user3', 'user3', false);
+INSERT INTO users (name, pass, admin) VALUES ('user4', 'user4', false);
+INSERT INTO users (name, pass, admin) VALUES ('user5', 'user5', false);
+INSERT INTO users (name, pass, admin) VALUES ('user6', 'user6', false);
+INSERT INTO users (name, pass, admin) VALUES ('user7', 'user7', false);

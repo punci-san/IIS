@@ -570,11 +570,8 @@ export class Database {
             .then(() => {
                 this.getTournament(tournamentID)
                 .then((t: ITournament) => {
-                    console.log(t);
-
                     this.matchDatabase.getMatches(tournamentID)
                     .then((ms: IMatch[]) => {
-                        console.log(ms);
                         const finishedMatches: IMatch[] = ms.filter((m: IMatch) => m.finished === true);
                         const match1: IMatch = finishedMatches.find((m: IMatch) => m.id === matchID);
 
@@ -584,8 +581,6 @@ export class Database {
 
                         const column: number = match1.column;
                         const row: number = (match1.row % 2 === 0) ? match1.row + 1 : match1.row - 1;
-
-                        console.log(column, row);
 
                         const match2: IMatch = finishedMatches.find((m: IMatch) => m.column === column && m.row === row);
 
@@ -615,8 +610,6 @@ export class Database {
                         if (nColumn === null) {
                             return resolve();
                         }
-
-                        console.log(tournamentID, usr1Win, usr2Win, team1Win, team2Win, nColumn, nRow);
 
                         this.addMatch(tournamentID, usr1Win, usr2Win, team1Win, team2Win, nRow, nColumn)
                         .then(() => {
@@ -700,58 +693,100 @@ export class Database {
 
     public getUserStatistics(userID: number): Promise<IUserStatistics> {
         return new Promise((resolve, reject) => {
-            this.matchDatabase.getMatchesByUser(userID)
-            .then((ms: IMatch[]) => {
-                this.matchEventDatabase.getMatchEventsByUser(userID)
-                .then((mes: IMatchEvent[]) => {
-                    const userStatistics: IUserStatistics = {
-                        matchesPlayed: 0,
-                        matchesWin: 0,
-                        matchesLost: 0,
-                        scores: 0,
-                        assistances: 0,
-                    };
+            this.userDatabase.getUser(userID)
+            .then((u: IUser) => {
+                this.matchDatabase.getMatchesByUser(userID)
+                .then((ms: IMatch[]) => {
+                    this.matchEventDatabase.getMatchEventsByUser(userID)
+                    .then((mes: IMatchEvent[]) => {
+                        const userStatistics: IUserStatistics = {
+                            matchesPlayed: 0,
+                            matchesWin: 0,
+                            matchesLost: 0,
+                            scores: 0,
+                            assistances: 0,
+                        };
 
-                    for (const m of ms) {
-                        userStatistics.matchesPlayed++;
+                        for (const m of ms) {
+                            if (m.finished === false) {
+                                continue;
+                            }
 
-                        if (m.user1 === userID) {
-                            if (m.score1 > m.score2) {
-                                userStatistics.matchesWin++;
-                            } else {
-                                userStatistics.matchesLost++;
+                            userStatistics.matchesPlayed++;
+
+                            if (m.user1 === userID) {
+                                if (m.score1 > m.score2) {
+                                    userStatistics.matchesWin++;
+                                } else {
+                                    userStatistics.matchesLost++;
+                                }
+                            }
+                            if (m.user2 === userID) {
+                                if (m.score1 < m.score2) {
+                                    userStatistics.matchesWin++;
+                                } else {
+                                    userStatistics.matchesLost++;
+                                }
                             }
                         }
 
-                        if (m.user2 === userID) {
-                            if (m.score1 < m.score2) {
-                                userStatistics.matchesWin++;
-                            } else {
-                                userStatistics.matchesLost++;
+                        for (const me of mes) {
+                            if (me.scorer_id === userID) {
+                                userStatistics.scores++;
+                            }
+
+                            if (me.assister_id === userID) {
+                                userStatistics.assistances++;
                             }
                         }
-                    }
 
-                    for (const me of mes) {
-                        if (me.scorer_id === userID) {
-                            userStatistics.scores++;
+                        if (u.team !== null) {
+                            this.matchDatabase.getMatchesByTeam(u.team)
+                            .then((matches: IMatch[]) => {
+                                for (const m of matches) {
+                                    if (m.team1 === u.team) {
+                                        if (m.score1 > m.score2) {
+                                            userStatistics.matchesWin++;
+                                        } else {
+                                            userStatistics.matchesLost++;
+                                        }
+                                    }
+
+                                    if (m.team2 === u.team) {
+                                        if (m.score2 > m.score1) {
+                                            userStatistics.matchesWin++;
+                                        } else {
+                                            userStatistics.matchesLost++;
+                                        }
+                                    }
+
+                                    for (const me of mes) {
+                                        if (me.match_id === m.id) {
+                                            userStatistics.matchesPlayed++;
+                                            break;
+                                        }
+                                    }
+                                }
+                                return resolve(userStatistics);
+                            })
+                            .catch(() => {
+                                return resolve(userStatistics);
+                            });
+                            return;
                         }
 
-                        if (me.assister_id === userID) {
-                            userStatistics.assistances++;
-                        }
-                    }
+                        return resolve(userStatistics);
 
-                    return resolve(userStatistics);
-
+                    })
+                    .catch(() => {
+                        return reject();
+                    });
                 })
                 .catch(() => {
-                    console.log("MatchesEvent getting failed.");
                     return reject();
                 });
             })
             .catch(() => {
-                console.log("Matches getting failed.");
                 return reject();
             });
         });
@@ -772,6 +807,10 @@ export class Database {
                     };
 
                     for (const m of ms) {
+                        if (m.finished === false) {
+                            continue;
+                        }
+
                         teamStatistics.matchesPlayed++;
 
                         if (m.team1 === teamID) {
@@ -2461,7 +2500,7 @@ class MatchEventDatabase {
                     return reject();
                 }
 
-                if (result !== undefined && result.affectedRows === 1) {
+                if (result !== undefined && result.affectedRows >= 0) {
                     return resolve();
                 }
 

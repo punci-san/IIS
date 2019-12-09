@@ -36,7 +36,7 @@
                     <div class="info" id="position_btn" *ngIf="getLoggedUser() !== null && getLoggedUser().id !== tournament.creator_id">
                         <button *ngIf="canJoinAsReferee(getLoggedUser().id)" (click)="joinAsReferee(getLoggedUser().id)">Register as referee</button>
                         <button *ngIf="canJoinAsTeam(getLoggedUser().team)" (click)="joinAsTeam(getLoggedUser().team)">Register as team</button>
-                        <button *ngIf="canJoinAsUser(getLoggedUser().id)" (click)="joinAsUser(getLoggedUser().id)">Register as user</button>
+                        <button *ngIf="canJoinAsUser(getLoggedUser().id)" (click)="joinAsUser(getLoggedUser().id)">Register as player</button>
                     </div>
                     <div class="info">
                         <p>Description:</p>
@@ -157,8 +157,9 @@
             <div>
                 <button  id="delete_tourney" *ngIf="getLoggedUser() !== null && tournament.creator_id === getLoggedUser().id" (click)="deleteTournament()">Delete tournament</button>
             </div>
-            <div *ngIf="getLoggedUser() !== null && tournament.creator_id === getLoggedUser().id">
-                <button id="finalize_tourney" *ngIf="tournament.created === null" [disabled]="canFinalize === false" (click)="finalizeTournament()">Finalize tournament</button>
+            <div *ngIf="getLoggedUser() !== null && tournament.creator_id === getLoggedUser().id && tournament.created === null">
+                <button id="finalize_tourney" *ngIf="canFinalize === true" (click)="finalizeTournament()">Finalize tournament</button>
+                <span *ngIf="canFinalize === false">Please add referee and accept all players or teams to finalize.</span>
             </div>
         </div>
         <div *ngIf="tournament !== null && tournament.created !== null">

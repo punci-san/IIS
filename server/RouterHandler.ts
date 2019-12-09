@@ -645,7 +645,15 @@ export class RouterHandler {
                     const fee: number = Number(req.body.register_fee);
                     const desc = req.body.description;
                     const sponsors = req.body.sponsors;
-                    const tournamentStart: Date = new Date(req.body.tournament_start);
+                    const startDate: Date = new Date(req.body.tournament_start);
+
+                    const date: Date = new Date();
+                    const dateTime: number = (((date.getFullYear() * 100) + date.getMonth()) * 100) + date.getDate();
+                    const startDateTime: number = (((startDate.getFullYear() * 100) + startDate.getMonth()) * 100) + startDate.getDate();
+
+                    if (startDateTime < dateTime) {
+                        return res.status(500).send();
+                    }
 
                     if (
                         name === "" ||
@@ -653,8 +661,7 @@ export class RouterHandler {
                         isNaN(tourType) ||
                         isNaN(fee) ||
                         numberOfPlayers.includes(nop) === false ||
-                        tourType < 0 || tourType > teamType.length ||
-                        tournamentStart.getDate() < new Date().getDate()
+                        tourType < 0 || tourType > teamType.length
                         ) {
                             return res.status(500).send();
                     }
@@ -667,7 +674,7 @@ export class RouterHandler {
                         fee,
                         desc,
                         usr.id,
-                        tournamentStart,
+                        startDate,
                         sponsors,
                     )
                     .then(() => {
@@ -689,7 +696,6 @@ export class RouterHandler {
                     const tournamentID: number = Number(req.body.tournament_id);
 
                     if (isNaN(tournamentID)) {
-                        console.log("NaN");
                         return res.status(500).send();
                     }
 
@@ -699,10 +705,7 @@ export class RouterHandler {
                             return res.status(401).send();
                         }
 
-                        console.log(t);
-
                         if (t.created !== null) {
-                            console.log("Not created.");
                             return res.status(500).send();
                         }
 
@@ -710,7 +713,6 @@ export class RouterHandler {
                         .then((count: number) => {
 
                             if (count !== t.number_of_players && t.referee_id === null) {
-                                console.log("Not the same count or referee not selected.");
                                 return res.status(500).send();
                             }
 
@@ -719,12 +721,10 @@ export class RouterHandler {
                                 return res.send();
                             })
                             .catch(() => {
-                                console.log("Tournament update failed");
                                 return res.status(500).send();
                             });
                         })
                         .catch(() => {
-                            console.log("Count failed.");
                             return res.status(500).send();
                         });
                     })
@@ -1190,7 +1190,6 @@ export class RouterHandler {
                     this.database.getTournament(tournamentID)
                     .then((t: ITournament) => {
                         if (t.referee_id !== usr.id) {
-                            console.log("Not referee");
                             return res.status(401).send();
                         }
 

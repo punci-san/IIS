@@ -168,6 +168,7 @@
           <option *ngFor="let m_user of getMatchUsers()" value="{{m_user.value}}">{{m_user.name}}</option>
         </select>
         <button (click)="addEvent()">Add event</button>
+        <button *ngIf="selMatch !== null && selMatch.score1 !== selMatch.score2 && selMatch.finished === false" (click)="endMatch()">End match</button>
         
       </div>
       <div class="text-right" *ngIf="selMatch !== null && selMatch.finished === false && tournament.team_type !== 0">
